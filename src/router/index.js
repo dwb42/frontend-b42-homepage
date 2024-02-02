@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Import components
 import Home from '../views/Home.vue'
-import Search from '@/views/Search.vue'
+import DataCollectionForm from '@/views/DataCollectionForm.vue'
 import Testform01 from '@/views/Testform01.vue'
 
 // Routes
@@ -17,17 +17,18 @@ const routes = [
         component: Home,
       },    
       {
-        path: '/search',
-        name: 'Search',
-        component: Search,
+        path: '/datacollectionform',
+        name: 'DataCollectionForm',
+        component: DataCollectionForm,
       },             
+      {
+        path: '/testform01',
+        name: 'TestForm01',
+        component: Testform01,
+      },  
     ],
   },
-  {
-    path: '/testform01',
-    name: 'testform01',
-    component: Testform01,
-  },   
+ 
 
 ]
 

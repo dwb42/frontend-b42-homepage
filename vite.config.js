@@ -1,4 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -10,6 +12,12 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    vuetify({
+      autoImport: true,
+      styles: {
+        configFile: 'src/styles/settings.scss',
+      },
+    }),
   ],
   resolve: {
     alias: {

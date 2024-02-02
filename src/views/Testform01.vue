@@ -1,8 +1,6 @@
 <template>
-  <h1 class="text-h3 mb-6">Testform 01</h1>
-
-
-
+  <h1 class="text-h3 mb-6">Selenium Testform 01</h1>
+  
   <v-row>
       <v-col cols="12" md="6" xl="4">
           <v-card variant="elevated" class="pa-3 mb-6">
@@ -90,8 +88,8 @@
 import { ref, computed, watchEffect, onMounted } from 'vue';
 
 //import firestore instance and relevant functions
-//temp import { db } from '../firebase/init.js';
-//temp import { collection, addDoc, Timestamp, onSnapshot, getDocs, query as firestoreQuery, orderBy, where, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
+import { db } from '../firebase/init.js';
+import { collection, addDoc, Timestamp, onSnapshot, getDocs, query as firestoreQuery, orderBy, where, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 
 let unsubscribe = null;
 

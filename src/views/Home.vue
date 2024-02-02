@@ -8,8 +8,14 @@
 
       <div class="py-6" />
 
-      <router-link to="/search">
-        <v-btn color="primary">start</v-btn>
+      <router-link to="/datacollectionform">
+        <v-btn color="primary">data collection form</v-btn>
+      </router-link>
+
+      <div class="py-6" />
+      
+      <router-link to="/testform01">
+        <v-btn color="secondary">dummy target form 01</v-btn>
       </router-link>
 
     </v-responsive>
@@ -17,5 +23,4 @@
 </template>
 
 <script setup>
-
 </script>

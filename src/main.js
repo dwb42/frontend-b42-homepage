@@ -12,10 +12,13 @@ import { registerPlugins } from '@/plugins'
 
 const app = createApp(App)
 
-registerPlugins(app)
-
-
 // Use the router
 app.use(router)
 
+
+registerPlugins(app)
+
+
+
 app.mount('#app')
+

@@ -4,8 +4,7 @@
       <v-app-bar-nav-icon @click="openNav = !openNav"></v-app-bar-nav-icon>
     </template>
 
-    <v-app-bar-title><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">Love Poem
-        Generator</router-link></v-app-bar-title>
+    <v-app-bar-title><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">FormBot Prototype</router-link></v-app-bar-title>
 
     <template v-slot:append>
       <!-- <v-btn icon="mdi-dots-vertical"></v-btn> -->
@@ -28,10 +27,10 @@
       <!-- <v-list-item isActive prepend-icon="mdi-home-outline" title="Home" :to="{ name: 'Home' }">
         </v-list-item> -->
 
-      <v-list-item prepend-icon="mdi-heart-circle-outline" title="Create" :to="{ name: 'Create' }"
+      <v-list-item prepend-icon="mdi-heart-circle-outline" title="data collection form" :to="{ name: 'DataCollectionForm' }"
         @click="openNav = !openNav"></v-list-item>
 
-      <v-list-item prepend-icon="mdi-archive" title="Archive" :to="{ name: 'Archive' }"
+      <v-list-item prepend-icon="mdi-archive" title="Selenium TestForm 01" :to="{ name: 'TestForm01' }"
         @click="openNav = !openNav"></v-list-item>
 
 

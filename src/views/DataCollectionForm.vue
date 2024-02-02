@@ -1,12 +1,12 @@
 <template>
   <!-- <v-layout> -->
   <!-- <v-main class="ma-6"> -->
-  <h1 class="text-h3 mb-6">Sag uns wer Du bist</h1>
+  <h1 class="text-h3 mb-6">Data Input Form</h1>
 
   <v-form @submit.prevent="submit">
       <!-- <v-container> -->
       <v-row>
-          <v-col cols="12" md="8" xl="4">
+          <v-col cols="12" md="6" xl="4">
               <v-text-field v-model="firstName" label="Vorname" required hide-details class="mb-6"></v-text-field>
               <v-text-field v-model="lastName" label="Nachname" required hide-details class="mb-6"></v-text-field>
               <v-text-field v-model="street" label="Strasse" required hide-details class="mb-6"></v-text-field>
@@ -14,34 +14,6 @@
               <v-text-field v-model="zipcode" label="PLZ" required hide-details class="mb-6"></v-text-field>
               <v-text-field v-model="city" label="Stadt" required hide-details class="mb-6"></v-text-field>
 
-              <!-- 
-                  <v-text-field v-model="whereWeMet" label="Where did you meet?" required hide-details
-                  class="mb-6"></v-text-field>
-
-                  <v-text-field v-model="whatWeDoTogether" label="What do you like doing together?" required hide-details
-                      class="mb-6"></v-text-field>
-
-                  <v-text-field v-model="howLongACouple" label="How long have you been a couple?" required hide-details
-                      class="mb-6"></v-text-field>
-
-                  <v-btn-toggle v-model="loveEvent" divided mandatory color="gray" class="mb-6">
-                      <v-slide-group>
-                          <v-btn value="Just wanted to say I love you">Because I love you</v-btn>
-                          <v-btn value="birthday">Birthday</v-btn>
-                          <v-btn value="anniversary">Anniversary</v-btn>
-                          <v-btn value="valentines">Valentines</v-btn>
-                      </v-slide-group>
-                  </v-btn-toggle>
-
-                  <p class="text-body-1">write in</p>
-
-
-                  <v-btn-toggle v-model="language" divided mandatory color="gray">
-                      <v-btn value="english" selected="selected">English</v-btn>
-                      <v-btn value="german">German</v-btn>
-                      <v-btn value="spanish">Spanish</v-btn>
-                  </v-btn-toggle>
-              -->
           </v-col>
       </v-row>
 
