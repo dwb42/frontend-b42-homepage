@@ -2,14 +2,14 @@
   <v-container class="fill-height">
     <v-responsive class="align-center text-center fill-height">
 
-      <div class="text-body-2 font-weight-light mb-3">speed up your research</div>
+      <div class="text-body-2 font-weight-light mb-3">mike & dees</div>
 
-      <h1 class="text-h2 font-weight-bold">find ___ fast</h1>
+      <h1 class="text-h2 font-weight-bold">auction buddy</h1>
 
       <div class="py-6" />
 
       <router-link to="/datacollectionform">
-        <v-btn color="primary">data collection form</v-btn>
+        <v-btn color="primary">lots</v-btn>
       </router-link>
 
       <div class="py-6" />

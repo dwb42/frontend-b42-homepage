@@ -4,7 +4,7 @@
       <v-app-bar-nav-icon @click="openNav = !openNav"></v-app-bar-nav-icon>
     </template>
 
-    <v-app-bar-title><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">FormBot Prototype</router-link></v-app-bar-title>
+    <v-app-bar-title><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">auction buddy</router-link></v-app-bar-title>
 
     <template v-slot:append>
       <!-- <v-btn icon="mdi-dots-vertical"></v-btn> -->

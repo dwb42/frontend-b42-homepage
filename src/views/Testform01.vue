@@ -5,14 +5,14 @@
       <v-col cols="12" md="6" xl="4">
           <v-card variant="elevated" class="pa-3 mb-6">
               <v-form @submit.prevent="submit">
-                  <v-text-field v-model="firstName" label="Vorname" required hide-details class="mb-6"></v-text-field>
-                  <v-text-field v-model="lastName" label="Nachname" required hide-details class="mb-6"></v-text-field>
-                  <v-text-field v-model="street" label="Strasse" required hide-details class="mb-6"></v-text-field>
-                  <v-text-field v-model="housenr" label="Hausnr." required hide-details class="mb-6"></v-text-field>
-                  <v-text-field v-model="zipcode" label="PLZ" required hide-details class="mb-6"></v-text-field>
-                  <v-text-field v-model="city" label="Stadt" required hide-details class="mb-6"></v-text-field>
+                  <v-text-field v-model="firstName" id="firstName" label="Vorname" required hide-details class="mb-6"></v-text-field>
+                  <v-text-field v-model="lastName" id="lastName" label="Nachname" required hide-details class="mb-6"></v-text-field>
+                  <v-text-field v-model="street" id="street" label="Strasse" required hide-details class="mb-6"></v-text-field>
+                  <v-text-field v-model="housenr" id="housenr" label="Hausnr." required hide-details class="mb-6"></v-text-field>
+                  <v-text-field v-model="zipcode" id="zipcode" label="PLZ" required hide-details class="mb-6"></v-text-field>
+                  <v-text-field v-model="city" id="city" label="Stadt" required hide-details class="mb-6"></v-text-field>
 
-                  <v-checkbox v-model="dsgvocheck"
+                  <v-checkbox v-model="dsgvocheck" id="dsgvocheck"
                       label="Ich bin einverstanden mit der Datenschutzerklärung"></v-checkbox>
 
                   <!-- </v-col>
@@ -63,7 +63,10 @@
                       <tr v-for="item in submitsFirestore" :key="item.id">
                           <td>{{ formatDateUsingDateFns(item.timestamp) }}</td>
                           <td>{{ item.firstName }} {{ item.lastName }}</td>
-                          <td>{{ item.zipcode }}, {{ item.city }}</td>
+                          <td>
+                            {{ item.street }}, {{ item.housenr }} <br> 
+                            {{ item.zipcode }}, {{ item.city }}
+                          </td>
                       </tr>
                   </tbody>
               </v-table>
