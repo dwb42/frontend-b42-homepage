@@ -43,29 +43,29 @@
 
       <v-col cols="12" md="6" xl="4">
           <v-card variant="tonal" color=#91b2f6 class="pa-3 mb-6">
-              <h2 class="text-h5 mb-6">Form Submits</h2>
+              <!-- h2 class="text-h5 mb-6">Lots</h2 -->
 
               <v-table>
                   <thead>
                       <tr>
                           <th class="text-left">
-                              created at
-                          </th>
-                          <th class="text-left">
                               Name
                           </th>
                           <th class="text-left">
-                              Adresse
+                              Number of cards
+                          </th>
+                          <th class="text-left">
+                              Value
                           </th>
                       </tr>
                   </thead>
                   <tbody>
-                      <tr v-for="item in submitsFirestore" :key="item.id">
-                          <td>{{ formatDateUsingDateFns(item.timestamp) }}</td>
-                          <td>{{ item.firstName }} {{ item.lastName }}</td>
+                      <tr v-for="item in lotsData" :key="item.id">
+                          <!--td>{{ formatDateUsingDateFns(item.timestamp) }}</td-->
+                          <td>{{ item.it }}</td>
+                          <td>{{ item.lotname }}</td>
                           <td>
-                            {{ item.street }}, {{ item.housenr }} <br> 
-                            {{ item.zipcode }}, {{ item.city }}
+                            {{ item.street }} 
                           </td>
                       </tr>
                   </tbody>
@@ -92,12 +92,16 @@ import { ref, computed, watchEffect, onMounted } from 'vue';
 
 //import firestore instance and relevant functions
 import { db } from '../firebase/init.js';
+import axios from 'axios'; 
+    
 import { collection, addDoc, Timestamp, onSnapshot, getDocs, query as firestoreQuery, orderBy, where, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 
 let unsubscribe = null;
 
 //import date-fns
 import { format } from 'date-fns';
+
+const lotsData = ref({}); 
 
 const firstName = ref('');
 const lastName = ref('');
@@ -112,6 +116,19 @@ const formStatus = ref('');
 const submitsFirestore = ref([]);
 
 
+
+async function fetchLots() {
+  try {
+    const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/lots/');
+    lotsData.value = response.data; // Assuming the API returns the lots data directly
+    console.log(lotsData.value);
+  } catch (error) {
+    console.error('Error fetching lots:', error);
+    // Handle error appropriately
+  }
+}
+
+    
 //function after submit of form 
 const submit = async (event) => {
   //console.log(event, nameOfLovedOne.value);
@@ -156,8 +173,11 @@ const saveToFirebase = async () => {
   //access auto generated id
 }
 
+    
 
 onMounted(() => {
+    fetchLots();
+
   const colRef = collection(db, "testform01submits");
   const query = firestoreQuery(colRef, orderBy('timestamp', 'desc'));
 
