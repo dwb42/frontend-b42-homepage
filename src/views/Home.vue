@@ -8,15 +8,15 @@
 
       <div class="py-6" />
 
-      <router-link to="/datacollectionform">
+      <router-link to="/lots">
         <v-btn color="primary">lots</v-btn>
       </router-link>
 
       <div class="py-6" />
       
-      <router-link to="/testform01">
+      <!--router-link to="/testform01">
         <v-btn color="secondary">dummy target form 01</v-btn>
-      </router-link>
+      </router-link-->
 
     </v-responsive>
   </v-container>

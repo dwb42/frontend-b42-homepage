@@ -27,13 +27,12 @@
       <!-- <v-list-item isActive prepend-icon="mdi-home-outline" title="Home" :to="{ name: 'Home' }">
         </v-list-item> -->
 
-      <v-list-item prepend-icon="mdi-heart-circle-outline" title="data collection form" :to="{ name: 'DataCollectionForm' }"
+      <v-list-item prepend-icon="mdi-archive" title="Lots for purchase" :to="{ name: 'Lots' }"
         @click="openNav = !openNav"></v-list-item>
 
-      <v-list-item prepend-icon="mdi-archive" title="Selenium TestForm 01" :to="{ name: 'TestForm01' }"
-        @click="openNav = !openNav"></v-list-item>
-
-
+      <!--v-list-item prepend-icon="mdi-heart-circle-outline" title="data collection form" :to="{ name: 'DataCollectionForm' }"
+        @click="openNav = !openNav"></v-list-item-->
+      
     </v-list>
   </v-navigation-drawer>
 </template>
