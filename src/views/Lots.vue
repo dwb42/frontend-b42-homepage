@@ -20,16 +20,9 @@
             <td>
               <router-link :to="`/lots/${item.id}`">{{ item.lotname }}</router-link>
             </td> 
-            <td>
-              {{ item.street }} 
-            </td>
-            <td>
-              {{ item.street }} 
-            </td>
-              <td>
-                {{ formatDateUsingDateFns(item.createdAt) }}
-                <br>  {{ item.createdAt }}
-              </td>
+            <td></td>
+            <td>}</td>
+              <td>{{ formatDateUsingDateFns(item.createdAt) }}</td>
             </tr>
           </tbody>
         </v-table>
@@ -41,46 +34,17 @@
         <h2 class="text-h5 mb-6">create new lot</h2>
         <v-form @submit.prevent="createLot">
           <v-text-field v-model="lotname" id="lotname" label="Lotname" required hide-details class="mb-6"></v-text-field>
-          <!--v-text-field v-model="lastName" id="lastName" label="Nachname" required hide-details class="mb-6"></v-text-field>
-          <v-text-field v-model="street" id="street" label="Strasse" required hide-details class="mb-6"></v-text-field>
-          <v-text-field v-model="housenr" id="housenr" label="Hausnr." required hide-details class="mb-6"></v-text-field>
-          <v-text-field v-model="zipcode" id="zipcode" label="PLZ" required hide-details class="mb-6"></v-text-field>
-          <v-text-field v-model="city" id="city" label="Stadt" required hide-details class="mb-6"></v-text-field>
-    
-          <v-checkbox v-model="dsgvocheck" id="dsgvocheck"
-            label="Ich bin einverstanden mit der Datenschutzerklärung"></v-checkbox-->
-    
-
-          <v-btn v-if="formStatus !== 'submitted'" color="primary" type="submit">create new lot</v-btn>
-          <v-alert @click="formStatus = null" v-if="formStatus == 'submitted'" type="success" variant="tonal"
-            title="Danke für Ihre Anfrage"
-            text="Wir schicken Ihnen die angeforderten Informationen postwendent zu. "
-            style="cursor: pointer;"></v-alert>
+          <v-btn color="primary" type="submit">create new lot</v-btn>
         </v-form>
       </v-card>
-    
-    
-      <!-- <v-card v-if="formStatus == 'submitted'" variant="tonal" color=pink class="pa-3 mb-6">
-          <h2 class="text-h4 mb-3">Danke f&uuml;r Ihre Anfrage</h2>
-          <p class="text-subtitle-2 mb-3">Wir schicken Ihnen gerne unseren Prospekt zu:</p>
-          <p class="text-subtitle-2">
-            {{ firstName }} {{ lastName }} <br>
-            {{ street }} {{ housenr }} <br>
-            {{ zipcode }} {{ city }} <br>
-          </p>
-        </v-card> -->
     </v-col>
   </v-row>
-  <br /><br />
-
-
-
 </template>
 
 <script setup>
 import { ref, computed, watchEffect, onMounted } from 'vue';
 import axios from 'axios'; 
-import { format } from 'date-fns';
+import { formatDateUsingDateFns } from '@/utils/index.js';
 
 const lotsData = ref({}); 
 const lotname = ref('');
@@ -118,13 +82,4 @@ async function createLot() {
   onMounted(() => {
     fetchLots();
   });
-
-
-
-  
-const formatDateUsingDateFns = (date) => {
-  return format(new Date(date), 'dd.MM.yyyy HH:mm');
-};
-
-
 </script>
