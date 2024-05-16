@@ -1,11 +1,11 @@
 <template>
-  <span class="text-caption"><router-link :to="`/lots/`">Lots</router-link></span>
+  <span class="text-caption"><router-link :to="`/lots/${ itemData.lotId }`">Lot</router-link></span>
   <h1 class="text-h4 mb-2"><b>
-    {{ lotData.lotname }}</b> &nbsp;
-    <v-btn color="primary" size="small" @click="openEditModal">Edit Lot</v-btn>
+    {{ itemData.collection }} - #{{ itemData.nr }} {{ itemData.name }}</b> &nbsp;
+    <v-btn color="primary" size="small" @click="openEditModal">Edit Card</v-btn>
   </h1>
-  <span class="text-body-1 mr-6">status: {{ lotData.status }}</span>
-  <span class="text-body-1 mr-6">id: {{ lotData.id }}</span>
+  <span class="text-body-1 mr-6">grade: {{ itemData.grade }}</span>
+  <!--<span class="text-body-1 mr-6">id: {{ lotData.id }}</span>
   <span class="text-body-1 mr-6">created: {{ formatDateUsingDateFns(lotData.createdAt) }}</span>
   <span class="text-body-1">
     <a :href="lotData.url_to_marketplace" class="v-link" target="_blank">{{ lot_url_to_marketplace_display }}</a>
@@ -17,7 +17,7 @@
 
   
 
-  <v-dialog v-model="editModal" persistent max-width="600px" @keydown.esc="closeEditModal" @keydown.enter="saveLot">
+    <!--v-dialog v-model="editModal" persistent max-width="600px" @keydown.esc="closeEditModal" @keydown.enter="saveLot">
     <v-card>
       <v-card-title>
         <span class="text-h5">Edit Lot</span>
@@ -27,8 +27,8 @@
           <v-form ref="form">
             <v-text-field v-model="editData.lotname" ref="lotnameInput" label="Lot Name" :rules="[v => !!v || 'Name is required']"></v-text-field>
             <v-text-field v-model="editData.url_to_marketplace" label="Marketplace URL" :rules="[v => !!v || 'URL is required']"></v-text-field>
-            <v-text-field v-model="editData.appraised_value" label="Lot Appraisal Value" type="number"></v-text-field> <!-- New Field -->
-            <v-text-field v-model="editData.bid_price" label="Bid Price" type="number"></v-text-field> <!-- New Field -->
+            <v-text-field v-model="editData.appraised_value" label="Lot Appraisal Value" type="number"></v-text-field> >
+            <v-text-field v-model="editData.bid_price" label="Bid Price" type="number"></v-text-field> 
             <v-textarea v-model="editData.comment" label="Comment"></v-textarea>
           </v-form>
         </v-container>
@@ -39,36 +39,36 @@
         <v-btn color="primary"  @click="saveLot()">Save</v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </v-dialog-->
 
 
   
   <v-row>
     <v-col cols="12" md="12" xl="12">
-      <h2 class="text-h5 mt-6 mb-2"><b>Cards in Lot</b></h2>
+      <h2 class="text-h5 mt-6 mb-2"><b>Auctions for this Card</b></h2>
 
       <v-table>
         <thead>
           <tr>
-            <th class="text-left">id</th>
             <th class="text-left">Collection</th>
             <th class="text-left">#</th>
             <th class="text-left">Player Name</th>
             <th class="text-left">Grade</th>
-            <th class="text-left">Nr Auctions</th>
-            <th class="text-left">Avg. Price</th>
+            <th class="text-left">Auction Date</th>
+            <th class="text-right">Auction Price</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in itemsData" :key="item.id">
-            <td>{{ item.id }}</td>
-            <td>{{ item.collection }}</td> 
-            <td>{{ item.nr }} </td>
+          <tr v-for="item in auctionsData" :key="item.id">
+            <td>{{ item.collection_name }}</td>
+            <td>{{ item.card_nr }}</td> 
+            <td>{{ item.card_name }} </td>
             <td>
-              <router-link :to="`/items/${item.id}`">{{ item.name }} </router-link>
+              <!--router-link :to="`/lots/${item.id}`">{{ item.name }} </router-link-->
+              {{ item.auction_grade_nr }}
             </td>
-            <td>{{ item.grade}}</td>
-            <td>to do</td>
+            <td>{{ formatDateUsingDateFns (item.auction_date,'noTime')}}</td>
+            <td class="text-right">{{ usdFormat(item.auction_price)}}</td>
             <td>to do</td>
           </tr>
         </tbody>
@@ -87,40 +87,53 @@
   const route = useRoute();
   const routeParams = route.params;
   
-  const thisLotId = ref(route.params.id);
-  const lotData = ref({}); 
+  const thisItemId = ref(route.params.id);
+  
+  const itemData = ref({}); 
   const editData = ref({});
   const editModal = ref(false);
-  const lotnameInput = ref(null); // ref var to set focus on first field in modal 
-  const lot_url_to_marketplace_display = ref()
+  //const itemnameInput = ref(null); // ref var to set focus on first field in modal 
+  //const lot_url_to_marketplace_display = ref()
 
-  const itemsData = ref({}); 
+  const auctionsData = ref({}); 
 
   
-  async function fetchLot(id) {
+  async function fetchItem(id) {
     
     try {
-      const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/lots/' + id) ;
-      lotData.value = response.data[0]; // Assuming the API returns the lots data directly
-      lot_url_to_marketplace_display.value = truncateString(response.data[0].url_to_marketplace, 25);
-      //console.log(lotData.value);
+      const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/items/' + id) ;
+      itemData.value = response.data[0]; // Assuming the API returns the lots data directly
+      console.log(itemData.value);
+      await fetchAuctions(); // fetch auctions once data for item has been retrieved
       } catch (error) {
-      console.error('Error fetching lots:', error);  }
+      console.error('Error fetching item:', error);  }
     }
 
-  async function fetchItems(id) {
+  
+  async function fetchAuctions() {
+    console.log('Fetching auctions for:', itemData.value.collection, itemData.value.nr);
+    if (!itemData.value.collection || !itemData.value.nr) {
+      console.error('Error: collection or card_nr is not defined.');
+      return;
+    }
     try {
-    const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/items/lot/' + id);
-    itemsData.value = response.data; // Assuming the API returns the lots data directly
-    //console.log('itemsdata ', itemsData.value);
+      const searchData = {
+        collection: itemData.value.collection,
+          card_nr: itemData.value.nr,
+      };
+      const response = await axios.post('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/auctions/search', searchData);
+      auctionsData.value = response.data; 
+      console.log('Auctions Data:', auctionsData.value);
     } catch (error) {
-    console.error('Error fetching items:', error);  }
+      console.error('Error fetching auctions:', error);  
+    }
   }
+  
   
   onMounted(() => {
     //console.log('thisLotId: ', thisLotId.value)
-    fetchLot(thisLotId.value);
-    fetchItems(thisLotId.value);
+    fetchItem(thisItemId.value);
+    
   });
   
 
@@ -131,7 +144,7 @@
     editModal.value = true;
 
     nextTick(() => {
-      lotnameInput.value.$el.querySelector('input').focus();
+      itemnameInput.value.$el.querySelector('input').focus();
     });
   }
   
@@ -139,7 +152,7 @@
     editModal.value = false;
   }
 
-  
+  /*
   async function saveLot() {
     // Make an HTTP PUT request to update the lot in the database using Sequelize
     try {
@@ -154,6 +167,7 @@
       console.error('Error updating lot:', error);
     }
   }
+  */
 
   
 

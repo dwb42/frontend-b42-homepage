@@ -2,7 +2,7 @@
   <h1 class="text-h4 mb-6">Lots for purchase</h1>
   
   <v-row>
-    <v-col cols="12" md="6" xl="4">
+    <v-col cols="12" md="12" xl="12">
       <v-card variant="tonal" color=#91b2f6 class="pa-3 mb-6">
         <v-table>
           <thead>
@@ -11,17 +11,17 @@
               <th class="text-left">Name</th>
               <th class="text-left">Number of cards</th>
               <th class="text-left">Value</th>
-              <th class="text-left">created at</th>
+              <th class="text-left">Bid Price</th>
+              <th class="text-left">created</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in lotsData" :key="item.id">
-            <td>{{ item.id }}</td>
-            <td>
-              <router-link :to="`/lots/${item.id}`">{{ item.lotname }}</router-link>
-            </td> 
-            <td></td>
-            <td>}</td>
+              <td>{{ item.id }}</td>
+              <td><router-link :to="`/lots/${item.id}`">{{ item.lotname }}</router-link></td> 
+              <td></td>
+              <td>{{ usdFormat(item.appraised_value) }}</td>
+              <td>{{ usdFormat(item.bid_price) }}</td>
               <td>{{ formatDateUsingDateFns(item.createdAt) }}</td>
             </tr>
           </tbody>
@@ -29,7 +29,7 @@
       </v-card>
     </v-col>
   
-    <v-col cols="12" md="6" xl="4">
+    <v-col cols="12" md="8" xl="4">
       <v-card variant="elevated" class="pa-3 mb-6">
         <h2 class="text-h5 mb-6">create new lot</h2>
         <v-form @submit.prevent="createLot">
@@ -44,7 +44,7 @@
 <script setup>
 import { ref, computed, watchEffect, onMounted } from 'vue';
 import axios from 'axios'; 
-import { formatDateUsingDateFns } from '@/utils/index.js';
+import { formatDateUsingDateFns, usdFormat } from '@/utils/index.js';
 
 const lotsData = ref({}); 
 const lotname = ref('');

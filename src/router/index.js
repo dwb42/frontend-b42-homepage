@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Import components
 import Home from '../views/Home.vue'
-import DataCollectionForm from '@/views/DataCollectionForm.vue'
 import Lots from '@/views/Lots.vue'
 import LotDetails from '@/views/LotDetails.vue'
+import ItemDetails from '@/views/ItemDetails.vue'
 
 // Routes
 const routes = [
@@ -18,19 +18,19 @@ const routes = [
         component: Home,
       },    
       {
-        path: '/datacollectionform',
-        name: 'DataCollectionForm',
-        component: DataCollectionForm,
-      },             
+        path: '/lots',
+        name: 'Lots',
+        component: Lots,
+      },  
       {
         path: '/lots/:id',
         name: 'LotDetails',
         component: LotDetails,
       },  
       {
-        path: '/lots',
-        name: 'Lots',
-        component: Lots,
+        path: '/items/:id',
+        name: 'ItemDetails',
+        component: ItemDetails,
       },  
     ],
   },
