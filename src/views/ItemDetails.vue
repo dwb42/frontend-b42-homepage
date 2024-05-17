@@ -121,7 +121,7 @@
         collection: itemData.value.collection,
           card_nr: itemData.value.nr,
       };
-      const response = await axios.post('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/auctions/search', searchData);
+      const response = await axios.post('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_auctions/search', searchData);
       auctionsData.value = response.data; 
       console.log('Auctions Data:', auctionsData.value);
     } catch (error) {

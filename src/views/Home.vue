@@ -8,9 +8,11 @@
 
       <div class="py-6" />
 
-      <router-link to="/lots">
-        <v-btn color="primary">lots</v-btn>
-      </router-link>
+      <router-link to="/lots"><v-btn color="primary">lots for purchase</v-btn></router-link>
+
+      <div class="py-6" />
+      
+      <router-link to="/psa_collections" class="mt-6"><v-btn color="primary">psa auction data</v-btn></router-link>
 
       <div class="py-6" />
       

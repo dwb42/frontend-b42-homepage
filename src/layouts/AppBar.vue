@@ -30,8 +30,8 @@
       <v-list-item prepend-icon="mdi-archive" title="Lots for purchase" :to="{ name: 'Lots' }"
         @click="openNav = !openNav"></v-list-item>
 
-      <!--v-list-item prepend-icon="mdi-heart-circle-outline" title="data collection form" :to="{ name: 'DataCollectionForm' }"
-        @click="openNav = !openNav"></v-list-item-->
+      <v-list-item prepend-icon="mdi-gavel" title="PSA Auction Data" :to="{ name: 'PSA_Collections' }"
+        @click="openNav = !openNav"></v-list-item>
       
     </v-list>
   </v-navigation-drawer>

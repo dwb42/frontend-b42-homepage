@@ -5,6 +5,10 @@ import Home from '../views/Home.vue'
 import Lots from '@/views/Lots.vue'
 import LotDetails from '@/views/LotDetails.vue'
 import ItemDetails from '@/views/ItemDetails.vue'
+import PSA_Collections from '@/views/PSA_Collections.vue'
+import PSA_CollectionDetails from '@/views/PSA_CollectionDetails.vue'
+import PSA_CardDetail from '@/views/PSA_CardDetail.vue'
+
 
 // Routes
 const routes = [
@@ -32,6 +36,22 @@ const routes = [
         name: 'ItemDetails',
         component: ItemDetails,
       },  
+      {
+        path: '/psa_collections',
+        name: 'PSA_Collections',
+        component: PSA_Collections,
+      },  
+      {
+        path: '/psa_collections/:id',
+        name: 'PSA_CollectionDetails',
+        component: PSA_CollectionDetails,
+      },  
+      {
+        path: '/psa_cards/:id',
+        name: 'PSA_CardDetail',
+        component: PSA_CardDetail,
+      },  
+
     ],
   },
  
