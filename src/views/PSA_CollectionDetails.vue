@@ -38,7 +38,7 @@
         <tbody>
           <tr v-for="item in psa_cardsData" :key="item.id">
             <td>{{ item.id }}</td>
-            <td>{{ item.nr }}</td> 
+            <td>{{ item.card_nr }}</td> 
             <td>
               <router-link :to="`/psa_cards/${item.id}`">{{ item.name }} </router-link>
             </td>

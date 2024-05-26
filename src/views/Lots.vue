@@ -61,13 +61,7 @@ async function fetchLots() {
 async function createLot() {
   try {
   const formData = {
-    lotname: lotname.value,
-    lastName: lastName.value,
-    street: street.value,
-    housenr: housenr.value,
-    zipcode: zipcode.value,
-    city: city.value,
-    dsgvocheck: dsgvocheck.value,
+    lotname: lotname.value
   };
   const response = await axios.post('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/lots/', formData);
   console.log('Lot created:', response.data);
