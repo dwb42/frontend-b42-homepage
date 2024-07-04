@@ -42,7 +42,7 @@
             <td>
               <router-link :to="`/psa_cards/${item.id}`">{{ item.name }} </router-link>
             </td>
-            <td>to do</td>
+            <td>{{ item.nrAuctions }}</td>
             <td>to do</td>
           </tr>
       </tbody>
@@ -64,6 +64,8 @@
   const thisPSA_CollectionId = ref(route.params.id);
   const psa_collectionData = ref({}); 
   const psa_cardsData = ref({}); 
+  const psa_auctionsMetaData = ref({}); 
+  
 
   
   async function fetchPSA_Collection(id) {
@@ -78,9 +80,34 @@
 
   async function fetchPSA_Cards(id) {
     try {
-    const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_cards/collection/' + id);
-    psa_cardsData.value = response.data; // Assuming the API returns the lots data directly
-    //console.log('itemsdata ', itemsData.value);
+      const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_cards/collection/' + id);
+      const cards = response.data;
+
+      /*
+      for (let card of cards) {
+        try {
+          const auctionResponse = await fetchPSA_AuctionsMetaData(card.id);
+          //console.log(`Auction response for card ${card.id}:`, auctionResponse);
+          card.nrAuctions = auctionResponse;
+        } catch (error) {
+          console.error(`Error fetching auction metadata for card ${card.id}:`, error);
+        }
+      }
+      */
+      psa_cardsData.value = cards;
+
+      //psa_cardsData.value = response.data; // Assuming the API returns the lots data directly
+    //console.log('!!! psa_cardsData ', psa_cardsData.value);
+    } catch (error) {
+    console.error('Error fetching items:', error);  }
+  }
+
+  async function fetchPSA_AuctionsMetaData(cardId) {
+    try {
+    const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_auctions/card/' + cardId);
+    psa_auctionsMetaData.value = response.data.count; // Assuming the API returns the lots data directly
+    //console.log('auction data ', psa_auctionsMetaData.value);
+      return response.data.count;
     } catch (error) {
     console.error('Error fetching items:', error);  }
   }

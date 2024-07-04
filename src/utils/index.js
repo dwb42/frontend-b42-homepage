@@ -24,6 +24,10 @@ export const truncateString = (str, maxLength) => {
   }  
 
 export const usdFormat = (number) => {
+  if (number === null || number === undefined) {
+    return ''; // or any other default value you'd prefer to display
+  }
+  
   return number.toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',

@@ -64,6 +64,7 @@
             <th class="text-left">PSA Card</th>
             <th class="text-left">Nr Auctions</th>
             <th class="text-left">Avg. Price</th>
+            <th class="text-right">Valuation</th>
             <th class="text-left"></th>
           </tr>
         </thead>
@@ -86,6 +87,18 @@
             </td>
             <td>to do</td>
             <td>to do</td>
+            <td class="text-right">
+              <div v-if="editingItemId === item.id">
+                <v-text-field
+                  v-model="newValuation"
+                  @keyup.enter="saveNewValuation(item)"
+                  @blur="cancelEdit"
+                ></v-text-field>
+              </div>
+              <div v-else @click="editValuation(item)">
+                {{ item.valuation ? `${usdFormat(item.valuation)}` : '-' }}
+              </div>
+            </td>            
             <td>
               <v-icon small @click="openEditItemModal(item)">mdi-pencil</v-icon>
               <span class="mr-2">&nbsp;</span>
@@ -93,6 +106,13 @@
             </td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="9" style="text-align: right;"><b>Total Valuation</b></td>
+            <td style="text-align: right;">{{ usdFormat(totalValuation) }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
       </v-table>
     </v-col>
   </v-row>
@@ -110,11 +130,40 @@
       </v-card-title>
       <v-card-text>
         <v-container>
+          <v-tabs v-model="activeTab">
+            <v-tab>PSA Select</v-tab>
+            <v-tab>Manual Enter</v-tab>
+          </v-tabs>
+          <div class="py-3" />
           <v-form ref="form">
-            <v-text-field v-model="newItemData.collection" label="Collection Name" :rules="[v => !!v || 'Collection Name is required']"></v-text-field>
-            <v-text-field v-model="newItemData.number" label="Card #" type="number" :rules="[v => !!v || 'Card # is required']"></v-text-field>
-            <v-text-field v-model="newItemData.name" label="Card Name" :rules="[v => !!v || 'Card Name is required']"></v-text-field>
-            <v-text-field v-model="newItemData.grade_numerical" label="Grade Numerical" :rules="[v => !!v || 'Grade is required']"></v-text-field>
+            <v-tab-item v-if="activeTab === 0">
+              <v-autocomplete
+                v-model="selectedPsaCollectionId"
+                :items="psaCollections"
+                item-title="name"
+                item-value="id"
+                label="PSA Collection"
+                @change="fetchPsaCards"
+                :rules="[v => !!v || 'PSA Collection is required']"
+              ></v-autocomplete>
+              <v-autocomplete
+                v-model="newItemData.psa_cardId"
+                :items="psaCards"
+                item-title="card_nr_name"
+                item-value="id"
+                label="PSA Cards"
+                :disabled="!selectedPsaCollectionId"
+                :rules="[v => !!v || 'PSA Card is required']"
+              ></v-autocomplete>
+            </v-tab-item>
+            <v-tab-item v-else>
+              <v-text-field v-model="newItemData.collection" label="Collection Name"> </v-text-field>
+              <v-text-field v-model="newItemData.number" label="Card #" type="number"></v-text-field>
+              <v-text-field v-model="newItemData.name" label="Card Name"></v-text-field>
+            </v-tab-item>
+
+            <v-text-field v-model="newItemData.grade_numerical" label="Grade Numerical"></v-text-field>
+            
           </v-form>
         </v-container>
       </v-card-text>
@@ -137,11 +186,31 @@
         <v-container>
           <v-form ref="form">
             <v-text-field v-model="editItemData.collection" label="Collection Name" :rules="[v => !!v || 'Collection Name is required']"></v-text-field>
-            <v-text-field v-model="editItemData.number" label="Card #" type="number" :rules="[v => !!v || 'Card # is required']"></v-text-field>
+            <v-text-field v-model="editItemData.number" label="Card #" type="text" :rules="[v => !!v || 'Card # is required']"></v-text-field>
             <v-text-field v-model="editItemData.name" label="Card Name" :rules="[v => !!v || 'Card Name is required']"></v-text-field>
             <v-text-field v-model="editItemData.grade_raw" label="Grade Raw" :rules="[v => !!v || 'Grade is required']"></v-text-field>
             <v-text-field v-model="editItemData.grade_numerical" label="Grade Numerical" :rules="[v => !!v || 'Grade is required']"></v-text-field>
-            <v-text-field v-model="editItemData.psa_cardId" label="PSA Card"></v-text-field>
+            <!--v-text-field v-model="editItemData.psa_cardId" label="PSA Card"></v-text-field--> 
+            <!-- HERENOW -->
+            <v-autocomplete
+              v-model="selectedPsaCollectionId"
+              :items="psaCollections"
+              item-title="name"
+              item-value="id"
+              label="PSA Collection"
+              @change="fetchPsaCards"
+              :rules="[v => !!v || 'PSA Collection is required']"
+            ></v-autocomplete>
+            <v-autocomplete
+              v-model="editItemData.psa_cardId"
+              :items="psaCards"
+              item-title="card_nr_name"
+              item-value="id"
+              label="PSA Cards"
+              :disabled="!selectedPsaCollectionId"
+              :rules="[v => !!v || 'PSA Card is required']"
+            ></v-autocomplete>
+
           </v-form>
         </v-container>
       </v-card-text>
@@ -246,7 +315,7 @@
 </template>
 
 <script setup>
-  import { ref, computed, watchEffect, onMounted, nextTick } from 'vue';
+  import { ref, computed, watchEffect, watch, onMounted, nextTick } from 'vue';
   import axios from 'axios'; 
   import { formatDateUsingDateFns, truncateString, usdFormat } from '@/utils/index.js';
   
@@ -267,11 +336,14 @@
   const itemsData = ref([]); 
 
   const addItemModal = ref(false);
+  const activeTab = ref(0);
   const newItemData = ref({
     collection: '',
     number: 0,
     name: '',
-    grade_raw: ''
+    grade_raw: '', 
+    grade_numerical: '', 
+    psa_cardId: ''
   });
 
   const editItemModal = ref(false);
@@ -281,9 +353,38 @@
     number: 0,
     name: '',
     grade_raw: '',
-    grade_numberical: '', 
-    psa_cardId: ''
+    grade_numerical: '', 
+    psa_cardId: '', 
+    psa_card_name: '', 
+    psa_card_nr: '', 
+    psa_card_collectionId: '', 
+    psa_collection_name: ''
   });
+
+  //edit item valuation 
+  const editingItemId = ref(null);
+  const newValuation = ref("");
+  const editValuation = (item) => {
+    editingItemId.value = item.id;
+    newValuation.value = item.valuation || "";
+  };
+  const cancelEdit = () => {
+    editingItemId.value = null;
+  };
+
+  //compute total valuation of items
+  const totalValuation = computed(() => {
+    return itemsData.value.reduce((total, item) => {
+      return total + (item.valuation ? parseFloat(item.valuation) : 0);
+    }, 0);
+  });
+
+  //watch for changes in totalValuation and save new valuation to db
+  watch(totalValuation, (newVal) => {
+    lotData.value.appraised_value = newVal;
+    saveLotValuation(newVal);
+  });
+  
 
   const deleteItemModal = ref(false);
   const itemToDelete = ref(null);
@@ -306,7 +407,12 @@
     }
   });
 
-  //psa_collection and psa_card lookup vars
+  //psa_collection and psa_card autocomplete vars
+  const psaCollections = ref([]);
+  const selectedPsaCollectionId = ref(null);
+  const selectedPsaCollectionName = ref(null);
+  const psaCards = ref([]);
+  const selectedPsaCard = ref(null);
   
   
   /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// /// 
@@ -328,7 +434,7 @@
     try {
     const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/items/lot/' + id);
     //itemsData.value = response.data; // Assuming the API returns the lots data directly
-    const items = response.data;
+    let items = response.data;
     // Fetch corresponding psa_card data for each item
     const psaCardPromises = items.map(async (item) => {
       if (item.psa_cardId) {
@@ -340,6 +446,17 @@
       return item;
     });
     itemsData.value = await Promise.all(psaCardPromises);
+
+    // Sort items by collection and then by number
+    items.sort((a, b) => {
+      if (a.collection !== b.collection) {
+        return a.collection.localeCompare(b.collection);
+      } else {
+        return a.number - b.number;
+      }
+    });
+    itemsData.value = items;
+      
     console.log('itemsdata ', itemsData.value);
     } catch (error) {
     console.error('Error fetching items:', error);  }
@@ -349,6 +466,7 @@
     //console.log('thisLotId: ', thisLotId.value)
     fetchLot(thisLotId.value);
     fetchItems(thisLotId.value);
+    fetchPsaCollections();
   });
   
 
@@ -382,6 +500,22 @@
       console.error('Error updating lot:', error);
     }
   }
+
+
+  const saveLotValuation = async (newValuation) => {
+    try {
+      // Update lotData with new valuation
+      lotData.value.appraised_value = newValuation;
+      // Make an HTTP PUT request to update the lot in the database
+      const response = await axios.put(
+        `https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/lots/${lotData.value.id}`,
+        { appraised_value: newValuation }
+      );
+      console.log("Lot valuation updated:", response.data);
+    } catch (error) {
+      console.error("Error updating lot valuation:", error);
+    }
+  };
   ///  EDIT LOT 
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
 
@@ -393,20 +527,26 @@
       number: 0,
       name: '',
       grade_raw: '',
-      grade_numberical: ''
+      grade_numerical: '', 
+      psa_cardId: 0,
     };
+
     addItemModal.value = true;
   }
+  
   function closeAddItemModal() {
     addItemModal.value = false;
   }
+  
   async function createItem() {
     try {
+      console.log('new item data ', newItemData.value)
       const response = await axios.post(`https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/items`, {
         ...newItemData.value,
         lotId: thisLotId.value
       });
       itemsData.value.push(response.data);
+      fetchItems(thisLotId.value);
       addItemModal.value = false;
     } catch (error) {
       console.error('Error adding card:', error);
@@ -418,15 +558,40 @@
 
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
   ///  EDIT ITEM 
-  function openEditItemModal(item) {
+  async function openEditItemModal(item) {
     editItemData.value = { ...item };
+    console.log('edit item psa card id ', editItemData.value.psa_cardId);
+    // Only execute the axios.get request if editItemData.value.psa_cardId is set
+    if (editItemData.value.psa_cardId) {
+      const id = editItemData.value.psa_cardId;
+      try {
+        const response = await axios.get(
+          'https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_cards/' + id
+        );
+        let psa_card_Data = response.data;
+        console.log('psa card data: ', psa_card_Data);
+        // Update specific values in editItemData
+        editItemData.value.psa_card_name = psa_card_Data.name;
+        editItemData.value.psa_card_nr = psa_card_Data.card_nr;
+        editItemData.value.psa_card_collectionId = psa_card_Data.collectionId;
+        editItemData.value.psa_collection_name = psa_card_Data.psa_collection.name;
+      } catch (error) {
+        console.error('Error fetching psa card data during item edit:', error);
+      }
+    }
     editItemModal.value = true;
   }
+
+
   function closeEditItemModal() {
     editItemModal.value = false;
+    editItemData.value = {};
   }
+  
   async function updateItem() {
     try {
+      console.log ('edit item data ', editItemData.value);
+      
       const response = await axios.put(`https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/items/${editItemData.value.id}`, editItemData.value);
 
       // Find the index of the item to be updated
@@ -443,6 +608,7 @@
 
       fetchItems(thisLotId.value);
       editItemModal.value = false;
+      editItemData.value = {};
     } catch (error) {
       console.error('Error updating item:', error);
     }
@@ -450,6 +616,30 @@
   ///   EDIT ITEM 
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
 
+  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
+  ///  EDIT ITEM VALUATION
+  const saveNewValuation = async (item) => {
+    try {
+      const updatedItem = { ...item, valuation: newValuation.value };
+      //console.log('updatedItem ', updatedItem);
+
+      const response = await axios.put(`https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/items/${item.id}`, updatedItem);
+
+      // Update local itemsData
+      const index = itemsData.value.findIndex((i) => i.id === item.id);
+      if (index !== -1) {
+        itemsData.value[index].valuation = newValuation.value;
+      }
+      // Reset the editing state
+      editingItemId.value = null;
+    } catch (error) {
+      console.error("Error updating valuation:", error);
+    }
+  };
+  ///  EDIT ITEM VALUATION
+  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
+  
+  
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
   ///  DELETE ITEM 
   function openDeleteItemModal(item) {
@@ -488,7 +678,7 @@ collection, number, name, grade
 
 When you are not certain about a certain value, please indicate by adding "[uncertain]" next to the value. Dont add any other text or formatting.
 
-The format of the returned json-object should a simple array without a name that can be interpreted by javascript.`;
+The format of the returned json-object should be a simple array without a name that can be interpreted by javascript.`;
     batchAddCardModal.value = true;
   }
   // Function to close the Batch Add Card Modal
@@ -555,20 +745,96 @@ The format of the returned json-object should a simple array without a name that
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
 
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
-  ///  PSA CARD search and show 
-  async function fetchPsaCardData(id) {
-
+  ///  PSA COLLECTION and CARD autocomplete and match
+  // Fetch all PSA Collections
+  const fetchPsaCollections = async () => {
     try {
-      const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_cards/' + id) ;
-      psaCardData.value = response.data; 
-      console.log(psaCardData.value);
-      } catch (error) {
-      console.error('Error fetching psa card data:', error);  }
+      const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_collections/');
+      psaCollections.value = response.data;
+      //console.log('PSA Collections:', psaCollections.value);
+    } catch (error) {
+      console.error('Error fetching PSA collections:', error);
     }
+  };
+
+  // Fetch ONE PSA Collection
+  const fetchPSA_Collection = async (id) => {
+    try {
+      const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_collections/' + id);
+      console.log('PSA Collection Name:', response.data.name)
+      selectedPsaCollectionName.value = response.data.name; // Assuming the API returns the collection data directly
+    } catch (error) {
+      console.error('Error fetching collection:', error);
+    }
+  }
+  
+  // Fetch PSA Cards for selected collection
+  const fetchPsaCards = async (collectionId) => {
+    if (!collectionId) return;
+
+    console.log('collectionId wi fetchPsaCards: ', collectionId);
+    
+    try {
+      const response = await axios.get(`https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/psa_cards/collection/${collectionId}`);
+      //psaCards.value = response.data;
+      psaCards.value = response.data.map(card => ({
+        ...card,
+        card_nr_name: `${card.card_nr} :: ${card.name}`,
+        id: card.id
+      }));
+      console.log('PSA Cards in Collection:', psaCards.value);
+    } catch (error) {
+      console.error('Error fetching PSA cards:', error);
+    }
+  };
+  
+  // Watch for changes in selected PSA collection to fetch corresponding cards
+  watch(selectedPsaCollectionId, (newVal) => {
+    if (newVal) {
+      fetchPSA_Collection(newVal);
+      fetchPsaCards(newVal);
+    } else {
+      psaCards.value = [];
+    }
+  });
+
+
+  /*
+  const fetchPsaCardsForNewItem = async (collectionId) => {
+    if (!collectionId) return;
+    try {
+      const response = await axios.get(`https://your-api-endpoint/psa_cards/collection/${collectionId}`);
+      psaCards.value = response.data.map(card => ({
+        ...card,
+        card_nr_name: `${card.card_nr} :: ${card.name}`
+      }));
+    } catch (error) {
+      console.error('Error fetching PSA cards:', error);
+      psaCards.value = [];
+    }
+  };
+  */
+
+  
+  // Watch for changes in psa_cardId to autofill newItemData fields
+  watch(() => newItemData.value.psa_cardId, (newVal) => {
+    console.log('newVal: ', newVal);
+    console.log('selectedPsaCollectionId: ', selectedPsaCollectionId.value);
+    
+    if (newVal) {
+      const selectedCard = psaCards.value.find(card => card.id === newVal);
+      if (selectedCard) {
+        newItemData.value.collection = selectedPsaCollectionName.value;
+        newItemData.value.number = selectedCard.card_nr;
+        newItemData.value.name = selectedCard.name;
+      }
+    }
+  });
+
   
 
   
-  ///  PSA CARD search and show 
+  ///  PSA COLLECTION and CARD autocomplete and match
   ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///  ///
   
 </script>
