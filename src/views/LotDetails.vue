@@ -181,6 +181,7 @@
     <v-card>
       <v-card-title>
         <span class="text-h5">Edit Card</span>
+        ccc {{ editItemData.psa_card_collectionId }}
       </v-card-title>
       <v-card-text>
         <v-container>
@@ -192,8 +193,9 @@
             <v-text-field v-model="editItemData.grade_numerical" label="Grade Numerical" :rules="[v => !!v || 'Grade is required']"></v-text-field>
             <!--v-text-field v-model="editItemData.psa_cardId" label="PSA Card"></v-text-field--> 
             <!-- HERENOW -->
+            
             <v-autocomplete
-              v-model="selectedPsaCollectionId"
+              v-model="editItemData.psa_card_collectionId"
               :items="psaCollections"
               item-title="name"
               item-value="id"
@@ -575,6 +577,11 @@
         editItemData.value.psa_card_nr = psa_card_Data.card_nr;
         editItemData.value.psa_card_collectionId = psa_card_Data.collectionId;
         editItemData.value.psa_collection_name = psa_card_Data.psa_collection.name;
+
+        // Set the selected PSA Collection ID
+        selectedPsaCollectionId.value = editItemData.value.psa_card_collectionId;
+
+        
       } catch (error) {
         console.error('Error fetching psa card data during item edit:', error);
       }
@@ -789,7 +796,7 @@ The format of the returned json-object should be a simple array without a name t
   };
   
   // Watch for changes in selected PSA collection to fetch corresponding cards
-  watch(selectedPsaCollectionId, (newVal) => {
+  watch(editItemData.value.psa_card_collectionId, (newVal) => {
     if (newVal) {
       fetchPSA_Collection(newVal);
       fetchPsaCards(newVal);

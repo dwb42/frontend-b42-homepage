@@ -51,7 +51,7 @@ const lotname = ref('');
 
 async function fetchLots() {
   try {
-  const response = await axios.get('https://5ba3ca6b-a813-4e07-89f3-afccbf84b282-00-38uju9xxxdxfz.riker.replit.dev/lots/');
+  const response = await axios.get('https://0cc1571a-2243-4c69-977c-1089b23dcaa7-00-1q6dz6lfs5ps9.janeway.replit.dev/lots/');
   lotsData.value = response.data; // Assuming the API returns the lots data directly
   console.log(lotsData.value);
   } catch (error) {
