@@ -23,5 +23,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  define: {
+    'process.env.BACKEND_BASE_URL_DEV': JSON.stringify(process.env.BACKEND_BASE_URL_DEV),
+    'process.env.BACKEND_BASE_URL_PROD': JSON.stringify(process.env.BACKEND_BASE_URL_PROD),
+  },
 })

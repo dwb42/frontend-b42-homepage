@@ -35,3 +35,12 @@ export const usdFormat = (number) => {
     maximumFractionDigits: 0,
   });
 };
+
+
+const isDevelopment = window.location.href.includes('replit.dev');
+// Determine the API base URL
+export const apiBaseURL = isDevelopment
+  //? process.env.BACKEND_BASE_URL_DEV
+  //: process.env.BACKEND_BASE_URL_PROD
+  ? process.env.BACKEND_BASE_URL_DEV
+  : process.env.BACKEND_BASE_URL_PROD

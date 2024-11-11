@@ -1,10 +1,10 @@
 <template>
   <v-app-bar color="primary" density="compact">
-    <template v-slot:prepend>
+    <!--template v-slot:prepend>
       <v-app-bar-nav-icon @click="openNav = !openNav"></v-app-bar-nav-icon>
-    </template>
-
-    <v-app-bar-title><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">auction buddy</router-link></v-app-bar-title>
+  </template-->
+    
+    <v-app-bar-title class="pa-4"><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">saas-valuation.com</router-link></v-app-bar-title>
 
     <template v-slot:append>
       <!-- <v-btn icon="mdi-dots-vertical"></v-btn> -->
