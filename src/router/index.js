@@ -10,59 +10,76 @@ import PSA_Collections from '@/views/PSA_Collections.vue'
 import PSA_CollectionDetails from '@/views/PSA_CollectionDetails.vue'
 import PSA_CardDetail from '@/views/PSA_CardDetail.vue'
 
+import Valuations from '@/views/Valuations.vue'
+import ValuationDetail from '@/views/ValuationDetail.vue'
+
 
 // Routes
-const routes = [
-  {
-    path: '/',
-    component: () => import('../layouts/Default.vue'),
-    children: [
-      {
-        path: '/',
-        name: 'Home',
-        component: Home,
-      },    
-      {
-        path: '/admin',
-        name: 'Admin',
-        component: Admin,
-      }, 
-      {
-        path: '/lots',
-        name: 'Lots',
-        component: Lots,
-      },  
-      {
-        path: '/lots/:id',
-        name: 'LotDetails',
-        component: LotDetails,
-      },  
-      {
-        path: '/items/:id',
-        name: 'ItemDetails',
-        component: ItemDetails,
-      },  
-      {
-        path: '/psa_collections',
-        name: 'PSA_Collections',
-        component: PSA_Collections,
-      },  
-      {
-        path: '/psa_collections/:id',
-        name: 'PSA_CollectionDetails',
-        component: PSA_CollectionDetails,
-      },  
-      {
-        path: '/psa_cards/:id',
-        name: 'PSA_CardDetail',
-        component: PSA_CardDetail,
-      },  
-
-    ],
-  },
+  const routes = [
+    {
+      path: '/',
+      component: () => import('../layouts/Default.vue'), // Root layout
+      children: [
+        {
+          path: '', // Default child of "/"
+          name: 'Home',
+          component: Home,
+        },
+        {
+          path: 'admin',
+          name: 'Admin',
+          component: Admin,
+        },
+        {
+          path: 'lots',
+          name: 'Lots',
+          component: Lots,
+        },
+        {
+          path: 'lots/:id',
+          name: 'LotDetails',
+          component: LotDetails,
+        },
+        {
+          path: 'items/:id',
+          name: 'ItemDetails',
+          component: ItemDetails,
+        },
+        {
+          path: 'psa_collections',
+          name: 'PSA_Collections',
+          component: PSA_Collections,
+        },
+        {
+          path: 'psa_collections/:id',
+          name: 'PSA_CollectionDetails',
+          component: PSA_CollectionDetails,
+        },
+        {
+          path: 'psa_cards/:id',
+          name: 'PSA_CardDetail',
+          component: PSA_CardDetail,
+        },
+        {
+          path: 'app', // Parent route for the "app" section
+          //component: () => import('../layouts/Default.vue'), // Sub-layout for the /app section
+          children: [
+            {
+              path: 'valuations', 
+              name: 'Valuations',
+              component: Valuations,
+            },
+            {
+              path: 'valuation/:id', 
+              name: 'ValuationDetail',
+              component: ValuationDetail,
+            },
+          ],
+        },
+      ],
+    },
+  ];
  
-
-]
 
 // Create router instance
 const router = createRouter({

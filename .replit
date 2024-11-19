@@ -10,6 +10,8 @@ channel = "stable-22_11"
 PATH = "$REPL_HOME/.config/npm/node_global/bin:$REPL_HOME/node_modules/.bin"
 XDG_CONFIG_HOME = "/home/runner/.config"
 npm_config_prefix = "$REPL_HOME/.config/npm/node_global"
+REPLIT_NODEJS_PACKAGE_LAYER = "1" 
+
 
 [gitHubImport]
 requiredFiles = [".replit", "replit.nix", ".config"]
@@ -38,3 +40,7 @@ publicDir = "dist"
 [[ports]]
 localPort = 5173
 externalPort = 80
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"

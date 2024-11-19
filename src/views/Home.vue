@@ -3,7 +3,6 @@
     <!--img src="@/assets/saas-valuation-logo.png" alt="SaaS Valuation Logo" class="logo-image" /-->
     <v-row no-gutters>
       <v-col cols="12" sm="12" md="6" class="d-flex align-center justify-center">
-        
         <v-responsive class="align-left text-left fill-height">
           
           <div v-if="!isSubmitted">
@@ -176,6 +175,7 @@
     </v-card-actions>
   </v-card>
   </v-dialog>
+
   
 
 </template>
@@ -184,7 +184,7 @@
 import { ref, computed, watchEffect, onMounted } from 'vue';
 import { useDisplay } from 'vuetify'
 import axios from 'axios'; 
-import { formatDateUsingDateFns, usdFormat } from '@/utils/index.js';
+import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
 
 const email = ref('');
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -219,9 +219,13 @@ async function register() {
   const formData = {
       email: email.value
   };
-  const response = await axios.post('https://0cc1571a-2243-4c69-977c-1089b23dcaa7-00-1q6dz6lfs5ps9.janeway.replit.dev/emails/', formData);
+  console.log('Registering email at:', apiBaseURL);
+  const response = await axios.post(`${apiBaseURL}/emails/`, formData);
   console.log('Email registered:', response.data);
   isSubmitted.value = true; 
+
+  // Call the conversion tracking function after a successful registration
+  gtag_report_conversion();
 
   } catch (error) {
   console.error('Error creating lot:', error);
