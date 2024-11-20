@@ -129,31 +129,28 @@
           <tr v-for="row in rowDefinitionsKPIOutputs" :key="row.field">
             <td>{{ row.label }}</td>
             <template v-for="year in years" :key="year">
-              <td class="text-right" @click="startEditing(row.field, year)">
-                <div v-if="isEditing(row.field, year)">
-                  <input 
-                    v-model="editValue"
-                    @keyup.enter="saveEdit(row.field, year)"
-                    @blur="saveEdit(row.field, year)"
-                    :ref="el => setInputRef(el, row.field, year)"
-                    style="width: 80px; text-align: right;"
-                    autocomplete="off"
-                    type="text"
-                  />
-                </div>
-                <div v-else>
-                  <template v-if="valuationData?.valuation_financials?.[year]?.[row.field]">
-                    {{ usdFormat(valuationData.valuation_financials[year][row.field]) }}
+              <td class="text-right">
+                <template v-if="valuationKPIs[year] && valuationKPIs[year][row.field] != null">
+                  <!-- Check if KPI value is a number -->
+                  <template v-if="typeof valuationKPIs[year][row.field] === 'number'">
+                    {{ formatKPIValue(row.field, valuationKPIs[year][row.field]) }}
                   </template>
-                  <template v-else>
-                    <span style="background-color: #fffbe6;font-size: 0.8em;color:red">add data</span>
+                  <!-- If KPI value is an object with missing data -->
+                  <template v-else-if="valuationKPIs[year][row.field].missingData">
+                    <span style="color: red;">
+                      Missing data: {{ valuationKPIs[year][row.field].missingData.join(', ') }}
+                    </span>
                   </template>
-                </div>
+                </template>
+                <template v-else>
+                  <span style="color: red;">No data</span>
+                </template>
               </td>
             </template>
           </tr>
         </tbody>
       </v-table>
+
     </v-card>
   
   </v-container>  
@@ -173,6 +170,9 @@
   //valuation vars
   const thisValuationId = ref(route.params.id);
   const valuationData = reactive({}); 
+  // Initialize reactive object to store KPIs
+  const valuationKPIs = reactive({});
+
 
   //edit valuation financial cell
   const editingCell = ref(null);
@@ -255,7 +255,6 @@
   }
 
   
-  
   //get one valuation 
   async function fetchValuation(id) {
     try {
@@ -335,6 +334,84 @@
 
 
 
+  ///////////////
+  // START KPI Calculation Functions
+  //////
+
+  function calculateKPIsForYear(year) {
+    const financials = valuationData.valuation_financials[year];
+    const kpis = {};
+
+    if (financials) {
+      // Recurring Revenue Ratio
+      let missingData = [];
+      if (financials.recurring_revenue != null && financials.total_revenue != null) {
+        kpis.calc_recurring_revenue_ratio =
+          financials.total_revenue !== 0
+            ? financials.recurring_revenue / financials.total_revenue
+            : 0;
+      } else {
+        if (financials.recurring_revenue == null) missingData.push('recurring_revenue');
+        if (financials.total_revenue == null) missingData.push('total_revenue');
+        kpis.calc_recurring_revenue_ratio = { missingData };
+      }
+
+      // Year-over-Year Revenue Growth
+      missingData = [];
+      const previousYear = parseInt(year) - 1;
+      const prevFinancials = valuationData.valuation_financials[previousYear];
+      if (financials.total_revenue != null && prevFinancials && prevFinancials.total_revenue != null) {
+        kpis.calc_yoy_revenue_growth =
+          prevFinancials.total_revenue !== 0
+            ? (financials.total_revenue - prevFinancials.total_revenue) / prevFinancials.total_revenue
+            : null;
+      } else {
+        if (financials.total_revenue == null) missingData.push(`total_revenue (${year})`);
+        if (!prevFinancials || prevFinancials.total_revenue == null) missingData.push(`total_revenue (${previousYear})`);
+        kpis.calc_yoy_revenue_growth = { missingData };
+      }
+
+      // Continue with other KPIs...
+
+    } else {
+      kpis.missingFinancials = true;
+    }
+
+    valuationKPIs[year] = kpis;
+  }
+
+
+
+  watchEffect(() => {
+    if (valuationData.valuation_financials) {
+      for (const year of years.value) {
+        calculateKPIsForYear(year);
+      }
+    }
+  });
+
+
+  function formatKPIValue(field, value) {
+    // Define formatting rules based on KPI field
+    const percentageKPIs = ['calc_recurring_revenue_ratio', 'calc_gross_margin', 'calc_ebitda_margin'];
+    if (percentageKPIs.includes(field)) {
+      return (value * 100).toFixed(2) + '%';
+    } else {
+      // For other KPIs, format as currency
+      return usdFormat(value);
+    }
+  }
+
+
+  //////
+  // END KPI Calculation Functions
+  ///////////////
+
+
+
+
+
+  
 // url rules to format url nicely
   function urlRules(value) {
     if (!value) return 'URL is required'
