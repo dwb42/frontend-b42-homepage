@@ -29,55 +29,11 @@
     </v-card>
 
     <v-card variant="elevated" class="pa-3 mb-6">
-      <h2 class="text-h5 mb-2">Financials</h2>
-
-      <!--v-table>
-        <thead>
-          <tr>
-            <th class="text-left"></th>
-            <th class="text-right">2021</th>
-            <th class="text-right">2022</th>
-            <th class="text-right">2023</th>
-            <th class="text-right">2024</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Total Revenue</td>
-
-            <td class="text-right" @click="startEditing('total_revenue', 2021)">
-              <div v-if="isEditing('total_revenue', 2021)">
-                <input 
-                  v-model="editValue"
-                  @keyup.enter="saveEdit('total_revenue', 2021)"
-                  @blur="saveEdit('total_revenue', 2021)"
-                  ref="editInput"
-                  style="width: 100%; text-align: right;"
-                />
-              </div>
-              <div v-else>
-                {{ valuationData?.valuation_financials?.[2021]?.total_revenue || '' }}
-              </div>
-            </td>
-
-            <td class="text-right"></td>
-            <td class="text-right"></td>
-            <td class="text-right"></td>
-          </tr>
-          <tr>
-            <td>Recurring Revenue</td>
-            <td class="text-right">{{ valuationData?.valuation_financials?.[2021]?.recurring_revenue || '' }}</td> 
-            <td class="text-right"></td>
-            <td class="text-right"></td>
-            <td class="text-right"></td>
-          </tr>
-        </tbody>
-      </v-table-->
-
+      <!--h2 class="text-h5 mb-2">Your Financial KPIs</h2-->
       <v-table>
         <thead>
           <tr>
-            <th class="text-left"></th>
+            <th class="text-left"><h2 class="text-h5 mb-2"><b>Your Yearly Performance</b></h2></th>
             <template v-for="year in years" :key="year">
               <th class="text-right">{{ year }}</th>
             </template>
@@ -115,11 +71,11 @@
     </v-card>
 
     <v-card variant="elevated" class="pa-3 mb-6">
-      <h2 class="text-h5 mb-2">Calculated KPIs</h2>
+      <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
       <v-table>
         <thead>
           <tr>
-            <th class="text-left"></th>
+            <th class="text-left"><h2 class="text-h5 mb-2"><b>Calculated Yearly KPIs</b></h2></th>
             <template v-for="year in years" :key="year">
               <th class="text-right">{{ year }}</th>
             </template>
@@ -131,14 +87,18 @@
             <template v-for="year in years" :key="year">
               <td class="text-right">
                 <template v-if="valuationKPIs[year] && valuationKPIs[year][row.field] != null">
+                  <!-- Display dash for first year -->
+                  <template v-if="valuationKPIs[year][row.field] === '-'">
+                    -
+                  </template>
                   <!-- Check if KPI value is a number -->
-                  <template v-if="typeof valuationKPIs[year][row.field] === 'number'">
+                  <template v-else-if="typeof valuationKPIs[year][row.field] === 'number'">
                     {{ formatKPIValue(row.field, valuationKPIs[year][row.field]) }}
                   </template>
                   <!-- If KPI value is an object with missing data -->
                   <template v-else-if="valuationKPIs[year][row.field].missingData">
                     <span style="color: red;">
-                      Missing data: {{ valuationKPIs[year][row.field].missingData.join(', ') }}
+                      Missing data: <br>{{ valuationKPIs[year][row.field].missingData.join(', ') }}
                     </span>
                   </template>
                 </template>
@@ -200,8 +160,8 @@
 
     // Customer metrics
     { label: 'Number of Customers at End of Period', field: 'number_of_customers_end_of_period' },
-    { label: 'Customers Won in Period', field: 'customer_won_in_period' },
-    { label: 'Customers Lost in Period', field: 'comsteroms_lost_in_period' },
+    { label: 'Customers Won in Period', field: 'customers_won_in_period' },
+    { label: 'Customers Lost in Period', field: 'customers_lost_in_period' },
 
   ]);
 
@@ -358,19 +318,139 @@
 
       // Year-over-Year Revenue Growth
       missingData = [];
-      const previousYear = parseInt(year) - 1;
-      const prevFinancials = valuationData.valuation_financials[previousYear];
-      if (financials.total_revenue != null && prevFinancials && prevFinancials.total_revenue != null) {
-        kpis.calc_yoy_revenue_growth =
-          prevFinancials.total_revenue !== 0
-            ? (financials.total_revenue - prevFinancials.total_revenue) / prevFinancials.total_revenue
-            : null;
+      const yearsArray = Object.keys(valuationData.valuation_financials).sort();
+      const firstYear = yearsArray[0];
+
+      if (year === firstYear) {
+        // First year, set KPI to '-'
+        kpis.calc_yoy_revenue_growth = '-';
       } else {
-        if (financials.total_revenue == null) missingData.push(`total_revenue (${year})`);
-        if (!prevFinancials || prevFinancials.total_revenue == null) missingData.push(`total_revenue (${previousYear})`);
-        kpis.calc_yoy_revenue_growth = { missingData };
+        const previousYear = parseInt(year) - 1;
+        const prevFinancials = valuationData.valuation_financials[previousYear];
+        if (financials.total_revenue != null && prevFinancials && prevFinancials.total_revenue != null) {
+          kpis.calc_yoy_revenue_growth =
+            prevFinancials.total_revenue !== 0
+              ? (financials.total_revenue - prevFinancials.total_revenue) / prevFinancials.total_revenue
+              : null;
+        } else {
+          if (financials.total_revenue == null) missingData.push(`total_revenue (${year})`);
+          if (!prevFinancials || prevFinancials.total_revenue == null) missingData.push(`total_revenue (${previousYear})`);
+          kpis.calc_yoy_revenue_growth = { missingData };
+        }
       }
 
+
+      // Gross Margin
+      missingData = [];
+      if (financials.total_revenue != null && financials.costs_of_goods_sold != null) {
+        const revenue = financials.total_revenue;
+        const cogs = financials.costs_of_goods_sold;
+        kpis.calc_gross_margin = revenue !== 0 ? (revenue - cogs) / revenue : null;
+      } else {
+        if (financials.total_revenue == null) missingData.push('total_revenue');
+        if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
+        kpis.calc_gross_margin = { missingData };
+      }
+
+
+      // EBITDA Margin
+      missingData = [];
+      if (
+        financials.total_revenue != null &&
+        financials.costs_of_goods_sold != null &&
+        financials.costs_of_customer_acquisition != null &&
+        financials.costs_of_r_and_d != null &&
+        financials.costs_of_general_administration != null
+      ) {
+        const totalCosts =
+          financials.costs_of_goods_sold +
+          financials.costs_of_customer_acquisition +
+          financials.costs_of_r_and_d +
+          financials.costs_of_general_administration;
+        const ebitda = financials.total_revenue - totalCosts;
+        kpis.calc_ebitda_margin = financials.total_revenue !== 0 ? ebitda / financials.total_revenue : null;
+      } else {
+        if (financials.total_revenue == null) missingData.push('total_revenue');
+        if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
+        if (financials.costs_of_customer_acquisition == null) missingData.push('costs_of_customer_acquisition');
+        if (financials.costs_of_r_and_d == null) missingData.push('costs_of_r_and_d');
+        if (financials.costs_of_general_administration == null) missingData.push('costs_of_general_administration');
+        kpis.calc_ebitda_margin = { missingData };
+      }
+
+
+      // Average Revenue per Customer
+      missingData = [];
+      if (financials.total_revenue != null && financials.number_of_customers_end_of_period != null) {
+        const customers = financials.number_of_customers_end_of_period;
+        kpis.calc_average_revenue_per_customer = customers !== 0 ? financials.total_revenue / customers : null;
+      } else {
+        if (financials.total_revenue == null) missingData.push('total_revenue');
+        if (financials.number_of_customers_end_of_period == null) missingData.push('number_of_customers_end_of_period');
+        kpis.calc_average_revenue_per_customer = { missingData };
+      }
+
+
+      // Customer Logo Churn
+      missingData = [];
+      if (
+        financials.number_of_customers_end_of_period != null &&
+        financials.customers_won_in_period != null &&
+        financials.customers_lost_in_period != null
+      ) {
+        const customersAtEnd = financials.number_of_customers_end_of_period;
+        const customersWon = financials.customers_won_in_period;
+        const customersLost = financials.customers_lost_in_period;
+
+        const customersAtStart = customersAtEnd - customersWon + customersLost;
+
+        if (customersAtStart !== 0) {
+          kpis.calc_customer_logo_churn = customersLost / customersAtStart;
+        } else {
+          kpis.calc_customer_logo_churn = null;
+        }
+      } else {
+        if (financials.number_of_customers_end_of_period == null) missingData.push('number_of_customers_end_of_period');
+        if (financials.customers_won_in_period == null) missingData.push('customers_won_in_period');
+        if (financials.customers_lost_in_period == null) missingData.push('customers_lost_in_period');
+        kpis.calc_customer_logo_churn = { missingData };
+      }
+
+
+      // LTV to CAC Ratio
+      missingData = [];
+      if (
+        kpis.calc_average_revenue_per_customer != null &&
+        kpis.calc_gross_margin != null &&
+        kpis.calc_customer_logo_churn != null &&
+        financials.costs_of_customer_acquisition != null &&
+        financials.customers_won_in_period != null
+      ) {
+        const avgRevenuePerCustomer = kpis.calc_average_revenue_per_customer;
+        const grossMargin = kpis.calc_gross_margin;
+        const churnRate = kpis.calc_customer_logo_churn;
+
+        const ltv = churnRate !== 0 ? (avgRevenuePerCustomer * grossMargin) / churnRate : null;
+        const cac =
+          financials.customers_won_in_period !== 0
+            ? financials.costs_of_customer_acquisition / financials.customers_won_in_period
+            : null;
+
+        if (ltv != null && cac != null && cac !== 0) {
+          kpis.calc_ltv_to_cac = ltv / cac;
+        } else {
+          kpis.calc_ltv_to_cac = null;
+        }
+      } else {
+        if (kpis.calc_average_revenue_per_customer == null) missingData.push('calc_average_revenue_per_customer');
+        if (kpis.calc_gross_margin == null) missingData.push('calc_gross_margin');
+        if (kpis.calc_customer_logo_churn == null) missingData.push('calc_customer_logo_churn');
+        if (financials.costs_of_customer_acquisition == null) missingData.push('costs_of_customer_acquisition');
+        if (financials.customers_won_in_period == null) missingData.push('customers_won_in_period');
+        kpis.calc_ltv_to_cac = { missingData };
+      }
+
+      
       // Continue with other KPIs...
 
     } else {
@@ -392,15 +472,26 @@
 
 
   function formatKPIValue(field, value) {
-    // Define formatting rules based on KPI field
-    const percentageKPIs = ['calc_recurring_revenue_ratio', 'calc_gross_margin', 'calc_ebitda_margin'];
+    const percentageKPIs = [
+      'calc_recurring_revenue_ratio',
+      'calc_yoy_revenue_growth',
+      'calc_gross_margin',
+      'calc_ebitda_margin',
+      'calc_customer_logo_churn'
+    ];
+
     if (percentageKPIs.includes(field)) {
       return (value * 100).toFixed(2) + '%';
-    } else {
-      // For other KPIs, format as currency
+    } else if (field === 'calc_ltv_to_cac') {
+      return value.toFixed(2); // Format as a ratio
+    } else if (field === 'calc_average_revenue_per_customer') {
       return usdFormat(value);
+    } else {
+      // Default formatting
+      return value;
     }
   }
+
 
 
   //////
