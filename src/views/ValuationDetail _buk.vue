@@ -45,16 +45,32 @@
           <tr v-for="row in rowDefinitionsFinancialInputs" :key="row.field">
             <td>{{ row.label }}</td>
             <template v-for="year in years" :key="year">
-              <td class="text-right">
-                <input
-                  :value="getFinancialValue(year, row.field)"
-                  @input="updateFinancialValue(year, row.field, $event.target.value)"
-                  :placeholder="''"
-                  :class="['input_data', {'missing-data': isMissingValue(year, row.field)}]"
-                  style="width: 80px; text-align: right; padding: 4px"
-                  autocomplete="off"
-                  type="text"
-                />
+              <td class="text-right" @click="startEditing(row.field, year)">
+                <div v-if="isEditing(row.field, year)">
+                  <input 
+                    v-model="editValue"
+                    @keyup.enter="saveEdit(row.field, year)"
+                    @blur="saveEdit(row.field, year)"
+                    :ref="el => setInputRef(el, row.field, year)"
+                    style="width: 80px; text-align: right;"
+                    autocomplete="off"
+                    type="text"
+                  />
+                </div>
+                <div v-else>
+                  <template v-if="valuationData?.valuation_financials?.[year]?.[row.field] != null">
+                    <!-- Conditionally format based on isCurrency property -->
+                    <template v-if="row.isCurrency">
+                      {{ usdFormat(valuationData.valuation_financials[year][row.field]) }}
+                    </template>
+                    <template v-else>
+                      {{ valuationData.valuation_financials[year][row.field] }}
+                    </template>
+                  </template>
+                  <template v-else>
+                    <span style="background-color: #fffbe6;font-size: 0.8em;color:red">add data</span>
+                  </template>
+                </div>
               </td>
             </template>
           </tr>
@@ -126,6 +142,11 @@
   const valuationKPIs = reactive({});
 
 
+  //edit valuation financial cell
+  const editingCell = ref(null);
+  const editValue = ref(null);
+  const editInput = ref({}); 
+
   
   //compute properties for dynamic table
   const years = computed(() => {
@@ -164,7 +185,43 @@
   ]);
 
   
+  function setInputRef(el, field, year) {
+    if (!editInput.value) editInput.value = {};
+    const key = `${field}_${year}`;
+    editInput.value[key] = el;
+  }
 
+  
+  function startEditing(field, year) {
+    editingCell.value = `${field}_${year}`;
+    editValue.value = valuationData.valuation_financials[year]?.[field] || '';
+
+    // Use nextTick to ensure DOM is updated
+    nextTick(() => {
+      const key = `${field}_${year}`;
+      if (editInput.value[key]) {
+        editInput.value[key].focus();
+        editInput.value[key].select(); // This will also select the text if there's any
+      }
+    });
+  }
+
+  
+  function isEditing(field, year) {
+    return editingCell.value === `${field}_${year}`;
+  }
+
+  function saveEdit(field, year) {
+    if (editingCell.value === `${field}_${year}`) {
+      const value = Number(editValue.value);
+      if (isNaN(value)) {
+        console.error('Invalid number input');
+        return;
+      }
+      updateValuationFinancial(field, value, year);
+    }
+    editingCell.value = null;
+  }
 
   
   //get one valuation 
@@ -195,33 +252,6 @@
     }
 
 
-  // Function to get and set financial values
-  function getFinancialValue(year, field) {
-    return valuationData.valuation_financials[year]?.[field] ?? '';
-  }
-  function updateFinancialValue(year, field, value) {
-    if (!valuationData.valuation_financials[year]) {
-      valuationData.valuation_financials[year] = {};
-    }
-    valuationData.valuation_financials[year][field] = value;
-
-    // Debounce API calls to prevent excessive requests
-    debouncedUpdateValuationFinancial(field, value, year);
-  }
-
-  // Function to check if a value is missing
-  function isMissingValue(year, field) {
-    const value = valuationData.valuation_financials[year]?.[field];
-    return value == null || value === '';
-  }
-
-  // Debounced function to update valuation financials
-  const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
-    updateValuationFinancial(field, value, timePeriod);
-  }, 500);
-
-
-  
   //save valuation data to db
   async function saveValuation() {
     // Make an HTTP PUT request to update the lot in the database using Sequelize
@@ -238,29 +268,20 @@
 
   async function updateValuationFinancial(field, value, timePeriod) {
     try {
-      // Parse the value to a number if it's supposed to be numeric
-      const parsedValue = parseFloat(value);
-      if (isNaN(parsedValue)) {
-        // If the field is not supposed to be numeric, you can handle it differently
-        console.error('Invalid number input');
-        // Optionally, keep the invalid value for the user to correct
-        return;
-      }
-
-      // Make the API call to update the data
       const response = await axios.put(`${apiBaseURL}/valuations/financials/${thisValuationId.value}/${timePeriod}`, {
-        [field]: parsedValue,
+
+        [field]: value
       });
 
       // Update local data
-      valuationData.valuation_financials[timePeriod][field] = parsedValue;
+      valuationData.valuation_financials[timePeriod][field] = value;
+      editingCell.value = null;
 
       console.log('Valuation financial updated:', response);
     } catch (error) {
       console.error('Error updating valuation financial:', error);
     }
   }
-
 
   onMounted(() => {
     //console.log('thisValuationId: ', thisValuationId.value)
@@ -530,19 +551,3 @@
   }
 </script>
 
-<style>
-  .input_data {
-    width: 80px;
-    text-align: right;
-    padding: 4px;
-    border-radius: 5px;
-    border: 1px solid #cccccc;
-  }
-  
-  .missing-data {
-    border: 1px solid gray;
-    background-color: #f6f6f6;
-    color: red; 
-  }
-
-</style>
