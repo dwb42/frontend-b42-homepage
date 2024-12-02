@@ -47,14 +47,16 @@
             <template v-for="year in years" :key="year">
               <td class="text-right">
                 <input
-                  :value="getFinancialValue(year, row.field)"
+                  :value="displayedFinancialValue(year, row.field)"
+                  @focus="onFocus(year, row.field)"
+                  @blur="onBlur(year, row.field)"
                   @input="updateFinancialValue(year, row.field, $event.target.value)"
-                  :placeholder="''"
                   :class="['input_data', {'missing-data': isMissingValue(year, row.field)}]"
-                  style="width: 80px; text-align: right; padding: 4px"
+                  
                   autocomplete="off"
                   type="text"
                 />
+
               </td>
             </template>
           </tr>
@@ -104,6 +106,68 @@
       </v-table>
 
     </v-card>
+
+
+      <v-card variant="elevated" class="pa-3 mb-6">
+        <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
+        <v-table>
+          <thead>
+            <tr>
+              <th class="text-left"><h2 class="text-h5 mb-2"><b>Analysis of your KPIs</b></h2></th>
+              <th class="text-right"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td valign="top">Recurring Revenue Ratio</td>
+              <td>
+                Your Recurring Revenue Ratio for 2024 is 93,63%. <br>
+
+                This is an excellent value for a SaaS company and an investor might reward it with a slight boost to your valuation. <br>
+                
+                {{ recurringRevenueTrend }}    <br>
+                <v-dialog v-model="isDialogVisible" max-width="800">
+                  <template #activator="{ props }">
+                    <a href="#" v-bind="props" @click.prevent="isDialogVisible = true">learn more...</a>
+                  </template>
+
+                  <!-- Include the dialog content component -->
+                  <RecurringRevenueDialog :onClose="closeDialog" />
+                </v-dialog>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+
+      </v-card>
+    
+    
+    <v-card variant="elevated" class="pa-3 mb-6">
+      <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
+      <v-table>
+        <thead>
+          <tr>
+            <th class="text-left"><h2 class="text-h5 mb-2"><b>Valuation of your SaaS business</b></h2></th>
+            <th class="text-right"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Valuation Method</td>
+            <td>
+              
+            </td>
+          </tr>
+          <tr>
+            <td>Valuation Method</td>
+            <td>
+
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
+
+    </v-card>
   
   </v-container>  
 </template>
@@ -112,7 +176,22 @@
   import { reactive, ref, computed, watchEffect, watch, onMounted, nextTick } from 'vue';
   import axios from 'axios'; 
   import { formatDateUsingDateFns, truncateString, usdFormat, apiBaseURL } from '@/utils/index.js';
+  import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';
+
+  import getKPIInfo from '@/utils/kpiInterpretation/getKPIInfo';
+
+
+  //components
+  import RecurringRevenueDialog from '@/components/kpi_explanations/recurring_revenue_ratio.vue';
+  
+
+  const isDialogVisible = ref(false);
+
+  // Function to close the dialog
+  function closeDialog() {
+    isDialogVisible.value = false;
+  }
   
   //setup router
   import { useRoute } from 'vue-router'
@@ -125,13 +204,16 @@
   // Initialize reactive object to store KPIs
   const valuationKPIs = reactive({});
 
-
   
   //compute properties for dynamic table
   const years = computed(() => {
     if (!valuationData.valuation_financials) return [];
     return Object.keys(valuationData.valuation_financials).sort();
   });
+
+  //compute trends 
+  const { trendStatement: recurringRevenueTrend } = useTrendAnalysis(valuationKPIs, 'calc_recurring_revenue_ratio');
+
   
 
   const rowDefinitionsFinancialInputs = computed(() => [
@@ -172,7 +254,7 @@
     try {
       const response = await axios.get(`${apiBaseURL}/valuations/` + id) ;
       Object.assign(valuationData, response.data[0]); // Assuming the API returns the lots data directly
-      console.log('valuations data '. valuationData);
+      //db console.log('valuations data '. valuationData);
 
       // Assuming the API returns the data directly as response.data[0]
       const fetchedData = response.data[0];
@@ -188,7 +270,7 @@
       // Assign the transformed data to valuationData
       Object.assign(valuationData, fetchedData);
 
-      console.log('Transformed valuations data:', valuationData);
+      //db console.log('Transformed valuations data:', valuationData);
       //console.log(valuationData.value);
       } catch (error) {
       console.error('Error fetching lots:', error);  }
@@ -199,15 +281,18 @@
   function getFinancialValue(year, field) {
     return valuationData.valuation_financials[year]?.[field] ?? '';
   }
+  
   function updateFinancialValue(year, field, value) {
+    const unformattedValue = unformatValue(value);
     if (!valuationData.valuation_financials[year]) {
       valuationData.valuation_financials[year] = {};
     }
-    valuationData.valuation_financials[year][field] = value;
+    valuationData.valuation_financials[year][field] = unformattedValue;
 
     // Debounce API calls to prevent excessive requests
-    debouncedUpdateValuationFinancial(field, value, year);
+    debouncedUpdateValuationFinancial(field, unformattedValue, year);
   }
+
 
   // Function to check if a value is missing
   function isMissingValue(year, field) {
@@ -221,7 +306,6 @@
   }, 500);
 
 
-  
   //save valuation data to db
   async function saveValuation() {
     // Make an HTTP PUT request to update the lot in the database using Sequelize
@@ -235,7 +319,7 @@
     }
   }
 
-
+  // Function to update valuation financials
   async function updateValuationFinancial(field, value, timePeriod) {
     try {
       // Parse the value to a number if it's supposed to be numeric
@@ -265,6 +349,7 @@
   onMounted(() => {
     //console.log('thisValuationId: ', thisValuationId.value)
     fetchValuation(thisValuationId.value);
+    testGetKPIInfo();
   });
 
 
@@ -339,6 +424,7 @@
         if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
         kpis.calc_gross_margin = { missingData };
       }
+
 
 
       // EBITDA Margin
@@ -438,8 +524,6 @@
         kpis.calc_ltv_to_cac = { missingData };
       }
 
-      
-      // Continue with other KPIs...
 
     } else {
       kpis.missingFinancials = true;
@@ -449,6 +533,24 @@
   }
 
 
+  // Sample test function
+  function testGetKPIInfo() {
+    try {
+      // Define sample KPI key and value
+      const testKPIKey = 'calc_recurring_revenue_ratio'; // Replace with a valid KPI key from your kpiData
+      const testKPIValue = 0.9;        // Replace with a sample value to test
+
+      // Call the getKPIInfo function
+      const result = getKPIInfo(testKPIKey, testKPIValue);
+
+      // Output the result to the console
+      console.log('Test getKPIInfo Result:', result);
+    } catch (error) {
+      console.error('Error testing getKPIInfo:', error.message);
+    }
+  }
+
+  
 
   watchEffect(() => {
     if (valuationData.valuation_financials) {
@@ -487,6 +589,74 @@
   ///////////////
 
 
+  
+  
+
+  /// change formating of valuation input fields when in focus
+  // keep track which cells are focused
+  const focusedCells = reactive({});
+
+  function onFocus(year, field) {
+    if (!focusedCells[year]) {
+      focusedCells[year] = {};
+    }
+    focusedCells[year][field] = true;
+  }
+
+  function onBlur(year, field) {
+    if (focusedCells[year]) {
+      focusedCells[year][field] = false;
+    }
+  }
+
+  function isCellFocused(year, field) {
+    return focusedCells[year] && focusedCells[year][field];
+  }
+
+  function displayedFinancialValue(year, field) {
+    const value = getFinancialValue(year, field);
+    if (isCellFocused(year, field)) {
+      // Return raw value when focused
+      return value;
+    } else {
+      // Get the row definition to check if it's a currency field
+      const rowDef = rowDefinitionsFinancialInputs.value.find(row => row.field === field);
+      const isCurrency = rowDef ? rowDef.isCurrency : false;
+      // Return formatted value when not focused
+      return formatFinancialValue(value, isCurrency);
+    }
+  }
+
+  function formatFinancialValue(value, isCurrency) {
+    if (value == null || value === '') return '';
+    // Convert the value to a number
+    const numberValue = parseFloat(value);
+    if (isNaN(numberValue)) return value;
+
+    // Format the number with 'de-DE' locale for '.' as thousand separator and ',' as decimal separator
+    const formattedNumber = numberValue.toLocaleString('de-DE', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+
+    if (isCurrency) {
+      return '$' + formattedNumber;
+    } else {
+      return formattedNumber;
+    }
+  }
+
+  function unformatValue(value) {
+    if (value == null || value === '') return value;
+    // Remove currency symbols
+    let unformattedValue = value.replace(/\$/g, '');
+    // Remove thousand separators '.'
+    unformattedValue = unformattedValue.replace(/\./g, '');
+    // Replace decimal separator ',' with '.'
+    unformattedValue = unformattedValue.replace(/,/g, '.');
+
+    return unformattedValue;
+  }
 
 
 
@@ -528,11 +698,14 @@
       // Invalid URL, leave as is for now
     }
   }
+
+
+  
 </script>
 
 <style>
   .input_data {
-    width: 80px;
+    width: 85px;
     text-align: right;
     padding: 4px;
     border-radius: 5px;
@@ -542,7 +715,6 @@
   .missing-data {
     border: 1px solid gray;
     background-color: #f6f6f6;
-    color: red; 
   }
 
 </style>
