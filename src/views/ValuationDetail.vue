@@ -524,7 +524,7 @@
     // Wait for fetchValuation to complete
     await fetchValuation(thisValuationId.value);
     // Now valuationData is populated, and latestYear.value is available
-    testGetKPIInfo();
+    analyseYearlyKPIs();
   });
 
 
@@ -708,7 +708,7 @@
   }
 
 
-  function testGetKPIInfo() {
+  function analyseYearlyKPIs() {
     try {
       const latestYearValue = latestYear.value;
 
