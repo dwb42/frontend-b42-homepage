@@ -108,90 +108,251 @@
     </v-card>
 
 
-      <v-card variant="elevated" class="pa-3 mb-6">
-        <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
+    
+    
+    <v-card variant="elevated" class="pa-3 mb-6">
+      <h2 class="text-h5 mb-2"><b>Analysis of your KPIs</b></h2>
+      <p class="mb-6">To assess your current performance we analyse your {{ latestYear }} metrics. </p>
+      
+      <v-row>
+        <v-col 
+          v-for="(kpi, key) in analysed_kpis" :key="key"
+          cols="12" md="6" lg="4"
+        >
+          <v-card variant="elevated" class="pa-3 mb-6">
+
+            <v-card-item>
+              <v-card-title>{{ kpi.label }}: {{ formatKPIValue(key, kpi.value) }}</v-card-title>
+
+              <v-card-subtitle>{{ kpi.analysisResult.rangeName }}</v-card-subtitle>
+
+              <!--template v-slot:append>
+                <v-icon color="success" icon="mdi-check"></v-icon>
+            </template-->
+            </v-card-item>
+
+            
+            
+            <v-card-text class="bg-surface-light pt-4">
+              <p v-if="kpi.analysisResult">
+                <!--strong> {{ kpi.analysisResult.rangeName }}</strong><br-->
+                {{kpi.analysisResult.evaluationDescription}} <br>
+                <div class="mt-4 font-weight-bold text-high-emphasis" v-html="multipleImpact(kpi.analysisResult.impactPercentage)"> </div>
+              </p>
+              <p v-else>
+                <strong>Analysis:</strong> <span style="color: red;">No analysis available</span>
+              </p>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-btn
+                color="blue-lighten-2"
+                text="Learn More"
+                variant="text"
+                @click="openModal(key)"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-card>
+
+    
+    <!-- The Dialog that will show the selected KPI details -->
+    <v-dialog v-model="isDialogOpen" :style="{ maxWidth: '800px' }">
+      <v-card>
+        <v-card-title>
+          <!-- Display the title based on selectedKPI -->
+          {{ selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'KPI Details' }}
+        </v-card-title>
+        <v-card-text>
+          <!-- Dynamically render the component -->
+          <component 
+            v-if="selectedKPI && kpiModalConfig[selectedKPI]" 
+            :is="kpiModalConfig[selectedKPI].component"
+          />
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="isDialogOpen = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+  
+
+    {{isLoading}}
+    <!--v-if="!isLoading"-->
+    <template v-if="!isLoading">
+      <v-card variant="elevated" class="pa-3 mb-6" :style="{ maxWidth: '800px' }" >
+        <h2 class="text-h4 mb-2"><b>Valuation of your SaaS business</b></h2>
+        <p class="mb-6 text-body-1">Depending on which phase your business is in we will evaluate its worth using the ARR- or the EBITDA-Multiple Method.  </p>
+  
+        <h3 class="text-h6 mb-2 mt-6">What best describes your current state of business?</h3>
+        <v-radio-group v-model="valuationData.state_of_business">
+          <!--template v-slot:label>
+            <div><strong>What best describes your current state of business?</strong></div>
+        </template-->
+          <v-radio value="preRevenue">
+            <template v-slot:label>
+              <div>we are just getting started and do not have revenue yet <strong>(pre revenue)</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="earlyStage">
+            <template v-slot:label>
+              <div>we are investing heavily in product and/or growth and have little to no profit because of it <strong>(early stage)</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="laterStage">
+            <template v-slot:label>
+              <div>we are balancing our focus on growth and profitability <strong>(later stage)</strong></div>
+            </template>
+          </v-radio>
+        </v-radio-group>
+  
+        <!-- STARTING OUTPUT DEPENDING ON RADIO SELECTION -->
+        <!-- PRE REVENUE ... WONT DO -->
+        <template v-if="valuationData.state_of_business === 'preRevenue'">
+          <p class="text-body-1">
+            ❌ Our valuation method does not work for pre-revenue businesses. 🤷‍♂️
+          </p>
+        </template>
+  
+  
+        <!-- EARLY STAGE -->
+        <template v-if="valuationData.state_of_business === 'earlyStage'">
+          <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+          <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using an ARR-Multiple.  </p>
+          <!--p class="mb-6">To calculate your company's worth with the ARR-Multiple-Formula, you take your ARR and multiple it with the multiple applicable to your business.   </p-->
+  
+  
+          <h3 class="text-h6 mb-2 mt-0">Finding the Multiple for your business</h3>
+          <p class="mb-6">To find the multiple for your business, we evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
+  
+          <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
+          <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
+          <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
+          <p class="text-body-2 mb-2">We will ues your "current Gross Maring" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
+       
+  
         <v-table>
           <thead>
             <tr>
-              <th class="text-left"><h2 class="text-h5 mb-2"><b>Analysis of your KPIs</b></h2></th>
-              <th class="text-right"></th>
+              <th class="text-left" width="80%">Factor</th>
+              <th class="text-right"  width="20%">Multiple-Impact </th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td valign="top">Recurring Revenue Ratio</td>
               <td>
-                Your Recurring Revenue Ratio for 2024 is 93,63%. <br>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
+                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
 
-                This is an excellent value for a SaaS company and an investor might reward it with a slight boost to your valuation. <br>
-                
-                {{ recurringRevenueTrend }}    <br>
-                <v-dialog v-model="isDialogVisible" max-width="800">
-                  <template #activator="{ props }">
-                    <a href="#" v-bind="props" @click.prevent="isDialogVisible = true">learn more...</a>
-                  </template>
-
-                  <!-- Include the dialog content component -->
-                  <RecurringRevenueDialog :onClose="closeDialog" />
-                </v-dialog>
+                    For valuation purposes we will calculate your future growth rate at 
+                    ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
+                     + 
+                    {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
+                    / 2 = 33%
+                  </p>
+  
+  
+  
+              </div>
               </td>
             </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
+                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at 
+                    ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
+                     + 
+                    {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
+                    / 2 = 33%
+                  </p>
+
+
+
+              </div>
+              </td>
+            </tr>
+  
           </tbody>
         </v-table>
-
+        </template>
+        
       </v-card>
-    
-    
-    <v-card variant="elevated" class="pa-3 mb-6">
-      <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
-      <v-table>
-        <thead>
-          <tr>
-            <th class="text-left"><h2 class="text-h5 mb-2"><b>Valuation of your SaaS business</b></h2></th>
-            <th class="text-right"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Valuation Method</td>
-            <td>
-              
-            </td>
-          </tr>
-          <tr>
-            <td>Valuation Method</td>
-            <td>
+      <pre>{{analysed_kpis}}</pre>
+    </template>
 
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-
-    </v-card>
-  
+    
   </v-container>  
 </template>
 
 <script setup>
   import { reactive, ref, computed, watchEffect, watch, onMounted, nextTick } from 'vue';
   import axios from 'axios'; 
-  import { formatDateUsingDateFns, truncateString, usdFormat, apiBaseURL } from '@/utils/index.js';
+  import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, apiBaseURL } from '@/utils/index.js';
   import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';
 
   import getKPIInfo from '@/utils/kpiInterpretation/getKPIInfo';
 
+  //import kpiLearnMoreModals
+  import YearOnYearGrowthModal from '@/components/kpiLearnMoreModals/YearOnYearGrowthModal.vue';
+  import GrossMarginModal from '@/components/kpiLearnMoreModals/GrossMarginModal.vue';
+  import EBITDAMarginModal from '@/components/kpiLearnMoreModals/EBITDAMarginModal.vue';
+  import RecurringRevenueRatioModal from '@/components/kpiLearnMoreModals/RecurringRevenueRatioModal.vue';
+  import LtvToCacModal from '@/components/kpiLearnMoreModals/LtvToCacModal.vue';
 
-  //components
-  import RecurringRevenueDialog from '@/components/kpi_explanations/recurring_revenue_ratio.vue';
-  
+  //////////// START MODAL DIALOG STATES
+  const isDialogOpen = ref(false);
+  const selectedKPI = ref(null);
 
-  const isDialogVisible = ref(false);
+  // Configuration object: key = KPI field, value = { title, component }
+  const kpiModalConfig = {
+    calc_yoy_revenue_growth: {
+      title: 'Year-over-Year Growth Details',
+      component: YearOnYearGrowthModal
+    },
+    calc_gross_margin: {
+      title: 'Gross Margin Details',
+      component: GrossMarginModal
+    },
+    calc_ebitda_margin: {
+      title: 'EBITDA Margin Details',
+      component: EBITDAMarginModal
+    },
+    calc_recurring_revenue_ratio: {
+      title: 'Recurring Revenue Ratio Details',
+      component: RecurringRevenueRatioModal
+    },
+    calc_ltv_to_cac: {
+      title: 'LTV to CAC Ratio Details',
+      component: LtvToCacModal
+    }
+  };
 
-  // Function to close the dialog
-  function closeDialog() {
-    isDialogVisible.value = false;
+  function openModal(key) {
+    selectedKPI.value = key;
+    isDialogOpen.value = true;
   }
+
+  //////////// END MODAL DIALOG STATES
+
+
+  const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
+
+
   
   //setup router
   import { useRoute } from 'vue-router'
@@ -204,6 +365,9 @@
   // Initialize reactive object to store KPIs
   const valuationKPIs = reactive({});
 
+
+  const analysed_kpis = reactive({}); // var to save the output of getKPIInfo
+
   
   //compute properties for dynamic table
   const years = computed(() => {
@@ -211,8 +375,15 @@
     return Object.keys(valuationData.valuation_financials).sort();
   });
 
+  //finde latest year of financial data
+  const latestYear = computed(() => {
+    const sortedYears = years.value;
+    return sortedYears.length ? sortedYears[sortedYears.length - 1] : null;
+    
+  });
+
   //compute trends 
-  const { trendStatement: recurringRevenueTrend } = useTrendAnalysis(valuationKPIs, 'calc_recurring_revenue_ratio');
+  //temp const { trendStatement: recurringRevenueTrend } = useTrendAnalysis(valuationKPIs, 'calc_recurring_revenue_ratio');
 
   
 
@@ -236,14 +407,16 @@
 
 
   const rowDefinitionsKPIOutputs = computed(() => [
-    { label: 'Recurring Revenue Ratio', field: 'calc_recurring_revenue_ratio' },
-    { label: 'Year-over-Year Revenue Growth', field: 'calc_yoy_revenue_growth' },
-    { label: 'Gross Margin', field: 'calc_gross_margin' },
-    { label: 'EBITDA Margin', field: 'calc_ebitda_margin' },
-    { label: 'Average Revenue per Customer', field: 'calc_average_revenue_per_customer' },
-    { label: 'Customer Logo Churn', field: 'calc_customer_logo_churn' },
-    { label: 'LTV to CAC Ratio', field: 'calc_ltv_to_cac' }
+    { label: 'Recurring Revenue Ratio', field: 'calc_recurring_revenue_ratio', use_for_analysis: true, rank_for_analysis: 5 },
+    { label: 'Year-over-Year Growth', field: 'calc_yoy_revenue_growth', use_for_analysis: true, rank_for_analysis: 1 },
+    { label: 'CAGR', field: 'calc_cagr_revenue', use_for_analysis: true, rank_for_analysis: 2 },
+    { label: 'Gross Margin', field: 'calc_gross_margin', use_for_analysis: true, rank_for_analysis: 3 },
+    { label: 'EBITDA Margin', field: 'calc_ebitda_margin', use_for_analysis: true, rank_for_analysis: 4 },
+    { label: 'Average Revenue per Customer', field: 'calc_average_revenue_per_customer', use_for_analysis: false, rank_for_analysis: null },
+    { label: 'Customer Logo Churn', field: 'calc_customer_logo_churn', use_for_analysis: false, rank_for_analysis: null },
+    { label: 'LTV to CAC Ratio', field: 'calc_ltv_to_cac', use_for_analysis: true, rank_for_analysis: 6 }
   ]);
+
 
   
 
@@ -310,9 +483,9 @@
   async function saveValuation() {
     // Make an HTTP PUT request to update the lot in the database using Sequelize
     try {
-      console.log('val data ',valuationData)
+      //db console.log('val data ',valuationData)
       const response = await axios.put(`${apiBaseURL}/valuations/` + thisValuationId.value, valuationData);
-      console.log('valuation updated:', response);
+      //db console.log('valuation updated:', response);
 
     } catch (error) {
       console.error('Error updating valuation in db:', error);
@@ -346,9 +519,11 @@
   }
 
 
-  onMounted(() => {
-    //console.log('thisValuationId: ', thisValuationId.value)
-    fetchValuation(thisValuationId.value);
+  // Modify onMounted to be async
+  onMounted(async () => {
+    // Wait for fetchValuation to complete
+    await fetchValuation(thisValuationId.value);
+    // Now valuationData is populated, and latestYear.value is available
     testGetKPIInfo();
   });
 
@@ -533,21 +708,83 @@
   }
 
 
-  // Sample test function
   function testGetKPIInfo() {
     try {
-      // Define sample KPI key and value
-      const testKPIKey = 'calc_recurring_revenue_ratio'; // Replace with a valid KPI key from your kpiData
-      const testKPIValue = 0.9;        // Replace with a sample value to test
+      const latestYearValue = latestYear.value;
 
-      // Call the getKPIInfo function
-      const result = getKPIInfo(testKPIKey, testKPIValue);
+      // Get KPI definitions with use_for_analysis = true, sorted by rank_for_analysis
+      const kpiDefinitions = rowDefinitionsKPIOutputs.value
+        .filter(kpi => kpi.use_for_analysis)
+        .sort((a, b) => a.rank_for_analysis - b.rank_for_analysis);
 
-      // Output the result to the console
-      console.log('Test getKPIInfo Result:', result);
+      //console.log('Analyzing KPIs for latest year:', latestYearValue);
+
+      // Clear the analysed_kpis before starting
+      Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
+
+      kpiDefinitions.forEach(kpiDef => {
+        const field = kpiDef.field;
+        const kpiValue = valuationKPIs[latestYearValue]?.[field];
+
+        // Log KPI details before analysis
+        /*console.log('-------------------');
+        console.log(`Processing KPI: ${kpiDef.label}`);
+        console.log(`Field: ${field}`);
+        console.log(`Raw Value: ${kpiValue}`);*/
+
+        // Only proceed if we have a valid numeric value
+        if (kpiValue != null && typeof kpiValue === 'number') {
+          try {
+            const result = getKPIInfo(field, kpiValue);
+            //console.log('Analysis Result:', result);
+
+            // Save kpiDef and result into analysed_kpis
+            analysed_kpis[field] = {
+              ...kpiDef,
+              value: kpiValue,
+              analysisResult: result
+            };
+
+          } catch (error) {
+            console.warn(`Could not analyze ${field}:`, error.message);
+          }
+        } else {
+          console.warn(`Skipping ${field} - invalid or missing value`);
+        }
+      });
+
     } catch (error) {
-      console.error('Error testing getKPIInfo:', error.message);
+      console.error('Error in testGetKPIInfo:', error.message);
     }
+  
+  console.log('analysed kpis: ',analysed_kpis)
+
+  // After completing the logic, set loading to false
+  isLoading.value = false;
+  console.log('is loading: ',isLoading.value)
+  }
+
+
+  function computeCAGR() {
+    const allYears = years.value;
+    if (allYears.length < 2) return null; // Not enough data
+
+    const firstYear = allYears[0];
+    const lastYear = allYears[allYears.length - 1];
+
+    const beginningValue = valuationData.valuation_financials[firstYear]?.total_revenue;
+    const endingValue = valuationData.valuation_financials[lastYear]?.total_revenue;
+
+    if (beginningValue == null || endingValue == null || beginningValue === 0) {
+      return { missingData: ['total_revenue'] };
+    }
+
+    const n = allYears.length;
+    const cagr = Math.pow((endingValue / beginningValue), 1/(n-1)) - 1;
+
+    // Store it in a new KPI field for the latest year (or a special place)
+    // Since CAGR is not year-specific, you could store it under the latest year for convenience
+    valuationKPIs[lastYear].calc_cagr_revenue = cagr;
   }
 
   
@@ -557,8 +794,11 @@
       for (const year of years.value) {
         calculateKPIsForYear(year);
       }
+      // Compute CAGR now that all years are processed
+      computeCAGR();
     }
   });
+
 
 
   function formatKPIValue(field, value) {
@@ -567,7 +807,8 @@
       'calc_yoy_revenue_growth',
       'calc_gross_margin',
       'calc_ebitda_margin',
-      'calc_customer_logo_churn'
+      'calc_customer_logo_churn', 
+      'calc_cagr_revenue'
     ];
 
     if (percentageKPIs.includes(field)) {

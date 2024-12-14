@@ -6,6 +6,8 @@ function getKPIInfo(kpi_key, kpi_value) {
   // Retrieve the ranges for the specified KPI key
   const ranges = kpiData[kpi_key];
 
+  //console.log('kpiData import:', kpiData); 
+
   // Check if the KPI key exists
   if (!ranges) {
     throw new Error(`KPI key "${kpi_key}" not found.`);
