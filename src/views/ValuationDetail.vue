@@ -525,7 +525,44 @@
     await fetchValuation(thisValuationId.value);
     // Now valuationData is populated, and latestYear.value is available
     analyseYearlyKPIs();
+    analyseOtherKPIs();
   });
+
+  function analyseOtherKPIs() {
+    try {
+      const latestYearValue = latestYear.value;
+      const latestYearKPIs = valuationKPIs[latestYearValue];
+
+      if (!latestYearKPIs) {
+        console.warn('No KPI data available for latest year');
+        return;
+      }
+
+      // Calculate Combined Growth Rate (average of YoY and CAGR)
+      if (typeof latestYearKPIs.calc_yoy_revenue_growth === 'number' && 
+          typeof latestYearKPIs.calc_cagr_revenue === 'number') {
+        
+        const combinedGrowthRate = (latestYearKPIs.calc_yoy_revenue_growth + latestYearKPIs.calc_cagr_revenue) / 2;
+        
+        try {
+          const growthAnalysis = getKPIInfo('calc_growth_general', combinedGrowthRate);
+          analysed_kpis['calc_growth_combined'] = {
+            label: 'Combined Growth Rate',
+            field: 'calc_growth_combined',
+            value: combinedGrowthRate,
+            analysisResult: growthAnalysis
+          };
+        } catch (error) {
+          console.warn('Could not analyze combined growth rate:', error.message);
+        }
+      }
+
+      // Here you can add more combined/derived KPI calculations following the same pattern
+
+    } catch (error) {
+      console.error('Error in analyseOtherKPIs:', error.message);
+    }
+  }
 
 
   const saveData = debounce((data) => {
