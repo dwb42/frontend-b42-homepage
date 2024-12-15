@@ -227,7 +227,33 @@
           <!--p class="mb-6">To calculate your company's worth with the ARR-Multiple-Formula, you take your ARR and multiple it with the multiple applicable to your business.   </p-->
   
   
-          <h3 class="text-h6 mb-2 mt-0">Finding the Multiple for your business</h3>
+          <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+          <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+          <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+
+            Let's say that this multiple is 3. 
+
+            In order to evaluate if your business
+
+          </p>
+
+          <v-text-field
+            v-model="valuationData.base_arr_multiple"
+            label="Base ARR-Multiple"
+            type="number"
+            :rules="[v => v >= 0 || 'Multiple must be non-negative']"
+            hint="Base multiple for SaaS valuation"
+            persistent-hint
+            class="mb-6"
+            @update:modelValue="saveData"
+          ></v-text-field>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+
+          <p class="mb-6">
+
+            We would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
           <p class="mb-6">To find the multiple for your business, we evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
   
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
@@ -263,6 +289,9 @@
   
               </div>
               </td>
+              <td class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }} 
+              </td>
             </tr>
 
             <tr>
@@ -270,25 +299,70 @@
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
                   <p class="text-body-2 mb-2">
-                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
-                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
+                    When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
 
-                    For valuation purposes we will calculate your future growth rate at 
-                    ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
-                     + 
-                    {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                    / 2 = 33%
+                    Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}. <br>
+
+                    This is {{analysed_kpis.calc_gross_margin.analysisResult.rangeName}}.
                   </p>
-
-
-
               </div>
+              </td>
+              <td class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage) }}
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br>
+
+                    This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.rangeName}}.
+                  </p>
+              </div>
+              </td>
+              <td class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br>
+
+                    This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.rangeName}}.
+                  </p>
+              </div>
+              </td>
+              <td class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                </div>
+              </td>
+              <td class="text-right font-weight-bold">
+                {{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage *       analysed_kpis.calc_growth_combined.analysisResult.impactPercentage * analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage * analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
               </td>
             </tr>
   
           </tbody>
         </v-table>
-        </template>
+
+          
+       
+        <h3 class="text-h6 mb-2 mt-6">Putting it all together</h3>
+        <p class="mb-6">To find the multiple for your business, we evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
+       </template>
         
       </v-card>
       <pre>{{analysed_kpis}}</pre>
@@ -301,7 +375,7 @@
 <script setup>
   import { reactive, ref, computed, watchEffect, watch, onMounted, nextTick } from 'vue';
   import axios from 'axios'; 
-  import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, apiBaseURL } from '@/utils/index.js';
+  import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, multipleImpactPercent, apiBaseURL } from '@/utils/index.js';
   import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';
 
@@ -523,6 +597,10 @@
   onMounted(async () => {
     // Wait for fetchValuation to complete
     await fetchValuation(thisValuationId.value);
+    // Set default base_arr_multiple if not already set
+    if (!valuationData.base_arr_multiple) {
+      valuationData.base_arr_multiple = 3;
+    }
     // Now valuationData is populated, and latestYear.value is available
     analyseYearlyKPIs();
     analyseOtherKPIs();
@@ -845,7 +923,9 @@
       'calc_gross_margin',
       'calc_ebitda_margin',
       'calc_customer_logo_churn', 
-      'calc_cagr_revenue'
+      'calc_cagr_revenue', 
+      'calc_growth_combined'
+      
     ];
 
     if (percentageKPIs.includes(field)) {
