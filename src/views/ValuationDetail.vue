@@ -351,21 +351,38 @@
                 </div>
               </td>
               <td class="text-right font-weight-bold">
-                {{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage *       analysed_kpis.calc_growth_combined.analysisResult.impactPercentage * analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage * analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
+                {{ multipleImpactPercent(valuationData.total_arr_multiple_impact = analysed_kpis.calc_gross_margin.analysisResult.impactPercentage *       analysed_kpis.calc_growth_combined.analysisResult.impactPercentage * analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage * analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
               </td>
             </tr>
   
           </tbody>
         </v-table>
 
+          <p class="mb-2 mt-6">
+           Based on your business' performance, we need to adjust the ARR Base Multiple of {{valuationData.base_arr_multiple}} by {{multipleImpactPercent(valuationData.total_arr_multiple_impact)}}.  
+
+          </p>
+          <p v-if="valuationData.base_arr_multiple && valuationData.total_arr_multiple_impact" class="mb-2">
+            i.e. {{valuationData.base_arr_multiple}} *  {{valuationData.total_arr_multiple_impact.toFixed(2)}} 
+            = {{valuationData.final_arr_multiple = (valuationData.base_arr_multiple * valuationData.total_arr_multiple_impact).toFixed(2)}} 
+          </p>
+
+          <p v-if="valuationData.final_arr_multiple" class="mb-6 font-weight-bold"">
+            Your final ARR-Multiple is {{valuationData.final_arr_multiple}}.
+          </p>
           
        
-        <h3 class="text-h6 mb-2 mt-6">Putting it all together</h3>
-        <p class="mb-6">To find the multiple for your business, we evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
+        <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
+        <p class="mb-6">
+          In order 
+         {{valuationData.total_arr_multiple_impact}} asdf
+          
+        </p>
        </template>
         
       </v-card>
       <pre>{{analysed_kpis}}</pre>
+      <pre>{{valuationData}}</pre>
     </template>
 
     

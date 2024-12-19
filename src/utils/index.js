@@ -69,6 +69,24 @@ export const multipleImpact = (value) => {
   return result;
 }
 
+export const multipleImpactPercent = (value) => {
+  if (value === 1) return "-";
+  const percentageDiff = Math.abs(((value - 1) * 100).toFixed(0));
+  const iconCount = Math.floor(percentageDiff / 20);
+  let result = '';
+  let icons = '';
+
+
+
+  if (value > 1) {
+    result = `+${percentageDiff}%`;
+  } else {
+    result = `-${percentageDiff}% `;
+  }
+
+  return result;
+}
+
 
 
 const isDevelopment = window.location.href.includes('replit.dev');
