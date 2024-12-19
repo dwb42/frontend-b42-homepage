@@ -374,15 +374,17 @@
        
         <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
         <p class="mb-6">
-          In order 
-         {{valuationData.total_arr_multiple_impact}} asdf
+          To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
+          i.e. 
+            {{valuationData.valuation_financials[latestYear].recurring_revenue}} *     {{valuationData.final_arr_multiple}}  <br>
+          = {{valuationData.valuation_financials[latestYear].recurring_revenue *     valuationData.final_arr_multiple}} 
           
         </p>
        </template>
         
       </v-card>
-      <pre>{{analysed_kpis}}</pre>
-      <pre>{{valuationData}}</pre>
+      <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
+      <pre>valuationData<br>{{valuationData}}</pre>
     </template>
 
     
