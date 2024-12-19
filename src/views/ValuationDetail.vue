@@ -184,6 +184,7 @@
 
     {{isLoading}}
     <!--v-if="!isLoading"-->
+    
     <template v-if="!isLoading">
       <v-card variant="elevated" class="pa-3 mb-6" :style="{ maxWidth: '800px' }" >
         <h2 class="text-h4 mb-2"><b>Valuation of your SaaS business</b></h2>
@@ -247,6 +248,7 @@
             persistent-hint
             class="mb-6"
             @update:modelValue="saveData"
+            style="width: 200px;"
           ></v-text-field>
 
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
@@ -348,10 +350,26 @@
               <td>
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    ( 
+                    {{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} * 
+                    {{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} * 
+                    
+                    {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} * 
+                    {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}}  
+
+                    
+                    ) <br>
+                  </p>
                 </div>
               </td>
               <td class="text-right font-weight-bold">
-                {{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage *       analysed_kpis.calc_growth_combined.analysisResult.impactPercentage * analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage * analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
+                {{multipleImpactPercent(valuationData.total_impact_arr_multiple = 
+                  analysed_kpis.calc_gross_margin.analysisResult.impactPercentage *
+                  analysed_kpis.calc_growth_combined.analysisResult.impactPercentage *
+                  analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage *
+                  analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)
+                  }}
               </td>
             </tr>
   
@@ -361,11 +379,29 @@
           
        
         <h3 class="text-h6 mb-2 mt-6">Putting it all together</h3>
-        <p class="mb-6">To find the multiple for your business, we evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
+        <p class="mb-6">
+            Base Multiple: {{valuationData.base_arr_multiple}} <br>
+            + Total Impact on Multiple: {{multipleImpactPercent(valuationData.total_impact_arr_multiple)}}<br>
+            = Final Multiple: {{ (valuationData.base_arr_multiple * valuationData.total_impact_arr_multiple).toFixed(2) }}<br><br>
+
+          ARR {{latestYear}}: EUR {{usdFormat(valuationData.valuation_financials[latestYear].recurring_revenue)}}
+
+          <br><br>
+
+          Total Valuation = ARR {{latestYear}} * Final ARR-Multiple<br>
+          = {{usdFormat(valuationData.valuation_financials[latestYear].recurring_revenue)}} * {{valuationData.base_arr_multiple * valuationData.total_impact_arr_multiple.toFixed(2)}} <br>
+          = {{usdFormat(valuationData.valuation_financials[latestYear].recurring_revenue * valuationData.base_arr_multiple * valuationData.total_impact_arr_multiple)}} 
+      
+        </p>
+        <h3 class="text-h6 mb-2 mt-6">Your Estimated Valuation is {{usdFormat(valuationData.valuation_financials[latestYear].recurring_revenue * valuationData.base_arr_multiple * valuationData.total_impact_arr_multiple)}}!!!</h3>
        </template>
         
       </v-card>
+      analysed_kpis<br>
       <pre>{{analysed_kpis}}</pre>
+      <br><br>
+      valuationData<br>
+      <pre>{{valuationData}}</pre>
     </template>
 
     
@@ -595,15 +631,21 @@
 
   // Modify onMounted to be async
   onMounted(async () => {
-    // Wait for fetchValuation to complete
-    await fetchValuation(thisValuationId.value);
-    // Set default base_arr_multiple if not already set
-    if (!valuationData.base_arr_multiple) {
-      valuationData.base_arr_multiple = 3;
+    try {
+      // Wait for fetchValuation to complete
+      await fetchValuation(thisValuationId.value);
+      // Set default base_arr_multiple if not already set
+      if (!valuationData.base_arr_multiple) {
+        valuationData.base_arr_multiple = 3;
+      }
+      // Now valuationData is populated, and latestYear.value is available
+      analyseYearlyKPIs();
+      analyseOtherKPIs();
+    } catch (error) {
+      console.error('Error in mounting:', error);
+    } finally {
+      isLoading.value = false;
     }
-    // Now valuationData is populated, and latestYear.value is available
-    analyseYearlyKPIs();
-    analyseOtherKPIs();
   });
 
   function analyseOtherKPIs() {
