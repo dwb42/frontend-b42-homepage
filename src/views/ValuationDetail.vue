@@ -291,7 +291,7 @@
   
               </div>
               </td>
-              <td class="text-right">
+              <td v-if="analysed_kpis.calc_growth_combined.analysisResult.impactPercentage" class="text-right">
                 {{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }} 
               </td>
             </tr>
@@ -928,7 +928,7 @@
 
   // After completing the logic, set loading to false
   isLoading.value = false;
-  console.log('is loading: ',isLoading.value)
+  //console.log('is loading: ',isLoading.value)
   }
 
 
