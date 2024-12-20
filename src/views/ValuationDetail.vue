@@ -385,6 +385,8 @@
       </v-card>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationData<br>{{valuationData}}</pre>
+      <pre>valuationCalculation<br>{{valuationCalculation}}</pre>
+      
     </template>
 
     
@@ -455,11 +457,13 @@
   //valuation vars
   const thisValuationId = ref(route.params.id);
   const valuationData = reactive({}); 
+  
   // Initialize reactive object to store KPIs
-  const valuationKPIs = reactive({});
+  const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
+  const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
 
-  const analysed_kpis = reactive({}); // var to save the output of getKPIInfo
+  const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
 
   
   //compute properties for dynamic table
@@ -623,6 +627,7 @@
     // Now valuationData is populated, and latestYear.value is available
     analyseYearlyKPIs();
     analyseOtherKPIs();
+    doValuationCalculation();
   });
 
   function analyseOtherKPIs() {
@@ -921,6 +926,7 @@
     valuationKPIs[lastYear].calc_cagr_revenue = cagr;
   }
 
+
   
 
   watchEffect(() => {
@@ -932,6 +938,47 @@
       computeCAGR();
     }
   });
+
+
+  function doValuationCalculation() {
+    console.log('doValuationCalculation called');
+    
+    // Calculate future growth rate
+    const yoy = analysed_kpis.calc_yoy_revenue_growth?.value;
+    const cagr = analysed_kpis.calc_cagr_revenue?.value;
+    if (typeof yoy === 'number' && typeof cagr === 'number') {
+      valuationCalculation.futureGrowthRate = (yoy + cagr) / 2;
+    } else {
+      valuationCalculation.futureGrowthRate = null;
+    }
+
+    // Calculate total ARR multiple impact
+    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const marginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+    const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
+    const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
+
+    valuationCalculation.total_arr_multiple_impact = growthImpact * marginImpact * recurringImpact * ltvToCacImpact;
+
+    // Calculate final ARR multiple
+    if (valuationData.base_arr_multiple && valuationCalculation.total_arr_multiple_impact) {
+      valuationCalculation.final_arr_multiple = (valuationData.base_arr_multiple * valuationCalculation.total_arr_multiple_impact).toFixed(2);
+    } else {
+      valuationCalculation.final_arr_multiple = null;
+    }
+
+    // Calculate company worth
+    if (latestYear.value && valuationData.valuation_financials) {
+      const arr = valuationData.valuation_financials[latestYear.value]?.recurring_revenue;
+      if (arr != null && valuationCalculation.final_arr_multiple) {
+        valuationCalculation.companyWorth = arr * parseFloat(valuationCalculation.final_arr_multiple);
+      } else {
+        valuationCalculation.companyWorth = null;
+      }
+    } else {
+      valuationCalculation.companyWorth = null;
+    }
+  }
 
 
 
