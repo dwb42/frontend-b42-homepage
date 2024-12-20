@@ -682,13 +682,15 @@
   }
   
   watch(
-    () => ({ ...valuationData }),
+    () => ({ ...valuationData.valuation_financials }),
     async (newValues) => {
       try {
-        await saveData(newValues);
-        await analyseYearlyKPIsAsync();
-        await analyseOtherKPIsAsync();
-        await doValuationCalculationAsync();
+        await saveData(valuationData);
+        if (!isLoading.value) {
+          await computeCAGR();
+          await analyseYearlyKPIsAsync();
+          await analyseOtherKPIsAsync();
+        }
       } catch (error) {
         console.error('Error in watch handler:', error);
       }
@@ -697,11 +699,12 @@
   );
 
   watch(
-    () => ({ ...analysed_kpis }),
-    (newValues) => {
-      doValuationCalculation();
-    },
-    { deep: true }
+    () => valuationCalculation.total_arr_multiple_impact,
+    () => {
+      if (!isLoading.value) {
+        doValuationCalculation();
+      }
+    }
   );
 
 
