@@ -665,15 +665,33 @@
   }
 
 
-  const saveData = debounce((data) => {
-      saveValuation(data);
+  const saveData = debounce(async (data) => {
+    await saveValuation(data);
   }, 500);
+
+  async function analyseYearlyKPIsAsync() {
+    return analyseYearlyKPIs();
+  }
+
+  async function analyseOtherKPIsAsync() {
+    return analyseOtherKPIs();
+  }
+
+  async function doValuationCalculationAsync() {
+    return doValuationCalculation();
+  }
   
   watch(
     () => ({ ...valuationData }),
-    (newValues) => {
-      saveData(newValues);
-      doValuationCalculation();
+    async (newValues) => {
+      try {
+        await saveData(newValues);
+        await analyseYearlyKPIsAsync();
+        await analyseOtherKPIsAsync();
+        await doValuationCalculationAsync();
+      } catch (error) {
+        console.error('Error in watch handler:', error);
+      }
     },
     { deep: true }
   );
@@ -954,7 +972,7 @@
     const yoy = analysed_kpis.calc_yoy_revenue_growth?.value;
     const cagr = analysed_kpis.calc_cagr_revenue?.value;
     if (typeof yoy === 'number' && typeof cagr === 'number') {
-      valuationCalculation.futureGrowthRate = (yoy + cagr) / 2;
+      valuationCalculation.futureGrowthRate = ((yoy + cagr) / 2).toFixed(4);
     } else {
       valuationCalculation.futureGrowthRate = null;
     }
