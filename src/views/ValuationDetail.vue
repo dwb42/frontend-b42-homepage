@@ -246,6 +246,7 @@
             hint="Base multiple for SaaS valuation"
             persistent-hint
             class="mb-6"
+            style="width:300px"
             @update:modelValue="saveData"
           ></v-text-field>
 
@@ -282,7 +283,8 @@
                     ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
                      + 
                     {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                    / 2 = 33%
+                    / 2 = 
+                    {{valuationCalculation.futureGrowthRate*100}}%
                   </p>
   
   
@@ -351,7 +353,7 @@
                 </div>
               </td>
               <td class="text-right font-weight-bold">
-                {{ multipleImpactPercent(valuationData.total_arr_multiple_impact = analysed_kpis.calc_gross_margin.analysisResult.impactPercentage *       analysed_kpis.calc_growth_combined.analysisResult.impactPercentage * analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage * analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
+                {{ multipleImpactPercent(valuationCalculation.total_arr_multiple_impact) }}
               </td>
             </tr>
   
@@ -359,27 +361,23 @@
         </v-table>
 
           <p class="mb-2 mt-6">
-           Based on your business' performance, we need to adjust the ARR Base Multiple of {{valuationData.base_arr_multiple}} by {{multipleImpactPercent(valuationData.total_arr_multiple_impact)}}.  
+           Based on your business' performance, we need to adjust the ARR Base Multiple of {{valuationData.base_arr_multiple}} by {{multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}}.  
 
           </p>
-          <p v-if="valuationData.base_arr_multiple && valuationData.total_arr_multiple_impact" class="mb-2">
-            i.e. {{valuationData.base_arr_multiple}} *  {{valuationData.total_arr_multiple_impact.toFixed(2)}} 
-            = {{valuationData.final_arr_multiple = (valuationData.base_arr_multiple * valuationData.total_arr_multiple_impact).toFixed(2)}} 
-          </p>
-
-          <p v-if="valuationData.final_arr_multiple" class="mb-6 font-weight-bold"">
-            Your final ARR-Multiple is {{valuationData.final_arr_multiple}}.
-          </p>
+          <p class="mb-2">
+            i.e. {{valuationData.base_arr_multiple}} 
+            *  {{valuationCalculation.total_arr_multiple_impact.toFixed(2)}} = {{valuationCalculation.final_arr_multiple}}</p>
           
-       
+          <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  {{valuationCalculation.final_arr_multiple}}.</p>
+         
+
         <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
-        <p class="mb-6">
+        <p class="mb-2">
           To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
-          i.e. 
-            {{valuationData.valuation_financials[latestYear].recurring_revenue}} *     {{valuationData.final_arr_multiple}}  <br>
-          = {{valuationData.valuation_financials[latestYear].recurring_revenue *     valuationData.final_arr_multiple}} 
-          
+          i.e.{{usdFormat(valuationData.valuation_financials[latestYear].recurring_revenue)}} *     {{valuationCalculation.final_arr_multiple}}    
+          = {{usdFormat(valuationCalculation.companyWorthARR)}} 
         </p>
+        <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
        </template>
         
       </v-card>
@@ -675,6 +673,15 @@
     () => ({ ...valuationData }),
     (newValues) => {
       saveData(newValues);
+      doValuationCalculation();
+    },
+    { deep: true }
+  );
+
+  watch(
+    () => ({ ...analysed_kpis }),
+    (newValues) => {
+      doValuationCalculation();
     },
     { deep: true }
   );
@@ -971,12 +978,12 @@
     if (latestYear.value && valuationData.valuation_financials) {
       const arr = valuationData.valuation_financials[latestYear.value]?.recurring_revenue;
       if (arr != null && valuationCalculation.final_arr_multiple) {
-        valuationCalculation.companyWorth = arr * parseFloat(valuationCalculation.final_arr_multiple);
+        valuationCalculation.companyWorthARR = arr * parseFloat(valuationCalculation.final_arr_multiple);
       } else {
-        valuationCalculation.companyWorth = null;
+        valuationCalculation.companyWorthARR = null;
       }
     } else {
-      valuationCalculation.companyWorth = null;
+      valuationCalculation.companyWorthARR = null;
     }
   }
 
