@@ -109,8 +109,8 @@
 
 
     
-    
-    <v-card variant="elevated" class="pa-3 mb-6">
+    <!-- initial kachelansatz where kpis are displayed and analysed now deprecated because its all done in valuation table ... less is more ...  -->
+    <!-- v-card variant="elevated" class="pa-3 mb-6">
       <h2 class="text-h5 mb-2"><b>Analysis of your KPIs</b></h2>
       <p class="mb-6">To assess your current performance we analyse your {{ latestYear }} metrics. </p>
       
@@ -126,16 +126,13 @@
 
               <v-card-subtitle>{{ kpi.analysisResult.rangeName }}</v-card-subtitle>
 
-              <!--template v-slot:append>
-                <v-icon color="success" icon="mdi-check"></v-icon>
-            </template-->
+
             </v-card-item>
 
             
             
             <v-card-text class="bg-surface-light pt-4">
               <p v-if="kpi.analysisResult">
-                <!--strong> {{ kpi.analysisResult.rangeName }}</strong><br-->
                 {{kpi.analysisResult.evaluationDescription}} <br>
                 <div class="mt-4 font-weight-bold text-high-emphasis" v-html="multipleImpact(kpi.analysisResult.impactPercentage)"> </div>
               </p>
@@ -155,7 +152,7 @@
           </v-card>
         </v-col>
       </v-row>
-    </v-card>
+    </v-card-->
 
     
     <!-- The Dialog that will show the selected KPI details -->
@@ -182,18 +179,14 @@
 
   
 
-    {{isLoading}}
-    <!--v-if="!isLoading"-->
+    
     <template v-if="!isLoading">
       <v-card variant="elevated" class="pa-3 mb-6" :style="{ maxWidth: '800px' }" >
         <h2 class="text-h4 mb-2"><b>Valuation of your SaaS business</b></h2>
-        <p class="mb-6 text-body-1">Depending on which phase your business is in we will evaluate its worth using the ARR- or the EBITDA-Multiple Method.  </p>
+        <p class="mb-6 text-body-1">Depending on which phase your business is, in we will evaluate its worth using the ARR- or the EBITDA-Multiple Method.  </p>
   
         <h3 class="text-h6 mb-2 mt-6">What best describes your current state of business?</h3>
         <v-radio-group v-model="valuationData.state_of_business">
-          <!--template v-slot:label>
-            <div><strong>What best describes your current state of business?</strong></div>
-        </template-->
           <v-radio value="preRevenue">
             <template v-slot:label>
               <div>we are just getting started and do not have revenue yet <strong>(pre revenue)</strong></div>
@@ -223,19 +216,15 @@
         <!-- EARLY STAGE -->
         <template v-if="valuationData.state_of_business === 'earlyStage'">
           <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
-          <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using an ARR-Multiple.  </p>
-          <!--p class="mb-6">To calculate your company's worth with the ARR-Multiple-Formula, you take your ARR and multiple it with the multiple applicable to your business.   </p-->
-  
-  
+          <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
+
+          
           <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
 
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
           <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
 
-            Let's say that this multiple is 3. 
-
-            In order to evaluate if your business
-
+            As a default we set this multiple at "3". 
           </p>
 
           <v-text-field
@@ -243,20 +232,22 @@
             label="Base ARR-Multiple"
             type="number"
             :rules="[v => v >= 0 || 'Multiple must be non-negative']"
-            hint="Base multiple for SaaS valuation"
             persistent-hint
             class="mb-6"
             style="width:300px"
             @update:modelValue="saveData"
           ></v-text-field>
 
+          <!--hint="Base multiple for SaaS valuation"-->
+
+
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
 
-          <p class="mb-6">
-
-            We would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
-          <p class="mb-6">To find the multiple for your business, we evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). We also look at current market conditions and some other attributes that can have an impact on your valuation multiple. </p>
-  
+          <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
+         
+          <!--p class="text-body-2 mb-6">He would thenlook at current market conditions and some other attributes that  have an impact on your valuation multiple. </p-->
+          
+          
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
           <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
           <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
@@ -279,12 +270,26 @@
                     Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
                     Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
 
-                    For valuation purposes we will calculate your future growth rate at 
+                    For valuation purposes we will calculate your future growth rate at <br>
                     ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
                      + 
                     {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
                     / 2 = 
                     {{valuationCalculation.futureGrowthRate*100}}%
+
+                    <br><br>
+                    A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
+                    
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
                   </p>
   
   
@@ -303,9 +308,20 @@
                   <p class="text-body-2 mb-2">
                     When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
 
-                    Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}. <br>
+                    Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> <br>
 
-                    This is {{analysed_kpis.calc_gross_margin.analysisResult.rangeName}}.
+                    A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
                   </p>
               </div>
               </td>
@@ -319,9 +335,19 @@
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
                   <p class="text-body-2 mb-2">
-                    Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br>
+                    Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
 
-                    This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.rangeName}}.
+                    This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
                   </p>
               </div>
               </td>
@@ -335,9 +361,19 @@
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
                   <p class="text-body-2 mb-2">
-                    Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br>
+                    Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
 
-                    This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.rangeName}}.
+                    This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
                   </p>
               </div>
               </td>
@@ -350,6 +386,12 @@
               <td>
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
+                    {{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} *
+                    {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
+                    {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
+                  </p>
                 </div>
               </td>
               <td class="text-right font-weight-bold">
@@ -380,11 +422,231 @@
         <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
        </template>
         
+     
+
+
+    <template v-if="valuationData.state_of_business === 'laterStage'">
+          <h3 class="text-h5 mb-2 mt-4">Valueing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+          <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
+
+
+          <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+          <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+          <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+
+            As a default we set this multiple at "3". 
+          </p>
+
+          <v-text-field
+            v-model="valuationData.base_ebitda_multiple"
+            label="Base EBITDA-Multiple"
+            type="number"
+            :rules="[v => v >= 0 || 'Multiple must be non-negative']"
+            persistent-hint
+            class="mb-6"
+            style="width:300px"
+            @update:modelValue="saveData"
+          ></v-text-field>
+
+          <!--hint="Base multiple for SaaS valuation"-->
+
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+
+          <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
+
+          <!--p class="text-body-2 mb-6">He would thenlook at current market conditions and some other attributes that  have an impact on your valuation multiple. </p-->
+
+
+          <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
+          <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
+          <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
+          <p class="text-body-2 mb-2">We will ues your "current Gross Maring" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
+
+
+        <v-table>
+          <thead>
+            <tr>
+              <th class="text-left" width="80%">Factor</th>
+              <th class="text-right"  width="20%">Multiple-Impact </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
+                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
+                     + 
+                    {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
+                    / 2 = 
+                    {{valuationCalculation.futureGrowthRate*100}}%
+
+                    <br><br>
+                    A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+
+
+
+              </div>
+              </td>
+              <td v-if="analysed_kpis.calc_growth_combined.analysisResult.impactPercentage" class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }} 
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+
+                    Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> 
+
+                    A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.<br> <br>
+
+                    Your current EBITDA Margin is {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }}.<br> 
+
+                    An EBITDA Margin of {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }} is {{analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}}. <br> <br>
+
+                    To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and devide them by 2. <br>
+
+                    i.e. ({{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} + {{analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}}) / 2 = {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}}. <br>
+
+
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+              </div>
+              </td>
+              <td class="text-right">
+                {{multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2)}}
+                
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
+
+                    This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+              </div>
+              </td>
+              <td class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
+
+                    This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+              </div>
+              </td>
+              <td class="text-right">
+                {{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
+                    {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}} *
+                    {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
+                    {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
+                  </p>
+                </div>
+              </td>
+              <td class="text-right font-weight-bold">
+                {{ multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact) }}
+              </td>
+            </tr>
+
+          </tbody>
+        </v-table>
+
+          <p class="mb-2 mt-6">
+           Based on your business' performance, we need to adjust the EBITDA Base Multiple of {{valuationData.base_ebitda_multiple}} by {{multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}}.  
+
+          </p>
+          <p class="mb-2">
+            i.e. {{valuationData.base_ebitda_multiple}} 
+            *  {{valuationCalculation.total_ebitda_multiple_impact}} = {{valuationCalculation.final_ebitda_multiple}}</p>
+
+          <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  {{valuationCalculation.final_ebitda_multiple}}.</p>
+
+
+        <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
+        <p class="mb-2">
+          To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
+          i.e.{{usdFormat(valuationData.valuation_financials[latestYear].calc_ebitda_net)}} *     {{valuationCalculation.final_ebitda_multiple}}    
+          = {{usdFormat(valuationCalculation.companyWorthEBITDA)}} 
+        </p>
+        <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthEBITDA)}}.</p>
+       </template>
+
       </v-card>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationData<br>{{valuationData}}</pre>
       <pre>valuationCalculation<br>{{valuationCalculation}}</pre>
-      
+
     </template>
 
     
@@ -402,6 +664,7 @@
 
   //import kpiLearnMoreModals
   import YearOnYearGrowthModal from '@/components/kpiLearnMoreModals/YearOnYearGrowthModal.vue';
+  import FutureGrowthModal from '@/components/kpiLearnMoreModals/FutureGrowthModal.vue';
   import GrossMarginModal from '@/components/kpiLearnMoreModals/GrossMarginModal.vue';
   import EBITDAMarginModal from '@/components/kpiLearnMoreModals/EBITDAMarginModal.vue';
   import RecurringRevenueRatioModal from '@/components/kpiLearnMoreModals/RecurringRevenueRatioModal.vue';
@@ -416,6 +679,10 @@
     calc_yoy_revenue_growth: {
       title: 'Year-over-Year Growth Details',
       component: YearOnYearGrowthModal
+    },
+    calc_growth_combined: {
+      title: 'Future Growth Details',
+      component: FutureGrowthModal
     },
     calc_gross_margin: {
       title: 'Gross Margin Details',
@@ -498,6 +765,10 @@
 
 
   const rowDefinitionsKPIOutputs = computed(() => [
+    { label: 'Total Revenue', field: 'calc_total_revenue', use_for_analysis: false, rank_for_analysis: 0 },
+     { label: 'Gross Margin Net', field: 'calc_gross_margin_net', use_for_analysis: false, rank_for_analysis: 0 },
+     { label: 'EBITDA Net', field: 'calc_ebitda_net', use_for_analysis: false, rank_for_analysis: 0 },
+    
     { label: 'Recurring Revenue Ratio', field: 'calc_recurring_revenue_ratio', use_for_analysis: true, rank_for_analysis: 5 },
     { label: 'Year-over-Year Growth', field: 'calc_yoy_revenue_growth', use_for_analysis: true, rank_for_analysis: 1 },
     { label: 'CAGR', field: 'calc_cagr_revenue', use_for_analysis: true, rank_for_analysis: 2 },
@@ -644,10 +915,17 @@
     if (!valuationData.base_arr_multiple) {
       valuationData.base_arr_multiple = 3;
     }
-    // Trigger initial calculation
-    recalculateAllMetrics();
+    // Trigger initial calculation ... not neccessary anymore since caught by watchEffect
+    //await nextTick();
+    //recalculateAllMetrics();
   });
 
+
+  const debouncedRecalculate = debounce(() => {
+    recalculateAllMetrics();
+  }, 500);
+
+  
   // Single watcher for data changes
   watch(
     [
@@ -657,7 +935,11 @@
     async () => {
       try {
         await saveData(valuationData);
-        recalculateAllMetrics();
+        await nextTick();
+        // Check again if valuationData.valuation_financials is not empty
+            if (valuationData.valuation_financials && Object.keys(valuationData.valuation_financials).length > 0) {
+              recalculateAllMetrics();
+            }
       } catch (error) {
         console.error('Error in watch handler:', error);
       }
@@ -724,12 +1006,64 @@
   // START KPI Calculation Functions
   //////
 
+  
   function calculateKPIsForYear(year) {
-    const financials = valuationData.valuation_financials[year];
+    const financials = valuationData.valuation_financials && valuationData.valuation_financials[year];
+    if (!financials) {
+      valuationKPIs[year] = { error: 'No financial data available for this year yet.' };
+      return;
+    }
     const kpis = {};
 
-    if (financials) {
-      // Recurring Revenue Ratio
+    // calc_total_revenue = total_revenue directly
+    if (financials.total_revenue != null) {
+      kpis.calc_total_revenue = financials.total_revenue;
+    } else {
+      kpis.calc_total_revenue = { missingData: ['total_revenue'] };
+    }
+    // Store calc_total_revenue in valuationData
+    financials.calc_total_revenue = kpis.calc_total_revenue;
+
+    // calc_gross_margin_net = total_revenue - costs_of_goods_sold
+    if (financials.total_revenue != null && financials.costs_of_goods_sold != null) {
+      kpis.calc_gross_margin_net = financials.total_revenue - financials.costs_of_goods_sold;
+    } else {
+      const missingData = [];
+      if (financials.total_revenue == null) missingData.push('total_revenue');
+      if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
+      kpis.calc_gross_margin_net = { missingData };
+    }
+    // Store calc_gross_margin_net in valuationData
+    financials.calc_gross_margin_net = kpis.calc_gross_margin_net;
+
+    // calc_ebitda_net = total_revenue - (sum of all major costs)
+    if (
+      financials.total_revenue != null &&
+      financials.costs_of_goods_sold != null &&
+      financials.costs_of_customer_acquisition != null &&
+      financials.costs_of_r_and_d != null &&
+      financials.costs_of_general_administration != null
+    ) {
+      const totalCosts = financials.costs_of_goods_sold
+                       + financials.costs_of_customer_acquisition
+                       + financials.costs_of_r_and_d
+                       + financials.costs_of_general_administration;
+      kpis.calc_ebitda_net = financials.total_revenue - totalCosts;
+    } else {
+      const missingData = [];
+      if (financials.total_revenue == null) missingData.push('total_revenue');
+      if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
+      if (financials.costs_of_customer_acquisition == null) missingData.push('costs_of_customer_acquisition');
+      if (financials.costs_of_r_and_d == null) missingData.push('costs_of_r_and_d');
+      if (financials.costs_of_general_administration == null) missingData.push('costs_of_general_administration');
+      kpis.calc_ebitda_net = { missingData };
+    }
+    // Store calc_ebitda_net in valuationData
+    financials.calc_ebitda_net = kpis.calc_ebitda_net;
+
+
+    // Recurring Revenue Ratio
+    {
       let missingData = [];
       if (financials.recurring_revenue != null && financials.total_revenue != null) {
         kpis.calc_recurring_revenue_ratio =
@@ -741,9 +1075,11 @@
         if (financials.total_revenue == null) missingData.push('total_revenue');
         kpis.calc_recurring_revenue_ratio = { missingData };
       }
+    }
 
-      // Year-over-Year Revenue Growth
-      missingData = [];
+    // Year-over-Year Revenue Growth
+    {
+      let missingData = [];
       const yearsArray = Object.keys(valuationData.valuation_financials).sort();
       const firstYear = yearsArray[0];
 
@@ -764,10 +1100,11 @@
           kpis.calc_yoy_revenue_growth = { missingData };
         }
       }
+    }
 
-
-      // Gross Margin
-      missingData = [];
+    // Gross Margin
+    {
+      let missingData = [];
       if (financials.total_revenue != null && financials.costs_of_goods_sold != null) {
         const revenue = financials.total_revenue;
         const cogs = financials.costs_of_goods_sold;
@@ -777,11 +1114,11 @@
         if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
         kpis.calc_gross_margin = { missingData };
       }
+    }
 
-
-
-      // EBITDA Margin
-      missingData = [];
+    // EBITDA Margin
+    {
+      let missingData = [];
       if (
         financials.total_revenue != null &&
         financials.costs_of_goods_sold != null &&
@@ -804,10 +1141,11 @@
         if (financials.costs_of_general_administration == null) missingData.push('costs_of_general_administration');
         kpis.calc_ebitda_margin = { missingData };
       }
+    }
 
-
-      // Average Revenue per Customer
-      missingData = [];
+    // Average Revenue per Customer
+    {
+      let missingData = [];
       if (financials.total_revenue != null && financials.number_of_customers_end_of_period != null) {
         const customers = financials.number_of_customers_end_of_period;
         kpis.calc_average_revenue_per_customer = customers !== 0 ? financials.total_revenue / customers : null;
@@ -816,10 +1154,11 @@
         if (financials.number_of_customers_end_of_period == null) missingData.push('number_of_customers_end_of_period');
         kpis.calc_average_revenue_per_customer = { missingData };
       }
+    }
 
-
-      // Customer Logo Churn
-      missingData = [];
+    // Customer Logo Churn
+    {
+      let missingData = [];
       if (
         financials.number_of_customers_end_of_period != null &&
         financials.customers_won_in_period != null &&
@@ -842,10 +1181,11 @@
         if (financials.customers_lost_in_period == null) missingData.push('customers_lost_in_period');
         kpis.calc_customer_logo_churn = { missingData };
       }
+    }
 
-
-      // LTV to CAC Ratio
-      missingData = [];
+    // LTV to CAC Ratio
+    {
+      let missingData = [];
       if (
         kpis.calc_average_revenue_per_customer != null &&
         kpis.calc_gross_margin != null &&
@@ -876,14 +1216,11 @@
         if (financials.customers_won_in_period == null) missingData.push('customers_won_in_period');
         kpis.calc_ltv_to_cac = { missingData };
       }
-
-
-    } else {
-      kpis.missingFinancials = true;
     }
 
     valuationKPIs[year] = kpis;
   }
+  
 
 
   function analyseYearlyKPIs() {
@@ -991,13 +1328,21 @@
       valuationCalculation.futureGrowthRate = null;
     }
 
-    // Calculate total ARR multiple impact
+    // Calculate total ARR and EBITDA multiple impact
     const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
-    const marginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+    const GrossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+    const EbitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
+
     const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
     const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
 
-    valuationCalculation.total_arr_multiple_impact = growthImpact * marginImpact * recurringImpact * ltvToCacImpact;
+    //set total_arr_multiple_impact
+    valuationCalculation.total_arr_multiple_impact = 
+      (growthImpact * GrossMarginImpact * recurringImpact * ltvToCacImpact);
+
+    //set total_ebitda_multiple_impact
+    valuationCalculation.total_ebitda_multiple_impact = 
+    ((growthImpact * ((GrossMarginImpact + EbitdaMarginImpact)/2) * recurringImpact * ltvToCacImpact)).toFixed(2);
 
     // Calculate final ARR multiple
     if (valuationData.base_arr_multiple && valuationCalculation.total_arr_multiple_impact) {
@@ -1006,7 +1351,15 @@
       valuationCalculation.final_arr_multiple = null;
     }
 
-    // Calculate company worth
+    // Calculate final EBITDA multiple
+    if (valuationData.base_ebitda_multiple && valuationCalculation.total_ebitda_multiple_impact) {
+      valuationCalculation.final_ebitda_multiple = (valuationData.base_ebitda_multiple * valuationCalculation.total_ebitda_multiple_impact).toFixed(2);
+    } else {
+      valuationCalculation.final_ebitda_multiple = null;
+    }
+
+    
+    // Calculate company worth ARR
     if (latestYear.value && valuationData.valuation_financials) {
       const arr = valuationData.valuation_financials[latestYear.value]?.recurring_revenue;
       if (arr != null && valuationCalculation.final_arr_multiple) {
@@ -1016,6 +1369,18 @@
       }
     } else {
       valuationCalculation.companyWorthARR = null;
+    }
+
+    // Calculate company worth EBITDA 1234
+    if (latestYear.value && valuationData.valuation_financials) {
+      const ebitda = valuationData.valuation_financials[latestYear.value]?.calc_ebitda_net;
+      if (ebitda != null && valuationCalculation.final_arr_multiple) {
+        valuationCalculation.companyWorthEBITDA = ebitda * parseFloat(valuationCalculation.final_ebitda_multiple);
+      } else {
+        valuationCalculation.companyWorthEBITDA = null;
+      }
+    } else {
+      valuationCalculation.companyWorthEBITDA = null;
     }
   }
 
@@ -1030,20 +1395,34 @@
       'calc_customer_logo_churn', 
       'calc_cagr_revenue', 
       'calc_growth_combined'
-      
     ];
+
+    // Check if field is one of the new currency fields
+    const currencyFields = [
+      'calc_total_revenue',
+      'calc_gross_margin_net',
+      'calc_ebitda_net'
+    ];
+
+    if (value == null || (typeof value === 'object' && value.missingData)) {
+      return 'Missing data';
+    }
 
     if (percentageKPIs.includes(field)) {
       return (value * 100).toFixed(2) + '%';
     } else if (field === 'calc_ltv_to_cac') {
-      return value.toFixed(2); // Format as a ratio
+      return value.toFixed(2);
     } else if (field === 'calc_average_revenue_per_customer') {
+      return usdFormat(value);
+    } else if (currencyFields.includes(field)) {
+      // Format as currency
       return usdFormat(value);
     } else {
       // Default formatting
       return value;
     }
   }
+
 
 
 

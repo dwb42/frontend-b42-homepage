@@ -14,7 +14,7 @@ const kpiData = {
       "rangeName": "Low",
       "multipleVectorName": "Success Factor",
       "impactPercentage": 0.65,
-      "evaluationDescription": "Average proportion of recurring revenue."
+      "evaluationDescription": "a very low value for a SaaS business and will lead to a reduction in your multiple by 35%"
     },
     {
       "min": 0.6,
@@ -98,7 +98,7 @@ const kpiData = {
       "rangeName": "Looks Like SaaS",
       "multipleVectorName": "Profitability Factor",
       "impactPercentage": 1.00,
-      "evaluationDescription": "Gross margin between 70% and 80% is typical for SaaS businesses."
+      "evaluationDescription": "is in the typical range for SaaS businesses and has no impact on the multiple"
     },
     {
       "min": 0.8,
@@ -156,7 +156,7 @@ const kpiData = {
       "rangeName": "Amazingly Profitable",
       "multipleVectorName": "Profitability Factor",
       "impactPercentage": 1.40,
-      "evaluationDescription": "EBITDA margin above 40% is considered amazing."
+      "evaluationDescription": "considered amazing and increases your multiple by 40%"
     }
   ],
   "calc_ltv_to_cac": [
@@ -165,32 +165,40 @@ const kpiData = {
       "max": 1,
       "rangeName": "Unsustainable",
       "multipleVectorName": "Success Factor",
-      "impactPercentage": 0.50,
+      "impactPercentage": 0.75,
       "evaluationDescription": "LTV to CAC ratio less than 1 indicates unsustainable acquisition costs."
     },
     {
       "min": 1,
-      "max": 3,
+      "max": 2,
       "rangeName": "Needs Improvement",
       "multipleVectorName": "Success Factor",
-      "impactPercentage": 0.75,
+      "impactPercentage": 0.85,
       "evaluationDescription": "LTV to CAC ratio between 1 and 3 needs improvement."
     },
     {
-      "min": 3,
-      "max": 5,
-      "rangeName": "Good",
+      "min": 2,
+      "max": 4,
+      "rangeName": "SaaS Norm",
       "multipleVectorName": "Success Factor",
       "impactPercentage": 1.00,
-      "evaluationDescription": "LTV to CAC ratio between 3 and 5 is good."
+      "evaluationDescription": "in the range of one expects a SaaS business' LTV-to-CAC ratio to be in and hence has no impact on the multiple"
     },
     {
-      "min": 5,
+      "min": 4,
+      "max": 6,
+      "rangeName": "Good",
+      "multipleVectorName": "Success Factor",
+      "impactPercentage": 1.10,
+      "evaluationDescription": "a better than expected LTV-to-CAC ratio and will improve your multiple by 10%"
+    },
+    {
+      "min": 6,
       "max": Infinity,
       "rangeName": "Excellent",
       "multipleVectorName": "Success Factor",
-      "impactPercentage": 1.25,
-      "evaluationDescription": "LTV to CAC ratio greater than 5 is excellent."
+      "impactPercentage": 1.2,
+      "evaluationDescription": "a much better than expected LTV-to-CAC ratio and will improve your multiple by 20%"
     }
   ],
   "calc_cagr_revenue": [
@@ -246,35 +254,43 @@ const kpiData = {
     },
     {
       "min": 0,
+      "max": 0.1,
+      "rangeName": "Slow Growth",
+      "multipleVectorName": "Growth Factor",
+      "impactPercentage": 0.90,
+      "evaluationDescription": "is slow growth and will decrease your mutiple by 10%"
+    },
+    {
+      "min": 0.1,
       "max": 0.2,
       "rangeName": "Low Growth",
       "multipleVectorName": "Growth Factor",
       "impactPercentage": 0.90,
-      "evaluationDescription": "Low year-over-year revenue growth."
+      "evaluationDescription": "is low growth and has no effect on your multiple"
     },
     {
       "min": 0.2,
       "max": 0.3,
-      "rangeName": "Moderate Growth",
+      "rangeName": "Good Growth",
       "multipleVectorName": "Growth Factor",
-      "impactPercentage": 1.00,
-      "evaluationDescription": "Moderate year-over-year revenue growth."
+      "impactPercentage": 1.10,
+      "evaluationDescription": "is good and will improve your mutiple by 10%"
     },
     {
       "min": 0.3,
       "max": 0.5,
       "rangeName": "Strong Growth",
       "multipleVectorName": "Growth Factor",
-      "impactPercentage": 1.30,
-      "evaluationDescription": "Strong revenue growth in reported period."
+      "impactPercentage": 1.25,
+      "evaluationDescription": "strong and will improve your multiple by 25%"
     },
     {
       "min": 0.5,
       "max": 100,
       "rangeName": "High Growth",
       "multipleVectorName": "Growth Factor",
-      "impactPercentage": 1.20,
-      "evaluationDescription": "High year-over-year revenue growth."
+      "impactPercentage": 1.40,
+      "evaluationDescription": "excellent and will improve your multiple by 40%"
     }
   ]
 };
