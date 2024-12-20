@@ -717,8 +717,6 @@
   async function doValuationCalculationAsync() {
     return doValuationCalculation();
   }
-  
-  // Removed redundant watchers in favor of recalculateAllMetrics
 
 
 
