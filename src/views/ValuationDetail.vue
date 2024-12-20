@@ -381,17 +381,8 @@
           
         </p>
        </template>
-        new final_arr_multiple
-        <p v-if="final_arr_multiple">
-          Final ARR Multiple: {{ final_arr_multiple }}
-        </p>
-        <p v-if="companyWorth">
-          Estimated Company Worth: {{ companyWorth }}
-        </p>
+        
       </v-card>
-      <p v-if="companyWorth">
-        Estimated Company Worth: {{ companyWorth }}
-      </p>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationData<br>{{valuationData}}</pre>
     </template>
@@ -632,23 +623,6 @@
     // Now valuationData is populated, and latestYear.value is available
     analyseYearlyKPIs();
     analyseOtherKPIs();
-
-    // Define reactive variables at component level
-    const futureGrowthRate = ref(null)
-    const total_arr_multiple_impact = ref(null)
-    const final_arr_multiple = ref(null)
-    const companyWorth = ref(null)
-
-    // Get computed values
-    const calculations = initValuationCalculations(valuationData, analysed_kpis, latestYear)
-    
-    // Assign computed values to component variables
-    futureGrowthRate.value = calculations.futureGrowthRate
-    total_arr_multiple_impact.value = calculations.total_arr_multiple_impact
-    final_arr_multiple.value = calculations.final_arr_multiple
-    companyWorth.value = calculations.companyWorth
-
-    console.log('Company Worth:', companyWorth.value)
   });
 
   function analyseOtherKPIs() {
@@ -991,53 +965,6 @@
   // END KPI Calculation Functions
   ///////////////
 
-
-
-  // Example function that initializes the computed properties after data is available
-  function initValuationCalculations(valuationData, analysed_kpis, latestYear) {
-    const futureGrowthRate = computed(() => {
-      const yoy = analysed_kpis.calc_yoy_revenue_growth?.value
-      const cagr = analysed_kpis.calc_cagr_revenue?.value
-      if (typeof yoy === 'number' && typeof cagr === 'number') {
-        return (yoy + cagr) / 2
-      }
-      return null
-    })
-
-    const total_arr_multiple_impact = computed(() => {
-      const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1
-      const marginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1
-      const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1
-      const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1
-
-      console.log(growthImpact, marginImpact, recurringImpact, ltvToCacImpact)
-
-      return growthImpact * marginImpact * recurringImpact * ltvToCacImpact
-    })
-
-    const final_arr_multiple = computed(() => {
-      if (valuationData.base_arr_multiple && total_arr_multiple_impact.value) {
-        return (valuationData.base_arr_multiple * total_arr_multiple_impact.value).toFixed(2)
-      }
-      return null
-    })
-
-    const companyWorth = computed(() => {
-      if (!latestYear.value || !valuationData.valuation_financials) return null
-      const arr = valuationData.valuation_financials[latestYear.value]?.recurring_revenue
-      if (arr != null && final_arr_multiple.value) {
-        return arr * parseFloat(final_arr_multiple.value)
-      }
-      return null
-    })
-
-    return {
-      futureGrowthRate,
-      total_arr_multiple_impact,
-      final_arr_multiple,
-      companyWorth
-    }
-  }
 
   
   
