@@ -608,36 +608,33 @@
 
 
   
-  async function recalculateAllMetrics() {
-    try {
-      // Skip if no financial data available
-      if (!valuationData.valuation_financials || !years.value.length) {
-        return;
-      }
-
-      // Clear existing KPIs
-      Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
-      Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
-
-      // 1. Calculate KPIs for all years
-      await Promise.all(years.value.map(year => calculateKPIsForYear(year)));
-
-      // 2. Compute CAGR
-      await computeCAGR();
-
-      // 3. Analyse Yearly and Other KPIs
-      await analyseYearlyKPIs();
-      await analyseOtherKPIs();
-
-      // 4. Perform Valuation Calculation
-      await doValuationCalculation();
-
-      // Set loading to false after the first full calculation
-      isLoading.value = false;
-    } catch (error) {
-      console.error('Error in recalculateAllMetrics:', error);
-      isLoading.value = false;
+  function recalculateAllMetrics() {
+    // Skip if no financial data available
+    if (!valuationData.valuation_financials || !years.value.length) {
+      return;
     }
+
+    // Clear existing KPIs
+    Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
+    Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
+
+    // 1. Calculate KPIs for all years
+    years.value.forEach(year => {
+      calculateKPIsForYear(year);
+    });
+
+    // 2. Compute CAGR
+    computeCAGR();
+
+    // 3. Analyse Yearly and Other KPIs
+    analyseYearlyKPIs();
+    analyseOtherKPIs();
+
+    // 4. Perform Valuation Calculation
+    doValuationCalculation();
+
+    // Set loading to false after the first full calculation
+    isLoading.value = false;
   }
 
   onMounted(async () => {
@@ -727,14 +724,11 @@
   // START KPI Calculation Functions
   //////
 
-  async function calculateKPIsForYear(year) {
-    try {
-      const financials = valuationData.valuation_financials[year];
-      const kpis = {};
+  function calculateKPIsForYear(year) {
+    const financials = valuationData.valuation_financials[year];
+    const kpis = {};
 
-      if (!financials) {
-        return;
-      }
+    if (financials) {
       // Recurring Revenue Ratio
       let missingData = [];
       if (financials.recurring_revenue != null && financials.total_revenue != null) {
