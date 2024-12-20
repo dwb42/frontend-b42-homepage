@@ -441,11 +441,7 @@
   }
 
   //////////// END MODAL DIALOG STATES
-
-
   const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
-
-
   
   //setup router
   import { useRoute } from 'vue-router'
@@ -456,7 +452,7 @@
   const thisValuationId = ref(route.params.id);
   const valuationData = reactive({}); 
   
-  // Initialize reactive object to store KPIs
+  // Initialize reactive object to store KPIs and calculated metrics
   const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
   const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
@@ -511,9 +507,6 @@
     { label: 'Customer Logo Churn', field: 'calc_customer_logo_churn', use_for_analysis: false, rank_for_analysis: null },
     { label: 'LTV to CAC Ratio', field: 'calc_ltv_to_cac', use_for_analysis: true, rank_for_analysis: 6 }
   ]);
-
-
-  
 
 
   
@@ -614,7 +607,36 @@
   }
 
 
-  // Modify onMounted to be async
+  
+  function recalculateAllMetrics() {
+    // Skip if no financial data available
+    if (!valuationData.valuation_financials || !years.value.length) {
+      return;
+    }
+
+    // Clear existing KPIs
+    Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
+    Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
+
+    // 1. Calculate KPIs for all years
+    years.value.forEach(year => {
+      calculateKPIsForYear(year);
+    });
+
+    // 2. Compute CAGR
+    computeCAGR();
+
+    // 3. Analyse Yearly and Other KPIs
+    analyseYearlyKPIs();
+    analyseOtherKPIs();
+
+    // 4. Perform Valuation Calculation
+    doValuationCalculation();
+
+    // Set loading to false after the first full calculation
+    isLoading.value = false;
+  }
+
   onMounted(async () => {
     // Wait for fetchValuation to complete
     await fetchValuation(thisValuationId.value);
@@ -622,11 +644,26 @@
     if (!valuationData.base_arr_multiple) {
       valuationData.base_arr_multiple = 3;
     }
-    // Now valuationData is populated, and latestYear.value is available
-    analyseYearlyKPIs();
-    analyseOtherKPIs();
-    doValuationCalculation();
+    // Trigger initial calculation
+    recalculateAllMetrics();
   });
+
+  // Single watcher for data changes
+  watch(
+    [
+      () => ({ ...valuationData.valuation_financials }),
+      () => valuationData.base_arr_multiple
+    ],
+    async () => {
+      try {
+        await saveData(valuationData);
+        recalculateAllMetrics();
+      } catch (error) {
+        console.error('Error in watch handler:', error);
+      }
+    },
+    { deep: true }
+  );
 
   function analyseOtherKPIs() {
     try {
@@ -681,31 +718,7 @@
     return doValuationCalculation();
   }
   
-  watch(
-    () => ({ ...valuationData.valuation_financials }),
-    async (newValues) => {
-      try {
-        await saveData(valuationData);
-        if (!isLoading.value) {
-          await computeCAGR();
-          await analyseYearlyKPIsAsync();
-          await analyseOtherKPIsAsync();
-        }
-      } catch (error) {
-        console.error('Error in watch handler:', error);
-      }
-    },
-    { deep: true }
-  );
-
-  watch(
-    () => valuationCalculation.total_arr_multiple_impact,
-    () => {
-      if (!isLoading.value) {
-        doValuationCalculation();
-      }
-    }
-  );
+  // Removed redundant watchers in favor of recalculateAllMetrics
 
 
 
