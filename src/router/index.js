@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Import components
 import Home from '../views/Home.vue'
+import HomeReal from '../views/HomeReal.vue'
 import Admin from '../views/Admin.vue'
 import Lots from '@/views/Lots.vue'
 import LotDetails from '@/views/LotDetails.vue'
@@ -24,6 +25,11 @@ import ValuationDetail from '@/views/ValuationDetail.vue'
           path: '', // Default child of "/"
           name: 'Home',
           component: Home,
+        },
+        {
+          path: 'real', // Default child of "/"
+          name: 'HomeReal',
+          component: HomeReal,
         },
         {
           path: 'admin',

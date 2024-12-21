@@ -928,10 +928,11 @@
   
   // Single watcher for data changes
   watch(
-    [
+    /*[
       () => ({ ...valuationData.valuation_financials }),
       () => valuationData.base_arr_multiple
-    ],
+    ],*/ 
+    () => valuationData,
     async () => {
       try {
         await saveData(valuationData);
