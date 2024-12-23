@@ -43,7 +43,7 @@
         lines="two"
        
         subtitle="Logged in"
-        :title="localStorage.getItem('userEmail') || 'Not logged in'"
+        :title="localStorage.getItem('user.email') || 'Not logged in'"
       ></v-list-item>
     </v-list>
      <!--prepend-avatar="@/assets/user-icon-nav.png"-->
