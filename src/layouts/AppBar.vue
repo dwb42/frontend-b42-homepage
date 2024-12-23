@@ -43,7 +43,7 @@
         lines="two"
        
         subtitle="Logged in"
-        title="Jane Smith"
+        :title="localStorage.getItem('userEmail') || 'Not logged in'"
       ></v-list-item>
     </v-list>
      <!--prepend-avatar="@/assets/user-icon-nav.png"-->
