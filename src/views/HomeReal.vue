@@ -225,7 +225,7 @@ async function register() {
   isSubmitted.value = true; 
 
   // Call the conversion tracking function after a successful registration
-  gtag_report_conversion(); 
+  //gtag_report_conversion(); 
 
   } catch (error) {
   console.error('Error registering:', error);

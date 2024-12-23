@@ -4,16 +4,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import HomeReal from '../views/HomeReal.vue'
 import Admin from '../views/Admin.vue'
-import Lots from '@/views/Lots.vue'
-import LotDetails from '@/views/LotDetails.vue'
-import ItemDetails from '@/views/ItemDetails.vue'
-import PSA_Collections from '@/views/PSA_Collections.vue'
-import PSA_CollectionDetails from '@/views/PSA_CollectionDetails.vue'
-import PSA_CardDetail from '@/views/PSA_CardDetail.vue'
-
 import Valuations from '@/views/Valuations.vue'
 import ValuationDetail from '@/views/ValuationDetail.vue'
-
+import MagicalLinkVerification from '@/views/MagicLinkVerification.vue'
 
 // Routes
   const routes = [
@@ -37,37 +30,13 @@ import ValuationDetail from '@/views/ValuationDetail.vue'
           component: Admin,
         },
         {
-          path: 'lots',
-          name: 'Lots',
-          component: Lots,
-        },
-        {
-          path: 'lots/:id',
-          name: 'LotDetails',
-          component: LotDetails,
-        },
-        {
-          path: 'items/:id',
-          name: 'ItemDetails',
-          component: ItemDetails,
-        },
-        {
-          path: 'psa_collections',
-          name: 'PSA_Collections',
-          component: PSA_Collections,
-        },
-        {
-          path: 'psa_collections/:id',
-          name: 'PSA_CollectionDetails',
-          component: PSA_CollectionDetails,
-        },
-        {
-          path: 'psa_cards/:id',
-          name: 'PSA_CardDetail',
-          component: PSA_CardDetail,
+          path: 'verify',
+          name: 'verify',
+          component: MagicalLinkVerification,
         },
         {
           path: 'app', // Parent route for the "app" section
+          meta: { requiresAuth: true },
           //component: () => import('../layouts/Default.vue'), // Sub-layout for the /app section
           children: [
             {
@@ -92,5 +61,21 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+
+// Global navigation guard
+router.beforeEach((to, from, next) => {
+  // Check if this route (or a parent) has 'requiresAuth'
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // Read from localStorage
+    const isLoggedIn = localStorage.getItem('isLoggedIn')
+    if (!isLoggedIn) {
+      // Not logged in -> go to /login
+      return next({ name: 'HomeReal' })
+    }
+  }
+  next()
+})
+
 
 export default router
