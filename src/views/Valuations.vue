@@ -83,17 +83,19 @@ const company_url = ref('');
 
 async function fetchValuations() {
   try {
-  //axios.defaults.withCredentials = true;
-  const response = await axios.get(`${apiBaseURL}/valuations/`, {
-                                    withCredentials: true,
-                                    headers: {
-                                      'Content-Type': 'application/json'
-                                    }
-                                  });
-  valuationsData.value = response.data; 
-  console.log(valuationsData.value);
+    const response = await axios.get(`${apiBaseURL}/valuations/`, {
+      withCredentials: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Access-Control-Allow-Credentials': true
+      }
+    });
+    valuationsData.value = response.data;
+    console.log('Response:', response);
   } catch (error) {
-  console.error('Error fetching valuations:', error);  }
+    console.error('Error fetching valuations:', error);
+  }
 }
 
 async function createValuation() {
