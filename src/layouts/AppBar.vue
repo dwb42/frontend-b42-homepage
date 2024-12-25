@@ -95,13 +95,18 @@
     // If the store is empty but we have localStorage data, rehydrate the store
     if (!userStore.user.email) {
       const userData = localStorage.getItem('user')
-      if (userData) {
-        // Parse the userData string into an object before using it
-        const parsedUserData = JSON.parse(userData);
-        userStore.setUserData(parsedUserData);
+      if (userData && userData !== 'undefined') {
+        try {
+          const parsedUserData = JSON.parse(userData);
+          if (parsedUserData) {
+            userStore.setUserData(parsedUserData);
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('user'); // Clear invalid data
+        }
       }
     }
-    
   })
   
   
