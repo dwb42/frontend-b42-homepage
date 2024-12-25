@@ -62,8 +62,8 @@ async function testSession() {
   try {
     const token = '1d4938bef91f603364076810e8fd20cf8ef36c43ea747516632f9b3a2462c98e'
     // Call backend to verify token, handle redirection
-    axios.defaults.withCredentials = true;
-    const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`)
+    //axios.defaults.withCredentials = true;
+    const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`, { withCredentials: true })
     
     console.log('Verification message:', response);
     localStorage.setItem('isLoggedIn', 'true')
@@ -83,9 +83,8 @@ const company_url = ref('');
 
 async function fetchValuations() {
   try {
-  axios.defaults.withCredentials = true;
-
-  const response = await axios.get(`${apiBaseURL}/valuations/`);
+  //axios.defaults.withCredentials = true;
+  const response = await axios.get(`${apiBaseURL}/valuations/`, { withCredentials: true });
   valuationsData.value = response.data; // Assuming the API returns the lots data directly
   console.log(valuationsData.value);
   } catch (error) {
