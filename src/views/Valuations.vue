@@ -57,6 +57,8 @@ const company_url = ref('');
 
 async function fetchValuations() {
   try {
+  axios.defaults.withCredentials = true;
+
   const response = await axios.get(`${apiBaseURL}/valuations/`);
   valuationsData.value = response.data; // Assuming the API returns the lots data directly
   console.log(valuationsData.value);

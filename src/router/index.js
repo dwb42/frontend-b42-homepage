@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // Import components
 import Home from '../views/Home.vue'
 import HomeReal from '../views/HomeReal.vue'
+import Login from '../views/Login.vue'
 import Admin from '../views/Admin.vue'
 import Valuations from '@/views/Valuations.vue'
 import ValuationDetail from '@/views/ValuationDetail.vue'
@@ -20,9 +21,14 @@ import MagicalLinkVerification from '@/views/MagicLinkVerification.vue'
           component: Home,
         },
         {
-          path: 'real', // Default child of "/"
+          path: 'real', 
           name: 'HomeReal',
           component: HomeReal,
+        },
+        {
+          path: 'login', 
+          name: 'Login',
+          component: Login,
         },
         {
           path: 'admin',
@@ -36,7 +42,7 @@ import MagicalLinkVerification from '@/views/MagicLinkVerification.vue'
         },
         {
           path: 'app', // Parent route for the "app" section
-          meta: { requiresAuth: true },
+          //meta: { requiresAuth: true },
           //component: () => import('../layouts/Default.vue'), // Sub-layout for the /app section
           children: [
             {
@@ -71,7 +77,7 @@ router.beforeEach((to, from, next) => {
     const isLoggedIn = localStorage.getItem('isLoggedIn')
     if (!isLoggedIn) {
       // Not logged in -> go to /login
-      return next({ name: 'HomeReal' })
+      return next({ name: 'Login' })
     }
   }
   next()
