@@ -20,8 +20,17 @@
     try {
       const token = route.query.token
       // Call backend to verify token, handle redirection
+      //axios.defaults.withCredentials = true;
+      //const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`, { withCredentials: true })
+
       axios.defaults.withCredentials = true;
-      const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`, { withCredentials: true })
+      const response = await axios.get(`${apiBaseURL}/auth/verify`, {
+        params: { token },
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
       console.log('Verification message:', response);
       localStorage.setItem('isLoggedIn', 'true')
