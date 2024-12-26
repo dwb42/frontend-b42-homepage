@@ -6,9 +6,6 @@ import router from './router'
 
 import axios from 'axios';
 axios.defaults.withCredentials = true;
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.defaults.headers.common['Accept'] = 'application/json';
-axios.defaults.withCredentials = true;
 
 
 //import './assets/main.css'

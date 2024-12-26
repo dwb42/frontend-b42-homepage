@@ -786,7 +786,7 @@
     try {
       const response = await axios.get(`${apiBaseURL}/valuations/` + id) ;
       Object.assign(valuationData, response.data[0]); // Assuming the API returns the lots data directly
-      //db console.log('valuations data '. valuationData);
+      
 
       // Assuming the API returns the data directly as response.data[0]
       const fetchedData = response.data[0];
@@ -805,7 +805,7 @@
       //db console.log('Transformed valuations data:', valuationData);
       //console.log(valuationData.value);
       } catch (error) {
-      console.error('Error fetching lots:', error);  }
+      console.error('Error fetching valuations:', error);  }
     }
 
 

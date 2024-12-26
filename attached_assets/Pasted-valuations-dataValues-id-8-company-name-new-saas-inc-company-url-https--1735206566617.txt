@@ -1,0 +1,103 @@
+valuations {
+  dataValues: {
+    id: 8,
+    company_name: 'new saas inc',
+    company_url: 'https://www.spiegel.de',
+    operational_since: 2009,
+    number_of_employees: 3,
+    state_of_business: 'laterStage',
+    growth_selection: 'lastYearGrowth',
+    base_arr_multiple: 3,
+    base_ebitda_multiple: 10,
+    createdAt: 2024-11-19T21:37:23.269Z,
+    updatedAt: 2024-12-26T09:48:38.774Z,
+    userId: 13,
+    valuation_financials: [
+      [valuation_financials],
+      [valuation_financials],
+      [valuation_financials],
+      [valuation_financials]
+    ]
+  },
+  _previousDataValues: {
+    id: 8,
+    company_name: 'new saas inc',
+    company_url: 'https://www.spiegel.de',
+    operational_since: 2009,
+    number_of_employees: 3,
+    state_of_business: 'laterStage',
+    growth_selection: 'lastYearGrowth',
+    base_arr_multiple: 3,
+    base_ebitda_multiple: 10,
+    createdAt: 2024-11-19T21:37:23.269Z,
+    updatedAt: 2024-12-26T09:48:38.774Z,
+    userId: 13,
+    valuation_financials: [
+      [valuation_financials],
+      [valuation_financials],
+      [valuation_financials],
+      [valuation_financials]
+    ]
+  },
+  uniqno: 1,
+  _changed: Set(0) {},
+  _options: {
+    isNewRecord: false,
+    _schema: null,
+    _schemaDelimiter: '',
+    include: [ [Object] ],
+    includeNames: [ 'valuation_financials' ],
+    includeMap: { valuation_financials: [Object] },
+    includeValidated: true,
+    attributes: [
+      'id',
+      'company_name',
+      'company_url',
+      'operational_since',
+      'number_of_employees',
+      'state_of_business',
+      'growth_selection',
+      'base_arr_multiple',
+      'base_ebitda_multiple',
+      'createdAt',
+      'updatedAt',
+      'userId'
+    ],
+    raw: true
+  },
+  isNewRecord: false,
+  valuation_financials: [
+    valuation_financials {
+      dataValues: [Object],
+      _previousDataValues: [Object],
+      uniqno: 1,
+      _changed: Set(0) {},
+      _options: [Object],
+      isNewRecord: false
+    },
+    valuation_financials {
+      dataValues: [Object],
+      _previousDataValues: [Object],
+      uniqno: 1,
+      _changed: Set(0) {},
+      _options: [Object],
+      isNewRecord: false
+    },
+    valuation_financials {
+      dataValues: [Object],
+      _previousDataValues: [Object],
+      uniqno: 1,
+      _changed: Set(0) {},
+      _options: [Object],
+      isNewRecord: false
+    },
+    valuation_financials {
+      dataValues: [Object],
+      _previousDataValues: [Object],
+      uniqno: 1,
+      _changed: Set(0) {},
+      _options: [Object],
+      isNewRecord: false
+    }
+  ]
+}
