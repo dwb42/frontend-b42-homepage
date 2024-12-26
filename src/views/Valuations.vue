@@ -84,9 +84,7 @@ const company_url = ref('');
 async function fetchValuations() {
   try {
   //axios.defaults.withCredentials = true;
-  //const response = await axios.get(`${apiBaseURL}/valuations/`, {
-    const response = await axios.get(BASE_URL + /valuations/, {
-    
+  const response = await axios.get(`${apiBaseURL}/valuations/`, {
                                     withCredentials: true,
                                     headers: {
                                       'Content-Type': 'application/json'
