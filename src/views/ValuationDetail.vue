@@ -784,29 +784,23 @@
   //get one valuation 
   async function fetchValuation(id) {
     try {
-      const response = await axios.get(`${apiBaseURL}/valuations/` + id) ;
-      Object.assign(valuationData, response.data[0]); // Assuming the API returns the lots data directly
-      
+      // Fetch the valuation data
+      const { data } = await axios.get(`${apiBaseURL}/valuations/${id}`)
 
-      // Assuming the API returns the data directly as response.data[0]
-      const fetchedData = response.data[0];
-
-      // Transform valuation_financials array into an object keyed by time_period
-      if (fetchedData.valuation_financials) {
-        fetchedData.valuation_financials = fetchedData.valuation_financials.reduce((acc, item) => {
-          acc[item.time_period] = item;
-          return acc;
-        }, {});
+      // Convert the `valuation_financials` array into an object keyed by `time_period`
+      if (data.valuation_financials) {
+        data.valuation_financials = data.valuation_financials.reduce((acc, item) => {
+          acc[item.time_period] = item
+          return acc
+        }, {})
       }
 
-      // Assign the transformed data to valuationData
-      Object.assign(valuationData, fetchedData);
-
-      //db console.log('Transformed valuations data:', valuationData);
-      //console.log(valuationData.value);
-      } catch (error) {
-      console.error('Error fetching valuations:', error);  }
+      // Merge the transformed data into `valuationData`
+      Object.assign(valuationData, data)
+    } catch (error) {
+      console.error('Error fetching valuations:', error)
     }
+  }
 
 
   // Function to get and set financial values
