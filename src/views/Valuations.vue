@@ -90,7 +90,7 @@ async function fetchValuations() {
                                       'Content-Type': 'application/json'
                                     }
                                   });
-  valuationsData.value = response.data; 
+  valuationsData.value = response.data.valuations; 
   console.log(valuationsData.value);
   } catch (error) {
   console.error('Error fetching valuations:', error);  }
