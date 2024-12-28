@@ -32,7 +32,7 @@
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('user', JSON.stringify(response.data.user))
 
-      // Save JWT token
+      // Save JWT token to both localStorage and store
       userStore.setToken(response.data.token)
       
       // Update the store with user data
