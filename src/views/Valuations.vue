@@ -43,7 +43,6 @@
         </v-card>
       </v-col>
     </v-row>
-  <v-btn color="primary" class="mt-4" @click="testSession">test session</v-btn>
   </v-container>
 </template>
 
@@ -58,26 +57,7 @@ const router = useRouter();
 const userStore = useUserStore();
 const valuationsData = ref({});
 
-async function testSession() {
-  try {
-    const token = '1d4938bef91f603364076810e8fd20cf8ef36c43ea747516632f9b3a2462c98e'
-    // Call backend to verify token, handle redirection
-    //axios.defaults.withCredentials = true;
-    const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`, { withCredentials: true })
-    
-    console.log('Verification message:', response);
-    localStorage.setItem('isLoggedIn', 'true')
-    localStorage.setItem('user', JSON.stringify(response.data.user))
 
-    // Update the store
-    userStore.setUserData(response.data.user)
-    router.push('/app/valuations')
-  } catch (error) {
-    console.error(error)
-    // Show an error or redirect to a login page
-    //temp router.push('/login')
-  }
-} 
 const company_name = ref('');
 const company_url = ref('');
 

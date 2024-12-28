@@ -19,9 +19,7 @@
   onMounted(async () => {
     try {
       const token = route.query.token
-      // Call backend to verify token, handle redirection
-      //axios.defaults.withCredentials = true;
-      //const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`, { withCredentials: true })
+
 
       axios.defaults.withCredentials = true;
       const response = await axios.get(`${apiBaseURL}/auth/verify`, {
@@ -35,10 +33,10 @@
       console.log('Verification message:', response);
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('user', JSON.stringify(response.data.user))
+      localStorage.setItem('jwt_token', response.data.token)
 
       // Update the store with user data and token
       userStore.setUserData(response.data.user)
-      userStore.setToken(response.data.token)
       router.push('/app/valuations')
     } catch (error) {
       console.error(error)

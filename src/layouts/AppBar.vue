@@ -113,13 +113,8 @@
   async function logout() {
     try {
       await axios.post(`${apiBaseURL}/auth/logout`, {}, { withCredentials: true })
-      // Clear localStorage
       localStorage.removeItem('isLoggedIn')
       localStorage.removeItem('user')
-      // Clear all cookies
-      document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-      });
       userStore.clearUserData() // Clear store as well
       router.push('/login')
     } catch (error) {
