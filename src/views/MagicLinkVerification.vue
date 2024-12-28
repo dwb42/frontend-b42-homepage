@@ -39,7 +39,7 @@
       // Update the store with user data and token
       userStore.setUserData(response.data.user)
       userStore.setToken(response.data.token)
-      //router.push('/app/valuations')
+      router.push('/app/valuations')
     } catch (error) {
       console.error(error)
       // Show an error or redirect to a login page
