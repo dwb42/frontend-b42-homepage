@@ -1,4 +1,3 @@
-
 <template>
   <div>Verifying...</div>
 </template>
@@ -16,9 +15,14 @@
   import { useUserStore } from '@/stores/useUserStore.js'
   const userStore = useUserStore()
 
+
   onMounted(async () => {
     try {
       const token = route.query.token
+      // Call backend to verify token, handle redirection
+      //axios.defaults.withCredentials = true;
+      //const response = await axios.get(`${apiBaseURL}/auth/verify?token=${token}`, { withCredentials: true })
+
       axios.defaults.withCredentials = true;
       const response = await axios.get(`${apiBaseURL}/auth/verify`, {
         params: { token },
@@ -32,15 +36,15 @@
       localStorage.setItem('isLoggedIn', 'true')
       localStorage.setItem('user', JSON.stringify(response.data.user))
 
-      // Save JWT token
-      userStore.setToken(response.data.token)
-      
-      // Update the store with user data
+      // Update the store with user data and token
       userStore.setUserData(response.data.user)
-      router.push('/app/valuations')
+      userStore.setToken(response.data.token)
+      //router.push('/app/valuations')
     } catch (error) {
       console.error(error)
-      router.push('/login')
+      // Show an error or redirect to a login page
+      //temp router.push('/login')
     }
   })
+
 </script>

@@ -13,18 +13,12 @@ export const useUserStore = defineStore('userStore', {
     },
     setToken(token) {
       this.token = token
-      localStorage.setItem('token', token)
+      localStorage.setItem('jwt_token', token)
     },
     clearUserData() {
       this.user = { id: null, email: '' }
       this.token = null
-      localStorage.removeItem('token')
+      localStorage.removeItem('jwt_token')
     },
-    initializeFromLocalStorage() {
-      const token = localStorage.getItem('token')
-      if (token) {
-        this.token = token
-      }
-    }
   },
 })

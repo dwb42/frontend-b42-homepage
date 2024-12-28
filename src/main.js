@@ -1,16 +1,15 @@
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
+
 import router from './router'
-import axios from 'axios'
 
-// Create Pinia instance
-const pinia = createPinia()
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 
-// Setup axios interceptors
+// Add axios interceptor for JWT token
 axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('jwt_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -19,22 +18,19 @@ axios.interceptors.request.use(config => {
   return Promise.reject(error)
 })
 
-axios.defaults.withCredentials = true
+
+//import './assets/main.css'
+
+// Plugins
+import { registerPlugins } from '@/plugins'
 
 const app = createApp(App)
 
-// Use the router and pinia
+// Use the router
 app.use(router)
-app.use(pinia)
 
-// Initialize user store from localStorage
-const userStore = pinia.state.value.userStore
-if (userStore) {
-  userStore.initializeFromLocalStorage()
-}
+app.use(createPinia())
 
-// Register plugins
-import { registerPlugins } from '@/plugins'
 registerPlugins(app)
 
 app.mount('#app')
