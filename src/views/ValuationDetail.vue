@@ -842,7 +842,7 @@
 
   // Debounced function to update valuation financials
   const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
-    updateValuationFinancial(field, value, timePeriod);
+    updateYearlyInput(field, value, timePeriod);
   }, 500);
 
 
@@ -861,7 +861,7 @@
 
   // Function to update valuation financials
   // Function to update valuation financials
-  async function updateValuationFinancial(field, value, timePeriod) {
+  async function updateYearlyInput(field, value, timePeriod) {
     try {
       // Check if the value is null or empty
       const parsedValue = value === null || value === '' ? null : parseFloat(value);
