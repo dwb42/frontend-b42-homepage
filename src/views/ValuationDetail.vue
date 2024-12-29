@@ -1351,12 +1351,12 @@
     }
 
     // Calculate total ARR and EBITDA multiple impact
-    const growthImpact = typeof analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage === 'number' ? analysed_kpis.calc_growth_combined.analysisResult.impactPercentage : 1;
-    const GrossMarginImpact = typeof analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage === 'number' ? analysed_kpis.calc_gross_margin.analysisResult.impactPercentage : 1;
-    const EbitdaMarginImpact = typeof analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage === 'number' ? analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage : 1;
+    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const GrossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+    const EbitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
 
-    const recurringImpact = typeof analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage === 'number' ? analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage : 1;
-    const ltvToCacImpact = typeof analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage === 'number' ? analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage : 1;
+    const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
+    const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
 
     //set total_arr_multiple_impact
     valuationCalculation.total_arr_multiple_impact = 
