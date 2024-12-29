@@ -99,10 +99,10 @@
                           icon="mdi-progress-question"
                         ></v-icon>
                       </template>
-                      <div v-html="`<b>Missing data</b><br>- ${calculatedKPIs[year][row.field].missingData.map(field => 
+                      <!--div v-html="`<b>Missing data</b><br>- ${calculatedKPIs[year][row.field].missingData.map(field => 
                         rowDefinitionsFinancialInputs.find(row => row.field === field)?.label || field
                       ).join('<br>- ')}`">
-                      </div>
+                    </div-->
                     </v-tooltip>
                   </template>
                 </template>
@@ -842,7 +842,7 @@
 
   // Debounced function to update valuation financials
   const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
-    updateYearlyInput(field, value, timePeriod);
+    updateValuationFinancial(field, value, timePeriod);
   }, 500);
 
 
@@ -861,7 +861,7 @@
 
   // Function to update valuation financials
   // Function to update valuation financials
-  async function updateYearlyInput(field, value, timePeriod) {
+  async function updateValuationFinancial(field, value, timePeriod) {
     try {
       // Check if the value is null or empty
       const parsedValue = value === null || value === '' ? null : parseFloat(value);
