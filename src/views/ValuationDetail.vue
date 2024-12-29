@@ -658,6 +658,7 @@
   import { reactive, ref, computed, watchEffect, watch, onMounted, nextTick } from 'vue';
   import axios from 'axios'; 
   import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, multipleImpactPercent, apiBaseURL } from '@/utils/index.js';
+  import { urlRules, formatURL as formatURLUtil } from '@/utils/url_formatting.js';
   import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';
 
@@ -1019,8 +1020,6 @@
   ///////////////
   // START KPI Calculation Functions
   //////
-
-  
   function calculateKPIsForYear(year) {
     const financials = valuationData.valuation_yearly_inputs && valuationData.valuation_yearly_inputs[year];
     if (!financials) {
@@ -1318,8 +1317,6 @@
   }
 
 
-  
-
   watchEffect(() => {
     if (valuationData.valuation_yearly_inputs) {
       for (const year of years.value) {
@@ -1400,7 +1397,6 @@
   }
 
 
-
   function formatKPIValue(field, value) {
     const percentageKPIs = [
       'calc_recurring_revenue_ratio',
@@ -1438,15 +1434,10 @@
     }
   }
 
-
-
-
   //////
   // END KPI Calculation Functions
   ///////////////
 
-
-  
   
 
   /// change formating of valuation input fields when in focus
@@ -1516,9 +1507,6 @@
   }
 
 
-
-  
-import { urlRules, formatURL as formatURLUtil } from '@/utils/url_formatting.js';
 
 // Format URL wrapper function
 function formatURL() {
