@@ -92,17 +92,17 @@
                   <!-- If KPI value is an object with missing data -->
                   <template v-else-if="calculatedKPIs[year][row.field].missingData">
                     <v-tooltip location="top">
-  <template v-slot:activator="{ props }">
-    <v-icon
-      v-bind="props"
-      color="red"
-      icon="mdi-progress-question"
-    />
-  </template>
-  Missing data: {{ calculatedKPIs[year][row.field].missingData.map(field => 
-    rowDefinitionsFinancialInputs.find(row => row.field === field)?.label || field
-  ).join(', ') }}
-</v-tooltip>
+                      <template v-slot:activator="{ props }">
+                        <v-icon
+                          v-bind="props"
+                          color="red"
+                          icon="mdi-progress-question"
+                        />
+                      </template>
+                      Missing data: {{ calculatedKPIs[year][row.field].missingData.map(field => 
+                        rowDefinitionsFinancialInputs.find(row => row.field === field)?.label || field
+                      ).join(', ') }}
+                    </v-tooltip>
                   </template>
                 </template>
                 <template v-else>
