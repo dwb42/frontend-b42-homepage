@@ -42,7 +42,7 @@
   id="company_url" 
   label="Company Website" 
   required
-  :rules="[urlRules]"
+  :rules="[value => urlRules(value)]"
   placeholder="www.example.com"
   @blur="formatCompanyURL"
   hide-details="auto" 
