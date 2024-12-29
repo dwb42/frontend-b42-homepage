@@ -1518,43 +1518,14 @@
 
 
   
-// url rules to format url nicely
-  function urlRules(value) {
-    if (!value) return 'URL is required'
-    if (!isValidURL(value)) return 'Please enter a valid URL'
-    return true
-  }
-  function isValidURL(url) {
-    try {
-      new URL(url)
-      return true
-    } catch {
-      try {
-        new URL('https://' + url)
-        return true
-      } catch {
-        return false
-      }
-    }
-  }
-  function formatURL() {
-    if (!valuationData.company_url) return
+import { urlRules, formatURL as formatURLUtil } from '@/utils/url_formatting.js';
 
-    let url = valuationData.company_url.trim()
-
-    // If URL doesn't start with protocol, add https://
-    if (!/^https?:\/\//i.test(url)) {
-      url = 'https://' + url
-    }
-
-    // Update the URL if it's valid
-    try {
-      new URL(url)
-      valuationData.company_url = url
-    } catch {
-      // Invalid URL, leave as is for now
-    }
+// Format URL wrapper function
+function formatURL() {
+  if (valuationData.company_url) {
+    valuationData.company_url = formatURLUtil(valuationData.company_url);
   }
+}
 
 
   

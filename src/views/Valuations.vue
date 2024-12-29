@@ -37,7 +37,17 @@
           <h2 class="text-h5 mb-6">create new valuation</h2>
           <v-form @submit.prevent="createValuation">
             <v-text-field v-model="company_name" id="company_name" label="Company Name" required hide-details class="mb-6"></v-text-field>
-            <v-text-field v-model="company_url" id="company_url" label="Company Website" required hide-details class="mb-6"></v-text-field>
+            <v-text-field 
+  v-model="company_url" 
+  id="company_url" 
+  label="Company Website" 
+  required
+  :rules="[urlRules]"
+  placeholder="www.example.com"
+  @blur="formatCompanyURL"
+  hide-details="auto" 
+  class="mb-6"
+></v-text-field>
             <v-btn color="primary" type="submit">create new valuation</v-btn>
           </v-form>
         </v-card>
@@ -52,6 +62,7 @@ import axios from 'axios';
 import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore.js';
+import { urlRules, formatURL } from '@/utils/url_formatting.js';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -60,6 +71,10 @@ const valuationsData = ref({});
 
 const company_name = ref('');
 const company_url = ref('');
+
+function formatCompanyURL() {
+  company_url.value = formatURL(company_url.value);
+}
 
 async function fetchValuations() {
   try {
