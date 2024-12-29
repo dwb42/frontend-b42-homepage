@@ -63,8 +63,8 @@
         </tbody>
       </v-table>
     </v-card>
-
-    <v-card variant="elevated" class="pa-3 mb-6">
+    
+    <v-card variant="elevated" class="pa-3 mb-6" v-if="!isLoading">
       <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
       <v-table>
         <thead>
@@ -860,30 +860,35 @@
   }
 
   // Function to update valuation financials
+  // Function to update valuation financials
   async function updateValuationFinancial(field, value, timePeriod) {
     try {
-      // Parse the value to a number if it's supposed to be numeric
-      const parsedValue = parseFloat(value);
-      if (isNaN(parsedValue)) {
-        // If the field is not supposed to be numeric, you can handle it differently
+      // Check if the value is null or empty
+      const parsedValue = value === null || value === '' ? null : parseFloat(value);
+
+      // If the value is not null and is not a valid number, handle the error
+      if (parsedValue !== null && isNaN(parsedValue)) {
         console.error('Invalid number input');
-        // Optionally, keep the invalid value for the user to correct
         return;
       }
 
       // Make the API call to update the data
-      const response = await axios.put(`${apiBaseURL}/valuations/yearly-inputs/${thisValuationId.value}/${timePeriod}`, {
-        [field]: parsedValue,
-      });
+      const response = await axios.put(
+        `${apiBaseURL}/valuations/yearly-inputs/${thisValuationId.value}/${timePeriod}`,
+        {
+          [field]: parsedValue,
+        }
+      );
 
       // Update local data
       valuationData.valuation_yearly_inputs[timePeriod][field] = parsedValue;
 
-      console.log('Valuation financial updated:', response);
+      console.log('Valuation Yearly Input updated:', response);
     } catch (error) {
       console.error('Error updating valuation financial:', error);
     }
   }
+
 
 
   function hasSufficientFinancialData() {
@@ -959,12 +964,12 @@
         await saveData(valuationData);
         await nextTick();
         // Check again if valuationData.valuation_yearly_inputs is not empty
-        if (hasSufficientFinancialData()) {
+        //if (hasSufficientFinancialData()) {
           recalculateAllMetrics();
-        } else {
+        ///} else {
           // skip the KPI calculations
-          console.log('Skipping recalcAllMetrics - not enough data yet');
-        }
+          //console.log('Skipping recalcAllMetrics - not enough data yet');
+        //}
       } catch (error) {
         console.error('Error in watch handler:', error);
       }
