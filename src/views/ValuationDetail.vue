@@ -91,9 +91,18 @@
                   </template>
                   <!-- If KPI value is an object with missing data -->
                   <template v-else-if="calculatedKPIs[year][row.field].missingData">
-                    <span style="color: red;">
-                      Missing data: <br>{{ calculatedKPIs[year][row.field].missingData.join(', ') }}
-                    </span>
+                    <v-tooltip location="top">
+  <template v-slot:activator="{ props }">
+    <v-icon
+      v-bind="props"
+      color="red"
+      icon="mdi-progress-question"
+    />
+  </template>
+  Missing data: {{ calculatedKPIs[year][row.field].missingData.map(field => 
+    rowDefinitionsFinancialInputs.find(row => row.field === field)?.label || field
+  ).join(', ') }}
+</v-tooltip>
                   </template>
                 </template>
                 <template v-else>
