@@ -80,19 +80,19 @@
             <td>{{ row.label }}</td>
             <template v-for="year in years" :key="year">
               <td class="text-right">
-                <template v-if="calculatedKPIs[year] && valuationKPIs[year][row.field] != null">
+                <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
                   <!-- Display dash for first year -->
                   <template v-if="calculatedKPIs[year][row.field] === '-'">
                     -
                   </template>
                   <!-- Check if KPI value is a number -->
-                  <template v-else-if="typeof valuationKPIs[year][row.field] === 'number'">
-                    {{ formatKPIValue(row.field, valuationKPIs[year][row.field]) }}
+                  <template v-else-if="typeof calculatedKPIs[year][row.field] === 'number'">
+                    {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
                   </template>
                   <!-- If KPI value is an object with missing data -->
-                  <template v-else-if="valuationKPIs[year][row.field].missingData">
+                  <template v-else-if="calculatedKPIs[year][row.field].missingData">
                     <span style="color: red;">
-                      Missing data: <br>{{ valuationKPIs[year][row.field].missingData.join(', ') }}
+                      Missing data: <br>{{ calculatedKPIs[year][row.field].missingData.join(', ') }}
                     </span>
                   </template>
                 </template>
@@ -643,8 +643,9 @@
        </template>
 
       </v-card>
-      <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationData<br>{{valuationData}}</pre>
+      <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
+      <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationCalculation<br>{{valuationCalculation}}</pre>
 
     </template>
@@ -963,7 +964,7 @@
   function analyseOtherKPIs() {
     try {
       const latestYearValue = latestYear.value;
-      const latestYearKPIs = valuationKPIs[latestYearValue];
+      const latestYearKPIs = calculatedKPIs[latestYearValue];
 
       if (!latestYearKPIs) {
         console.warn('No KPI data available for latest year');
@@ -1035,7 +1036,7 @@
       kpis.calc_total_revenue = { missingData: ['total_revenue'] };
     }
     // Store calc_total_revenue in valuationData
-    financials.calc_total_revenue = kpis.calc_total_revenue;
+    //cxx financials.calc_total_revenue = kpis.calc_total_revenue;
 
     // calc_gross_margin_net = total_revenue - costs_of_goods_sold
     if (financials.total_revenue != null && financials.costs_of_goods_sold != null) {
@@ -1047,7 +1048,7 @@
       kpis.calc_gross_margin_net = { missingData };
     }
     // Store calc_gross_margin_net in valuationData
-    financials.calc_gross_margin_net = kpis.calc_gross_margin_net;
+    //cxx financials.calc_gross_margin_net = kpis.calc_gross_margin_net;
 
     // calc_ebitda_net = total_revenue - (sum of all major costs)
     if (
@@ -1072,7 +1073,7 @@
       kpis.calc_ebitda_net = { missingData };
     }
     // Store calc_ebitda_net in valuationData
-    financials.calc_ebitda_net = kpis.calc_ebitda_net;
+    //cxx financials.calc_ebitda_net = kpis.calc_ebitda_net;
 
 
     // Recurring Revenue Ratio
@@ -1232,6 +1233,7 @@
     }
 
   calculatedKPIs[year] = kpis;
+  console.log('calculatedKPIs:', calculatedKPIs);
   }
   
 
@@ -1252,7 +1254,7 @@
 
       kpiDefinitions.forEach(kpiDef => {
         const field = kpiDef.field;
-        const kpiValue = valuationKPIs[latestYearValue]?.[field];
+        const kpiValue = calculatedKPIs[latestYearValue]?.[field];
 
         // Log KPI details before analysis
         /*console.log('-------------------');
@@ -1312,7 +1314,7 @@
 
     // Store it in a new KPI field for the latest year (or a special place)
     // Since CAGR is not year-specific, you could store it under the latest year for convenience
-    valuationKPIs[lastYear].calc_cagr_revenue = cagr;
+    calculatedKPIs[lastYear].calc_cagr_revenue = cagr;
   }
 
 
