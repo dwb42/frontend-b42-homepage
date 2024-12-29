@@ -861,7 +861,7 @@
       }
 
       // Make the API call to update the data
-      const response = await axios.put(`${apiBaseURL}/valuations/financials/${thisValuationId.value}/${timePeriod}`, {
+      const response = await axios.put(`${apiBaseURL}/valuations/yearly-inputs/${thisValuationId.value}/${timePeriod}`, {
         [field]: parsedValue,
       });
 
