@@ -112,9 +112,10 @@
   
   async function logout() {
     try {
-      await axios.post(`${apiBaseURL}/auth/logout`, {}, { withCredentials: true })
       localStorage.removeItem('isLoggedIn')
       localStorage.removeItem('user')
+      localStorage.removeItem('jwt_token')
+      
       userStore.clearUserData() // Clear store as well
       router.push('/login')
     } catch (error) {

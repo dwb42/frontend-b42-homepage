@@ -85,7 +85,9 @@ async function createValuation() {
   const response = await axios.post(`${apiBaseURL}/valuations/`, formData);
   console.log('Valuation created:', response.data);
 
-  await fetchValuations();
+  //await fetchValuations(); 
+
+  router.push(`/app/valuation/${response.data.id}`);
     
   } catch (error) {
   console.error('Error creating new valuation:', error);

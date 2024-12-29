@@ -10,7 +10,6 @@ axios.defaults.withCredentials = true;
 // Add axios interceptor for JWT token
 axios.interceptors.request.use(config => {
   const token = localStorage.getItem('jwt_token')
-  console.log('jws token main:', token)
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

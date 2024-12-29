@@ -80,9 +80,9 @@
             <td>{{ row.label }}</td>
             <template v-for="year in years" :key="year">
               <td class="text-right">
-                <template v-if="valuationKPIs[year] && valuationKPIs[year][row.field] != null">
+                <template v-if="calculatedKPIs[year] && valuationKPIs[year][row.field] != null">
                   <!-- Display dash for first year -->
-                  <template v-if="valuationKPIs[year][row.field] === '-'">
+                  <template v-if="calculatedKPIs[year][row.field] === '-'">
                     -
                   </template>
                   <!-- Check if KPI value is a number -->
@@ -722,6 +722,8 @@
   // Initialize reactive object to store KPIs and calculated metrics
   const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
+  const calculatedKPIs = reactive({}); // var to save the output of calculateKPIsForYear 
+  
   const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
 
   const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
@@ -872,10 +874,27 @@
   }
 
 
+  function hasSufficientFinancialData() {
+    if (!valuationData.valuation_financials) return false;
+    // check if there's at least one year with something non-empty
+    const yearsKeys = Object.keys(valuationData.valuation_financials);
+    if (yearsKeys.length === 0) return false;
+
+    // For example, verify that some fields are not null
+    // If you want at least 'total_revenue' before proceeding:
+    for (const year of yearsKeys) {
+      const fin = valuationData.valuation_financials[year];
+      if (fin.total_revenue != null && fin.total_revenue !== '') {
+        return true; // we have at least 1 non-empty year
+      }
+    }
+    return false;
+  }
+  
   
   function recalculateAllMetrics() {
     // Skip if no financial data available
-    if (!valuationData.valuation_financials || !years.value.length) {
+    if (!hasSufficientFinancialData()) {
       return;
     }
 
@@ -922,19 +941,18 @@
   
   // Single watcher for data changes
   watch(
-    /*[
-      () => ({ ...valuationData.valuation_financials }),
-      () => valuationData.base_arr_multiple
-    ],*/ 
     () => valuationData,
     async () => {
       try {
         await saveData(valuationData);
         await nextTick();
         // Check again if valuationData.valuation_financials is not empty
-            if (valuationData.valuation_financials && Object.keys(valuationData.valuation_financials).length > 0) {
-              recalculateAllMetrics();
-            }
+        if (hasSufficientFinancialData()) {
+          recalculateAllMetrics();
+        } else {
+          // skip the KPI calculations
+          console.log('Skipping recalcAllMetrics - not enough data yet');
+        }
       } catch (error) {
         console.error('Error in watch handler:', error);
       }
@@ -1213,7 +1231,7 @@
       }
     }
 
-    valuationKPIs[year] = kpis;
+  calculatedKPIs[year] = kpis;
   }
   
 
