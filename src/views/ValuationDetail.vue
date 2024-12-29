@@ -416,7 +416,7 @@
         <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
         <p class="mb-2">
           To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
-          i.e.{{usdFormat(valuationData.valuation_financials[latestYear].recurring_revenue)}} *     {{valuationCalculation.final_arr_multiple}}    
+          i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)}} *     {{valuationCalculation.final_arr_multiple}}    
           = {{usdFormat(valuationCalculation.companyWorthARR)}} 
         </p>
         <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
@@ -636,7 +636,7 @@
         <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
         <p class="mb-2">
           To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
-          i.e.{{usdFormat(valuationData.valuation_financials[latestYear].calc_ebitda_net)}} *     {{valuationCalculation.final_ebitda_multiple}}    
+          i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)}} *     {{valuationCalculation.final_ebitda_multiple}}    
           = {{usdFormat(valuationCalculation.companyWorthEBITDA)}} 
         </p>
         <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthEBITDA)}}.</p>
@@ -732,8 +732,8 @@
   
   //compute properties for dynamic table
   const years = computed(() => {
-    if (!valuationData.valuation_financials) return [];
-    return Object.keys(valuationData.valuation_financials).sort();
+    if (!valuationData.valuation_yearly_inputs) return [];
+    return Object.keys(valuationData.valuation_yearly_inputs).sort();
   });
 
   //finde latest year of financial data
@@ -790,9 +790,9 @@
       // Fetch the valuation data
       const { data } = await axios.get(`${apiBaseURL}/valuations/${id}`)
 
-      // Convert the `valuation_financials` array into an object keyed by `time_period`
-      if (data.valuation_financials) {
-        data.valuation_financials = data.valuation_financials.reduce((acc, item) => {
+      // Convert the `valuation_yearly_inputs` array into an object keyed by `time_period`
+      if (data.valuation_yearly_inputs) {
+        data.valuation_yearly_inputs = data.valuation_yearly_inputs.reduce((acc, item) => {
           acc[item.time_period] = item
           return acc
         }, {})
@@ -808,15 +808,15 @@
 
   // Function to get and set financial values
   function getFinancialValue(year, field) {
-    return valuationData.valuation_financials[year]?.[field] ?? '';
+    return valuationData.valuation_yearly_inputs[year]?.[field] ?? '';
   }
   
   function updateFinancialValue(year, field, value) {
     const unformattedValue = unformatValue(value);
-    if (!valuationData.valuation_financials[year]) {
-      valuationData.valuation_financials[year] = {};
+    if (!valuationData.valuation_yearly_inputs[year]) {
+      valuationData.valuation_yearly_inputs[year] = {};
     }
-    valuationData.valuation_financials[year][field] = unformattedValue;
+    valuationData.valuation_yearly_inputs[year][field] = unformattedValue;
 
     // Debounce API calls to prevent excessive requests
     debouncedUpdateValuationFinancial(field, unformattedValue, year);
@@ -825,7 +825,7 @@
 
   // Function to check if a value is missing
   function isMissingValue(year, field) {
-    const value = valuationData.valuation_financials[year]?.[field];
+    const value = valuationData.valuation_yearly_inputs[year]?.[field];
     return value == null || value === '';
   }
 
@@ -866,7 +866,7 @@
       });
 
       // Update local data
-      valuationData.valuation_financials[timePeriod][field] = parsedValue;
+      valuationData.valuation_yearly_inputs[timePeriod][field] = parsedValue;
 
       console.log('Valuation financial updated:', response);
     } catch (error) {
@@ -876,15 +876,15 @@
 
 
   function hasSufficientFinancialData() {
-    if (!valuationData.valuation_financials) return false;
+    if (!valuationData.valuation_yearly_inputs) return false;
     // check if there's at least one year with something non-empty
-    const yearsKeys = Object.keys(valuationData.valuation_financials);
+    const yearsKeys = Object.keys(valuationData.valuation_yearly_inputs);
     if (yearsKeys.length === 0) return false;
 
     // For example, verify that some fields are not null
     // If you want at least 'total_revenue' before proceeding:
     for (const year of yearsKeys) {
-      const fin = valuationData.valuation_financials[year];
+      const fin = valuationData.valuation_yearly_inputs[year];
       if (fin.total_revenue != null && fin.total_revenue !== '') {
         return true; // we have at least 1 non-empty year
       }
@@ -947,7 +947,7 @@
       try {
         await saveData(valuationData);
         await nextTick();
-        // Check again if valuationData.valuation_financials is not empty
+        // Check again if valuationData.valuation_yearly_inputs is not empty
         if (hasSufficientFinancialData()) {
           recalculateAllMetrics();
         } else {
@@ -1022,7 +1022,7 @@
 
   
   function calculateKPIsForYear(year) {
-    const financials = valuationData.valuation_financials && valuationData.valuation_financials[year];
+    const financials = valuationData.valuation_yearly_inputs && valuationData.valuation_yearly_inputs[year];
     if (!financials) {
       valuationKPIs[year] = { error: 'No financial data available for this year yet.' };
       return;
@@ -1094,7 +1094,7 @@
     // Year-over-Year Revenue Growth
     {
       let missingData = [];
-      const yearsArray = Object.keys(valuationData.valuation_financials).sort();
+      const yearsArray = Object.keys(valuationData.valuation_yearly_inputs).sort();
       const firstYear = yearsArray[0];
 
       if (year === firstYear) {
@@ -1102,7 +1102,7 @@
         kpis.calc_yoy_revenue_growth = '-';
       } else {
         const previousYear = parseInt(year) - 1;
-        const prevFinancials = valuationData.valuation_financials[previousYear];
+        const prevFinancials = valuationData.valuation_yearly_inputs[previousYear];
         if (financials.total_revenue != null && prevFinancials && prevFinancials.total_revenue != null) {
           kpis.calc_yoy_revenue_growth =
             prevFinancials.total_revenue !== 0
@@ -1302,8 +1302,8 @@
     const firstYear = allYears[0];
     const lastYear = allYears[allYears.length - 1];
 
-    const beginningValue = valuationData.valuation_financials[firstYear]?.total_revenue;
-    const endingValue = valuationData.valuation_financials[lastYear]?.total_revenue;
+    const beginningValue = valuationData.valuation_yearly_inputs[firstYear]?.total_revenue;
+    const endingValue = valuationData.valuation_yearly_inputs[lastYear]?.total_revenue;
 
     if (beginningValue == null || endingValue == null || beginningValue === 0) {
       return { missingData: ['total_revenue'] };
@@ -1321,7 +1321,7 @@
   
 
   watchEffect(() => {
-    if (valuationData.valuation_financials) {
+    if (valuationData.valuation_yearly_inputs) {
       for (const year of years.value) {
         calculateKPIsForYear(year);
       }
@@ -1375,8 +1375,8 @@
 
     
     // Calculate company worth ARR
-    if (latestYear.value && valuationData.valuation_financials) {
-      const arr = valuationData.valuation_financials[latestYear.value]?.recurring_revenue;
+    if (latestYear.value && valuationData.valuation_yearly_inputs) {
+      const arr = valuationData.valuation_yearly_inputs[latestYear.value]?.recurring_revenue;
       if (arr != null && valuationCalculation.final_arr_multiple) {
         valuationCalculation.companyWorthARR = arr * parseFloat(valuationCalculation.final_arr_multiple);
       } else {
@@ -1387,8 +1387,8 @@
     }
 
     // Calculate company worth EBITDA 1234
-    if (latestYear.value && valuationData.valuation_financials) {
-      const ebitda = valuationData.valuation_financials[latestYear.value]?.calc_ebitda_net;
+    if (latestYear.value && valuationData.valuation_yearly_inputs) {
+      const ebitda = valuationData.valuation_yearly_inputs[latestYear.value]?.calc_ebitda_net;
       if (ebitda != null && valuationCalculation.final_arr_multiple) {
         valuationCalculation.companyWorthEBITDA = ebitda * parseFloat(valuationCalculation.final_ebitda_multiple);
       } else {
