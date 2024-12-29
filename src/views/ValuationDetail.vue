@@ -91,7 +91,9 @@
                   </template>
                   <!-- If KPI value is an object with missing data -->
                   <template v-else-if="calculatedKPIs[year][row.field].missingData">
-                    <v-tooltip location="top">
+                    <v-tooltip 
+                      location="top"
+                      >
                       <template v-slot:activator="{ props }">
                         <v-icon
                           v-bind="props"
