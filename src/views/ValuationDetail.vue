@@ -365,8 +365,8 @@
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">Growth</p>
                   <p class="text-body-2 mb-2">
-                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
-                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
+                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
+                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
 
                     For valuation purposes we will calculate your future growth rate at <br>
                     ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
@@ -576,8 +576,8 @@
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">Growth</p>
                   <p class="text-body-2 mb-2">
-                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}. <br>
-                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }}. <br>
+                    Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
+                    Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
 
                     For valuation purposes we will calculate your future growth rate at <br>
                     ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
