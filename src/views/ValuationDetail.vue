@@ -793,12 +793,12 @@
 
   
   const isGeneralInfoComplete = computed(() => {
-    // Trim strings to avoid cases where the user only entered whitespace
-    const hasCompanyName = valuationData.company_name && valuationData.company_name.trim() !== '';
-    const hasOperationalSince = valuationData.operational_since && valuationData.operational_since.trim() !== '';
-    const hasNumberOfEmployees = valuationData.number_of_employees && valuationData.number_of_employees.trim() !== '';
-    const hasStateOfBusiness = valuationData.state_of_business && valuationData.state_of_business.trim() !== '';
-    const hasValuationType = valuationData.valuation_type && valuationData.valuation_type.trim() !== '';
+    // Safely access and trim values, handling potential undefined/null cases
+    const hasCompanyName = valuationData.company_name?.toString().trim() !== '';
+    const hasOperationalSince = valuationData.operational_since?.toString().trim() !== '';
+    const hasNumberOfEmployees = valuationData.number_of_employees?.toString().trim() !== '';
+    const hasStateOfBusiness = valuationData.state_of_business?.toString().trim() !== '';
+    const hasValuationType = valuationData.valuation_type?.toString().trim() !== '';
 
     // Return true only if *all* are non-empty
     return (
