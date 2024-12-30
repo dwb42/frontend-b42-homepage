@@ -88,7 +88,6 @@ export const multipleImpactPercent = (value) => {
 }
 
 
-
 const isDevelopment = window.location.href.includes('replit.dev');
 // Determine the API base URL
 export const apiBaseURL = isDevelopment

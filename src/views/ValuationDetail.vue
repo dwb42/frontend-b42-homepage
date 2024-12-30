@@ -25,10 +25,58 @@
         ></v-text-field>
         <v-text-field v-model="valuationData.operational_since" id="operational_since" label="Operational since" required hide-details class="mb-6"></v-text-field>
         <v-text-field v-model="valuationData.number_of_employees" id="number_of_employees" label="Number of employees (incl. active founders)" required hide-details class="mb-6"></v-text-field>
+
+        <h3 class="text-h6 mb-2 mt-6">What best describes your current state of business?</h3>
+        <v-radio-group v-model="valuationData.state_of_business">
+          <v-radio value="preRevenue">
+            <template v-slot:label>
+              <div>we are just getting started and do not have revenue yet <strong>(pre revenue)</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="earlyStage">
+            <template v-slot:label>
+              <div>we are investing heavily in product and/or growth and have little to no profit because of it <strong>(early stage)</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="laterStage">
+            <template v-slot:label>
+              <div>we are balancing our focus on growth and profitability <strong>(later stage)</strong></div>
+            </template>
+          </v-radio>
+        </v-radio-group>
+
+        <h3 class="text-h6 mb-2 mt-2">How intense do you want your valuation to be?</h3>
+        <v-radio-group v-model="valuationData.valuation_type">
+          <v-radio value="">
+            <template v-slot:label>
+              <div><strong>temp null</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="minimal">
+            <template v-slot:label>
+              <div><strong>minimal</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="standard">
+            <template v-slot:label>
+              <div><strong>standard</strong></div>
+            </template>
+          </v-radio>
+          <v-radio value="complete">
+            <template v-slot:label>
+              <div><strong>complete</strong></div>
+            </template>
+          </v-radio>
+        </v-radio-group>
+
+        <v-btn color="primary" type="submit">Enter Financial Information</v-btn>
+        
       </v-form>
     </v-card>
 
-    <v-card variant="elevated" class="pa-3 mb-6">
+    asdf {{valuationData.valuation_type}}
+    
+    <v-card v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''" variant="elevated" class="pa-3 mb-6">
       <!--h2 class="text-h5 mb-2">Your Financial KPIs</h2-->
       <v-table>
         <thead>
@@ -64,6 +112,11 @@
       </v-table>
     </v-card>
     
+    <!--pre>valuationData<br>{{valuationData}}</pre>
+    <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
+    <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
+    <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
+    
     <v-card variant="elevated" class="pa-3 mb-6" v-if="!isLoading">
       <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
       <v-table>
@@ -90,6 +143,7 @@
                     {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
                   </template>
                   <!-- If KPI value is an object with missing data -->
+                  
                   <template v-else-if="calculatedKPIs[year][row.field].missingData">
                     <v-tooltip location="top">
                       <template #activator="{ props }">
@@ -99,10 +153,7 @@
                           icon="mdi-progress-question"
                         ></v-icon>
                       </template>
-                      <!--div v-html="`<b>Missing data</b><br>- ${calculatedKPIs[year][row.field].missingData.map(field => 
-                        rowDefinitionsFinancialInputs.find(row => row.field === field)?.label || field
-                      ).join('<br>- ')}`">
-                    </div-->
+                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
                     </v-tooltip>
                   </template>
                 </template>
@@ -194,26 +245,9 @@
       <v-card variant="elevated" class="pa-3 mb-6" :style="{ maxWidth: '800px' }" >
         <h2 class="text-h4 mb-2"><b>Valuation of your SaaS business</b></h2>
         <p class="mb-6 text-body-1">Depending on which phase your business is, in we will evaluate its worth using the ARR- or the EBITDA-Multiple Method.  </p>
-  
-        <h3 class="text-h6 mb-2 mt-6">What best describes your current state of business?</h3>
-        <v-radio-group v-model="valuationData.state_of_business">
-          <v-radio value="preRevenue">
-            <template v-slot:label>
-              <div>we are just getting started and do not have revenue yet <strong>(pre revenue)</strong></div>
-            </template>
-          </v-radio>
-          <v-radio value="earlyStage">
-            <template v-slot:label>
-              <div>we are investing heavily in product and/or growth and have little to no profit because of it <strong>(early stage)</strong></div>
-            </template>
-          </v-radio>
-          <v-radio value="laterStage">
-            <template v-slot:label>
-              <div>we are balancing our focus on growth and profitability <strong>(later stage)</strong></div>
-            </template>
-          </v-radio>
-        </v-radio-group>
-  
+
+
+
         <!-- STARTING OUTPUT DEPENDING ON RADIO SELECTION -->
         <!-- PRE REVENUE ... WONT DO -->
         <template v-if="valuationData.state_of_business === 'preRevenue'">
@@ -221,14 +255,14 @@
             ❌ Our valuation method does not work for pre-revenue businesses. 🤷‍♂️
           </p>
         </template>
-  
-  
+
+
         <!-- EARLY STAGE -->
         <template v-if="valuationData.state_of_business === 'earlyStage'">
           <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
           <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
 
-          
+
           <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
 
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
@@ -254,16 +288,16 @@
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
 
           <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
-         
+
           <!--p class="text-body-2 mb-6">He would thenlook at current market conditions and some other attributes that  have an impact on your valuation multiple. </p-->
-          
-          
+
+
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
           <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
           <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
           <p class="text-body-2 mb-2">We will ues your "current Gross Maring" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
-       
-  
+
+
         <v-table>
           <thead>
             <tr>
@@ -289,21 +323,21 @@
 
                     <br><br>
                     A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
-                    
+
                     <br>
                     <v-btn
                       color="blue-lighten-2"
                       variant="tonal"
                       density="compact"
-                      
+
                       text="Learn More"
                       class="mt-4"
                       @click="openModal('calc_growth_combined')"
                     ></v-btn>
                   </p>
-  
-  
-  
+
+
+
               </div>
               </td>
               <td v-if="analysed_kpis.calc_growth_combined.analysisResult.impactPercentage" class="text-right">
@@ -408,7 +442,7 @@
                 {{ multipleImpactPercent(valuationCalculation.total_arr_multiple_impact) }}
               </td>
             </tr>
-  
+
           </tbody>
         </v-table>
 
@@ -419,9 +453,9 @@
           <p class="mb-2">
             i.e. {{valuationData.base_arr_multiple}} 
             *  {{valuationCalculation.total_arr_multiple_impact.toFixed(2)}} = {{valuationCalculation.final_arr_multiple}}</p>
-          
+
           <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  {{valuationCalculation.final_arr_multiple}}.</p>
-         
+
 
         <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
         <p class="mb-2">
@@ -431,8 +465,8 @@
         </p>
         <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
        </template>
-        
-     
+
+
 
 
     <template v-if="valuationData.state_of_business === 'laterStage'">
@@ -556,7 +590,7 @@
               </td>
               <td class="text-right">
                 {{multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2)}}
-                
+
               </td>
             </tr>
 
@@ -801,6 +835,8 @@
       // Fetch the valuation data
       const { data } = await axios.get(`${apiBaseURL}/valuations/${id}`)
 
+      console.log('Fetched valuation data:', data);
+
       // Convert the `valuation_yearly_inputs` array into an object keyed by `time_period`
       if (data.valuation_yearly_inputs) {
         data.valuation_yearly_inputs = data.valuation_yearly_inputs.reduce((acc, item) => {
@@ -840,6 +876,23 @@
     return value == null || value === '';
   }
 
+  //function to provide the content of the missing fields tooltip 
+  function missingDataTooltipContent(missingFields) {
+    console.log('missingFields = ', missingFields);
+    if (!Array.isArray(missingFields)) {
+      return '<b>Missing data</b><br>- unknown fields';
+    }
+
+    const labels = missingFields.map(field => {
+      console.log('Field in missingFields:', field); // <--- Debug log
+      const rowDef = rowDefinitionsFinancialInputs.value.find(r => r.field === field);
+      return rowDef ? rowDef.label : field;
+    });
+
+    return `<b>Missing data</b><br>- ` + labels.join('<br>- ');
+  }
+
+
   // Debounced function to update valuation financials
   const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
     updateValuationFinancial(field, value, timePeriod);
@@ -852,7 +905,7 @@
     try {
       //db console.log('val data ',valuationData)
       const response = await axios.put(`${apiBaseURL}/valuations/` + thisValuationId.value, valuationData);
-      //db console.log('valuation updated:', response);
+      console.log('valuation updated:', response);
 
     } catch (error) {
       console.error('Error updating valuation in db:', error);
@@ -965,7 +1018,7 @@
         await nextTick();
         // Check again if valuationData.valuation_yearly_inputs is not empty
         //if (hasSufficientFinancialData()) {
-          recalculateAllMetrics();
+          //recalculateAllMetrics();
         ///} else {
           // skip the KPI calculations
           //console.log('Skipping recalcAllMetrics - not enough data yet');
