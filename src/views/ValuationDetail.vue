@@ -45,21 +45,21 @@
           </v-radio>
         </v-radio-group>
 
-        <h3 class="text-h6 mb-2 mt-2">How intense do you want your valuation to be?</h3>
+        <h3 class="text-h6 mb-2 mt-2">What kind of valuation do you want to do?</h3>
         <v-radio-group v-model="valuationData.valuation_type">
           <v-radio value="minimal">
             <template v-slot:label>
-              <div class="mb-2"><strong>minimal</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it</div>
+              <div class="mb-2"><strong>minimal</strong><br>Enter financial data for latest financial period to provide investors with a first sense of growth and profitability.  </div>
             </template>
           </v-radio>
           <v-radio value="standard">
             <template v-slot:label>
-              <div class="mt-2 mb-2"><strong>standard</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it</div>
+              <div class="mt-2 mb-2"><strong>standard</strong><br>Add more revenue data to get CAGR and current period customer data to calculate logo churn. </div>
             </template>
           </v-radio>
           <v-radio value="complete">
             <template v-slot:label>
-              <div class="mt-2"><strong>complete</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it</div>
+              <div class="mt-2"><strong>complete</strong><br>Provide investors with a complete overview of your current and past performance so that they can include trends in the valuation of your company. </div>
             </template>
           </v-radio>
         </v-radio-group>
@@ -72,11 +72,9 @@
           Enter Financial Information
         </v-btn>
 
-        
       </v-form>
     </v-card>
 
-    asdf {{valuationData.valuation_type}}
 
     <!-- ///////////////////////// -->
     <!-- YEARLY INPUTS START        -->
