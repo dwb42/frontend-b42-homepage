@@ -30,53 +30,63 @@
         <v-radio-group v-model="valuationData.state_of_business">
           <v-radio value="preRevenue">
             <template v-slot:label>
-              <div>we are just getting started and do not have revenue yet <strong>(pre revenue)</strong></div>
+              <div class="mb-2"><strong>pre revenue</strong><br>we are just getting started and do not have revenue yet </div>
             </template>
           </v-radio>
           <v-radio value="earlyStage">
             <template v-slot:label>
-              <div>we are investing heavily in product and/or growth and have little to no profit because of it <strong>(early stage)</strong></div>
+              <div class="mt-2 mb-2"><strong>early stage / growth focused</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it </div>
             </template>
           </v-radio>
           <v-radio value="laterStage">
             <template v-slot:label>
-              <div>we are balancing our focus on growth and profitability <strong>(later stage)</strong></div>
+              <div class="mt-2"><strong>later stage / balanced</strong><br>we are balancing our focus on growth and profitability </div>
             </template>
           </v-radio>
         </v-radio-group>
 
         <h3 class="text-h6 mb-2 mt-2">How intense do you want your valuation to be?</h3>
         <v-radio-group v-model="valuationData.valuation_type">
-          <v-radio value="">
-            <template v-slot:label>
-              <div><strong>temp null</strong></div>
-            </template>
-          </v-radio>
           <v-radio value="minimal">
             <template v-slot:label>
-              <div><strong>minimal</strong></div>
+              <div class="mb-2"><strong>minimal</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it</div>
             </template>
           </v-radio>
           <v-radio value="standard">
             <template v-slot:label>
-              <div><strong>standard</strong></div>
+              <div class="mt-2 mb-2"><strong>standard</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it</div>
             </template>
           </v-radio>
           <v-radio value="complete">
             <template v-slot:label>
-              <div><strong>complete</strong></div>
+              <div class="mt-2"><strong>complete</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it</div>
             </template>
           </v-radio>
         </v-radio-group>
 
-        <v-btn color="primary" type="submit">Enter Financial Information</v-btn>
+        <v-btn 
+          color="primary" 
+          type="submit"
+          :disabled="!isGeneralInfoComplete"
+        >
+          Enter Financial Information
+        </v-btn>
+
         
       </v-form>
     </v-card>
 
     asdf {{valuationData.valuation_type}}
+
+    <!-- ///////////////////////// -->
+    <!-- YEARLY INPUTS START        -->
+    <!-- /////////////////////////  -->
     
-    <v-card v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''" variant="elevated" class="pa-3 mb-6">
+    <v-card 
+      v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''" 
+      variant="elevated" 
+      class="pa-3 mb-6"
+      >
       <!--h2 class="text-h5 mb-2">Your Financial KPIs</h2-->
       <v-table>
         <thead>
@@ -94,28 +104,51 @@
             <td>{{ row.label }}</td>
             <template v-for="year in years" :key="year">
               <td class="text-right">
-                <input
-                  :value="displayedFinancialValue(year, row.field)"
-                  @focus="onFocus(year, row.field)"
-                  @blur="onBlur(year, row.field)"
-                  @input="updateFinancialValue(year, row.field, $event.target.value)"
-                  :class="['input_data', {'missing-data': isMissingValue(year, row.field)}]"
-                  
-                  autocomplete="off"
-                  type="text"
-                />
-
+                <template v-if="isRowFieldActive(valuationData.valuation_type, year, years, row)">
+                  <input
+                    :value="displayedFinancialValue(year, row.field)"
+                    @focus="onFocus(year, row.field)"
+                    @blur="onBlur(year, row.field)"
+                    @input="updateFinancialValue(year, row.field, $event.target.value)"
+                    :class="['input_data', { 'missing-data': isMissingValue(year, row.field) }]"
+                    autocomplete="off"
+                    type="text"
+                  />
+                </template>
+                <template v-else>
+                  -
+                </template>
               </td>
+
             </template>
           </tr>
         </tbody>
       </v-table>
+
+      <v-btn
+        color="primary"
+        class="mt-4"
+        :disabled="!allActiveFieldsFilled"
+        @click="recalculateAllMetrics"
+      >
+        Evaluate your business
+      </v-btn>
+
     </v-card>
+
+    <!-- ///////////////////////// -->
+    <!-- YEARLY INPUTS END          -->
+    <!-- /////////////////////////  -->
+
     
     <!--pre>valuationData<br>{{valuationData}}</pre>
-    <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
     <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
     <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
+
+
+    <!-- ///////////////////////// -->
+    <!-- KPI YEARLY TABLE START           TEMP123 --> 
+    <!-- /////////////////////////  -->
     
     <v-card variant="elevated" class="pa-3 mb-6" v-if="!isLoading">
       <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
@@ -165,10 +198,26 @@
           </tr>
         </tbody>
       </v-table>
-
+      
+      <div 
+        v-if="calculatedKPIs[latestYear] && calculatedKPIs[latestYear].calc_cagr_revenue != null"
+        class="mt-2 ml-4 text-body-2"
+        >
+        Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
+        {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
+      </div>
     </v-card>
 
 
+    <!-- ///////////////////////// -->
+    <!-- KPI YEARLY TABLE END           -->
+    <!-- /////////////////////////  -->
+
+
+    
+    <!-- ///////////////////////// -->
+    <!-- KPI KACHELN START           -->
+    <!-- /////////////////////////  -->
     
     <!-- initial kachelansatz where kpis are displayed and analysed now deprecated because its all done in valuation table ... less is more ...  -->
     <!-- v-card variant="elevated" class="pa-3 mb-6">
@@ -238,7 +287,14 @@
       </v-card>
     </v-dialog>
 
-  
+    <!-- ///////////////////////// -->
+    <!-- KPI KACHELN END           -->
+    <!-- /////////////////////////  -->
+
+
+    <!-- ///////////////////////// -->
+    <!-- EVALUATION START           -->
+    <!-- /////////////////////////  -->
 
     
     <template v-if="!isLoading">
@@ -688,12 +744,14 @@
 
       </v-card>
       <pre>valuationData<br>{{valuationData}}</pre>
-      <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationCalculation<br>{{valuationCalculation}}</pre>
 
     </template>
 
+    <!-- ///////////////////////// -->
+    <!-- EVALUATION END           -->
+    <!-- /////////////////////////  -->
     
   </v-container>  
 </template>
@@ -706,54 +764,8 @@
   import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';
 
-  import getKPIInfo from '@/utils/kpiInterpretation/getKPIInfo';
 
-  //import kpiLearnMoreModals
-  import YearOnYearGrowthModal from '@/components/kpiLearnMoreModals/YearOnYearGrowthModal.vue';
-  import FutureGrowthModal from '@/components/kpiLearnMoreModals/FutureGrowthModal.vue';
-  import GrossMarginModal from '@/components/kpiLearnMoreModals/GrossMarginModal.vue';
-  import EBITDAMarginModal from '@/components/kpiLearnMoreModals/EBITDAMarginModal.vue';
-  import RecurringRevenueRatioModal from '@/components/kpiLearnMoreModals/RecurringRevenueRatioModal.vue';
-  import LtvToCacModal from '@/components/kpiLearnMoreModals/LtvToCacModal.vue';
-
-  //////////// START MODAL DIALOG STATES
-  const isDialogOpen = ref(false);
-  const selectedKPI = ref(null);
-
-  // Configuration object: key = KPI field, value = { title, component }
-  const kpiModalConfig = {
-    calc_yoy_revenue_growth: {
-      title: 'Year-over-Year Growth Details',
-      component: YearOnYearGrowthModal
-    },
-    calc_growth_combined: {
-      title: 'Future Growth Details',
-      component: FutureGrowthModal
-    },
-    calc_gross_margin: {
-      title: 'Gross Margin Details',
-      component: GrossMarginModal
-    },
-    calc_ebitda_margin: {
-      title: 'EBITDA Margin Details',
-      component: EBITDAMarginModal
-    },
-    calc_recurring_revenue_ratio: {
-      title: 'Recurring Revenue Ratio Details',
-      component: RecurringRevenueRatioModal
-    },
-    calc_ltv_to_cac: {
-      title: 'LTV to CAC Ratio Details',
-      component: LtvToCacModal
-    }
-  };
-
-  function openModal(key) {
-    selectedKPI.value = key;
-    isDialogOpen.value = true;
-  }
-
-  //////////// END MODAL DIALOG STATES
+  
   const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
   
   //setup router
@@ -774,6 +786,29 @@
 
   const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
 
+
+  //////////////////////////////////////////////////////
+  // FINANCIAL DATA INPUT START 
+  //////////////////////////////////////////////////////
+
+  
+  const isGeneralInfoComplete = computed(() => {
+    // Trim strings to avoid cases where the user only entered whitespace
+    const hasCompanyName = valuationData.company_name && valuationData.company_name.trim() !== '';
+    const hasOperationalSince = valuationData.operational_since && valuationData.operational_since.trim() !== '';
+    const hasNumberOfEmployees = valuationData.number_of_employees && valuationData.number_of_employees.trim() !== '';
+    const hasStateOfBusiness = valuationData.state_of_business && valuationData.state_of_business.trim() !== '';
+    const hasValuationType = valuationData.valuation_type && valuationData.valuation_type.trim() !== '';
+
+    // Return true only if *all* are non-empty
+    return (
+      hasCompanyName &&
+      hasOperationalSince &&
+      hasNumberOfEmployees &&
+      hasStateOfBusiness &&
+      hasValuationType
+    );
+  });
   
   //compute properties for dynamic table
   const years = computed(() => {
@@ -785,15 +820,17 @@
   const latestYear = computed(() => {
     const sortedYears = years.value;
     return sortedYears.length ? sortedYears[sortedYears.length - 1] : null;
-    
+  });
+
+  const oldestYear = computed(() => {
+    return years.value.length ? years.value[0] : null;
   });
 
   //compute trends 
   //temp const { trendStatement: recurringRevenueTrend } = useTrendAnalysis(valuationKPIs, 'calc_recurring_revenue_ratio');
-
   
 
-  const rowDefinitionsFinancialInputs = computed(() => [
+  const rowDefinitionsFinancialInputsBUK = computed(() => [
     // Revenue metrics
     { label: 'Total Revenue', field: 'total_revenue', isCurrency: true },
     { label: 'Recurring Revenue', field: 'recurring_revenue', isCurrency: true },
@@ -811,53 +848,201 @@
     { label: 'Customers Lost in Period', field: 'customers_lost_in_period', isCurrency: false },
   ]);
 
-
-  const rowDefinitionsKPIOutputs = computed(() => [
-    { label: 'Total Revenue', field: 'calc_total_revenue', use_for_analysis: false, rank_for_analysis: 0 },
-     { label: 'Gross Margin Net', field: 'calc_gross_margin_net', use_for_analysis: false, rank_for_analysis: 0 },
-     { label: 'EBITDA Net', field: 'calc_ebitda_net', use_for_analysis: false, rank_for_analysis: 0 },
-    
-    { label: 'Recurring Revenue Ratio', field: 'calc_recurring_revenue_ratio', use_for_analysis: true, rank_for_analysis: 5 },
-    { label: 'Year-over-Year Growth', field: 'calc_yoy_revenue_growth', use_for_analysis: true, rank_for_analysis: 1 },
-    { label: 'CAGR', field: 'calc_cagr_revenue', use_for_analysis: true, rank_for_analysis: 2 },
-    { label: 'Gross Margin', field: 'calc_gross_margin', use_for_analysis: true, rank_for_analysis: 3 },
-    { label: 'EBITDA Margin', field: 'calc_ebitda_margin', use_for_analysis: true, rank_for_analysis: 4 },
-    { label: 'Average Revenue per Customer', field: 'calc_average_revenue_per_customer', use_for_analysis: false, rank_for_analysis: null },
-    { label: 'Customer Logo Churn', field: 'calc_customer_logo_churn', use_for_analysis: false, rank_for_analysis: null },
-    { label: 'LTV to CAC Ratio', field: 'calc_ltv_to_cac', use_for_analysis: true, rank_for_analysis: 6 }
-  ]);
-
-
-  
-  //get one valuation 
-  async function fetchValuation(id) {
-    try {
-      // Fetch the valuation data
-      const { data } = await axios.get(`${apiBaseURL}/valuations/${id}`)
-
-      console.log('Fetched valuation data:', data);
-
-      // Convert the `valuation_yearly_inputs` array into an object keyed by `time_period`
-      if (data.valuation_yearly_inputs) {
-        data.valuation_yearly_inputs = data.valuation_yearly_inputs.reduce((acc, item) => {
-          acc[item.time_period] = item
-          return acc
-        }, {})
+  const rowDefinitionsFinancialInputs = computed(() => [
+    {
+      label: 'Total Revenue',
+      field: 'total_revenue',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestAndPrevious',
+        standard: 'all',
+        complete: 'all'
       }
+    },
+    {
+      label: 'Recurring Revenue',
+      field: 'recurring_revenue',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestOnly',
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Total Costs',
+      field: 'total_costs',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestOnly',
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Costs of Goods Sold',
+      field: 'costs_of_goods_sold',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestOnly',
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Costs of Customer Acquisition',
+      field: 'costs_of_customer_acquisition',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestOnly',
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Costs of Research and Development',
+      field: 'costs_of_r_and_d',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestOnly',
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Costs of General Administration',
+      field: 'costs_of_general_administration',
+      isCurrency: true,
+      applyToRules: {
+        minimal: 'latestOnly',
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Number of Customers at End of Period',
+      field: 'number_of_customers_end_of_period',
+      isCurrency: false,
+      applyToRules: {
+        minimal: null,   // Not used for minimal
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Customers Won in Period',
+      field: 'customers_won_in_period',
+      isCurrency: false,
+      applyToRules: {
+        minimal: null,
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    },
+    {
+      label: 'Customers Lost in Period',
+      field: 'customers_lost_in_period',
+      isCurrency: false,
+      applyToRules: {
+        minimal: null,
+        standard: 'latestOnly',
+        complete: 'all'
+      }
+    }
+  ])
 
-      // Merge the transformed data into `valuationData`
-      Object.assign(valuationData, data)
-    } catch (error) {
-      console.error('Error fetching valuations:', error)
+  // Helper to Determine If a RowField Is Active depending on valuation_type 
+  function isRowFieldActive(valuationType, year, allYears, row) {
+    // If no valuation type is selected
+    if (!valuationType) return false
+
+    // Get the rule from the row
+    const rule = row.applyToRules?.[valuationType]
+
+    // If there is no rule (or it's null), not active
+    if (!rule) return false
+
+    // Figure out how to interpret the rule
+    const lastIndex = allYears.length - 1
+    if (lastIndex < 0) return false
+    const latestYearValue = allYears[lastIndex]
+
+    switch (rule) {
+      case 'all':
+        return true
+      case 'latestOnly':
+        return year === latestYearValue
+      case 'latestAndPrevious': {
+        if (lastIndex <= 0) {
+          // Only 1 year total, so that must be the latest
+          return year === latestYearValue
+        }
+        const secondToLastIndex = lastIndex - 1
+        const previousYearValue = allYears[secondToLastIndex]
+        return (year === latestYearValue || year === previousYearValue)
+      }
+      default:
+        return false
     }
   }
+
+
+  // Computed Property to check if all active fields have been filled 
+  const allActiveFieldsFilled = computed(() => {
+    const valuationType = valuationData.valuation_type
+    if (!valuationType) return false
+
+    const allYearsArray = years.value
+    if (!allYearsArray.length) return false
+
+    // For each row definition
+    for (const row of rowDefinitionsFinancialInputs.value) {
+      const rule = row.applyToRules?.[valuationType]
+      if (!rule) continue // means row not required for this type
+
+      // Determine relevant years
+      let relevantYears = []
+      switch (rule) {
+        case 'all':
+          relevantYears = allYearsArray
+          break
+        case 'latestOnly':
+          relevantYears = [ allYearsArray[allYearsArray.length - 1] ]
+          break
+        case 'latestAndPrevious': {
+          const lastIndex = allYearsArray.length - 1
+          if (lastIndex < 0) break // no years
+          const latest = allYearsArray[lastIndex]
+          if (lastIndex === 0) {
+            // only one year total
+            relevantYears = [ latest ]
+          } else {
+            const prev = allYearsArray[lastIndex - 1]
+            relevantYears = [ prev, latest ]
+          }
+          break
+        }
+        default:
+          break
+      }
+
+      // Check each relevant year for a value
+      for (const y of relevantYears) {
+        const val = valuationData.valuation_yearly_inputs[y]?.[row.field]
+        if (val == null || val === '') {
+          return false
+        }
+      }
+    }
+    return true
+  })
 
 
   // Function to get and set financial values
   function getFinancialValue(year, field) {
     return valuationData.valuation_yearly_inputs[year]?.[field] ?? '';
   }
-  
+
   function updateFinancialValue(year, field, value) {
     const unformattedValue = unformatValue(value);
     if (!valuationData.valuation_yearly_inputs[year]) {
@@ -869,644 +1054,6 @@
     debouncedUpdateValuationFinancial(field, unformattedValue, year);
   }
 
-
-  // Function to check if a value is missing
-  function isMissingValue(year, field) {
-    const value = valuationData.valuation_yearly_inputs[year]?.[field];
-    return value == null || value === '';
-  }
-
-  //function to provide the content of the missing fields tooltip 
-  function missingDataTooltipContent(missingFields) {
-    console.log('missingFields = ', missingFields);
-    if (!Array.isArray(missingFields)) {
-      return '<b>Missing data</b><br>- unknown fields';
-    }
-
-    const labels = missingFields.map(field => {
-      console.log('Field in missingFields:', field); // <--- Debug log
-      const rowDef = rowDefinitionsFinancialInputs.value.find(r => r.field === field);
-      return rowDef ? rowDef.label : field;
-    });
-
-    return `<b>Missing data</b><br>- ` + labels.join('<br>- ');
-  }
-
-
-  // Debounced function to update valuation financials
-  const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
-    updateValuationFinancial(field, value, timePeriod);
-  }, 500);
-
-
-  //save valuation data to db
-  async function saveValuation() {
-    // Make an HTTP PUT request to update the lot in the database using Sequelize
-    try {
-      //db console.log('val data ',valuationData)
-      const response = await axios.put(`${apiBaseURL}/valuations/` + thisValuationId.value, valuationData);
-      console.log('valuation updated:', response);
-
-    } catch (error) {
-      console.error('Error updating valuation in db:', error);
-    }
-  }
-
-  // Function to update valuation financials
-  // Function to update valuation financials
-  async function updateValuationFinancial(field, value, timePeriod) {
-    try {
-      // Check if the value is null or empty
-      const parsedValue = value === null || value === '' ? null : parseFloat(value);
-
-      // If the value is not null and is not a valid number, handle the error
-      if (parsedValue !== null && isNaN(parsedValue)) {
-        console.error('Invalid number input');
-        return;
-      }
-
-      // Make the API call to update the data
-      const response = await axios.put(
-        `${apiBaseURL}/valuations/yearly-inputs/${thisValuationId.value}/${timePeriod}`,
-        {
-          [field]: parsedValue,
-        }
-      );
-
-      // Update local data
-      valuationData.valuation_yearly_inputs[timePeriod][field] = parsedValue;
-
-      console.log('Valuation Yearly Input updated:', response);
-    } catch (error) {
-      console.error('Error updating valuation financial:', error);
-    }
-  }
-
-
-
-  function hasSufficientFinancialData() {
-    if (!valuationData.valuation_yearly_inputs) return false;
-    // check if there's at least one year with something non-empty
-    const yearsKeys = Object.keys(valuationData.valuation_yearly_inputs);
-    if (yearsKeys.length === 0) return false;
-
-    // For example, verify that some fields are not null
-    // If you want at least 'total_revenue' before proceeding:
-    for (const year of yearsKeys) {
-      const fin = valuationData.valuation_yearly_inputs[year];
-      if (fin.total_revenue != null && fin.total_revenue !== '') {
-        return true; // we have at least 1 non-empty year
-      }
-    }
-    return false;
-  }
-  
-  
-  function recalculateAllMetrics() {
-    // Skip if no financial data available
-    if (!hasSufficientFinancialData()) {
-      return;
-    }
-
-    // Clear existing KPIs
-    Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
-    Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
-
-    // 1. Calculate KPIs for all years
-    years.value.forEach(year => {
-      calculateKPIsForYear(year);
-    });
-
-    // 2. Compute CAGR
-    computeCAGR();
-
-    // 3. Analyse Yearly and Other KPIs
-    analyseYearlyKPIs();
-    analyseOtherKPIs();
-
-    // 4. Perform Valuation Calculation
-    doValuationCalculation();
-
-    // Set loading to false after the first full calculation
-    isLoading.value = false;
-  }
-
-  onMounted(async () => {
-    // Wait for fetchValuation to complete
-    await fetchValuation(thisValuationId.value);
-    // Set default base_arr_multiple if not already set
-    if (!valuationData.base_arr_multiple) {
-      valuationData.base_arr_multiple = 3;
-    }
-    // Trigger initial calculation ... not neccessary anymore since caught by watchEffect
-    //await nextTick();
-    //recalculateAllMetrics();
-  });
-
-
-  const debouncedRecalculate = debounce(() => {
-    recalculateAllMetrics();
-  }, 500);
-
-  
-  // Single watcher for data changes
-  watch(
-    () => valuationData,
-    async () => {
-      try {
-        await saveData(valuationData);
-        await nextTick();
-        // Check again if valuationData.valuation_yearly_inputs is not empty
-        //if (hasSufficientFinancialData()) {
-          //recalculateAllMetrics();
-        ///} else {
-          // skip the KPI calculations
-          //console.log('Skipping recalcAllMetrics - not enough data yet');
-        //}
-      } catch (error) {
-        console.error('Error in watch handler:', error);
-      }
-    },
-    { deep: true }
-  );
-
-  function analyseOtherKPIs() {
-    try {
-      const latestYearValue = latestYear.value;
-      const latestYearKPIs = calculatedKPIs[latestYearValue];
-
-      if (!latestYearKPIs) {
-        console.warn('No KPI data available for latest year');
-        return;
-      }
-
-      // Calculate Combined Growth Rate (average of YoY and CAGR)
-      if (typeof latestYearKPIs.calc_yoy_revenue_growth === 'number' && 
-          typeof latestYearKPIs.calc_cagr_revenue === 'number') {
-        
-        const combinedGrowthRate = (latestYearKPIs.calc_yoy_revenue_growth + latestYearKPIs.calc_cagr_revenue) / 2;
-        
-        try {
-          const growthAnalysis = getKPIInfo('calc_growth_general', combinedGrowthRate);
-          analysed_kpis['calc_growth_combined'] = {
-            label: 'Combined Growth Rate',
-            field: 'calc_growth_combined',
-            value: combinedGrowthRate,
-            analysisResult: growthAnalysis
-          };
-        } catch (error) {
-          console.warn('Could not analyze combined growth rate:', error.message);
-        }
-      }
-
-      // Here you can add more combined/derived KPI calculations following the same pattern
-
-    } catch (error) {
-      console.error('Error in analyseOtherKPIs:', error.message);
-    }
-  }
-
-
-  const saveData = debounce(async (data) => {
-    await saveValuation(data);
-  }, 500);
-
-  async function analyseYearlyKPIsAsync() {
-    return analyseYearlyKPIs();
-  }
-
-  async function analyseOtherKPIsAsync() {
-    return analyseOtherKPIs();
-  }
-
-  async function doValuationCalculationAsync() {
-    return doValuationCalculation();
-  }
-
-
-
-  ///////////////
-  // START KPI Calculation Functions
-  //////
-  function calculateKPIsForYear(year) {
-    const financials = valuationData.valuation_yearly_inputs && valuationData.valuation_yearly_inputs[year];
-    if (!financials) {
-      valuationKPIs[year] = { error: 'No financial data available for this year yet.' };
-      return;
-    }
-    const kpis = {};
-
-    // calc_total_revenue = total_revenue directly
-    if (financials.total_revenue != null) {
-      kpis.calc_total_revenue = financials.total_revenue;
-    } else {
-      kpis.calc_total_revenue = { missingData: ['total_revenue'] };
-    }
-    // Store calc_total_revenue in valuationData
-    //cxx financials.calc_total_revenue = kpis.calc_total_revenue;
-
-    // calc_gross_margin_net = total_revenue - costs_of_goods_sold
-    if (financials.total_revenue != null && financials.costs_of_goods_sold != null) {
-      kpis.calc_gross_margin_net = financials.total_revenue - financials.costs_of_goods_sold;
-    } else {
-      const missingData = [];
-      if (financials.total_revenue == null) missingData.push('total_revenue');
-      if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
-      kpis.calc_gross_margin_net = { missingData };
-    }
-    // Store calc_gross_margin_net in valuationData
-    //cxx financials.calc_gross_margin_net = kpis.calc_gross_margin_net;
-
-    // calc_ebitda_net = total_revenue - (sum of all major costs)
-    if (
-      financials.total_revenue != null &&
-      financials.costs_of_goods_sold != null &&
-      financials.costs_of_customer_acquisition != null &&
-      financials.costs_of_r_and_d != null &&
-      financials.costs_of_general_administration != null
-    ) {
-      const totalCosts = financials.costs_of_goods_sold
-                       + financials.costs_of_customer_acquisition
-                       + financials.costs_of_r_and_d
-                       + financials.costs_of_general_administration;
-      kpis.calc_ebitda_net = financials.total_revenue - totalCosts;
-    } else {
-      const missingData = [];
-      if (financials.total_revenue == null) missingData.push('total_revenue');
-      if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
-      if (financials.costs_of_customer_acquisition == null) missingData.push('costs_of_customer_acquisition');
-      if (financials.costs_of_r_and_d == null) missingData.push('costs_of_r_and_d');
-      if (financials.costs_of_general_administration == null) missingData.push('costs_of_general_administration');
-      kpis.calc_ebitda_net = { missingData };
-    }
-    // Store calc_ebitda_net in valuationData
-    //cxx financials.calc_ebitda_net = kpis.calc_ebitda_net;
-
-
-    // Recurring Revenue Ratio
-    {
-      let missingData = [];
-      if (financials.recurring_revenue != null && financials.total_revenue != null) {
-        kpis.calc_recurring_revenue_ratio =
-          financials.total_revenue !== 0
-            ? financials.recurring_revenue / financials.total_revenue
-            : 0;
-      } else {
-        if (financials.recurring_revenue == null) missingData.push('recurring_revenue');
-        if (financials.total_revenue == null) missingData.push('total_revenue');
-        kpis.calc_recurring_revenue_ratio = { missingData };
-      }
-    }
-
-    // Year-over-Year Revenue Growth
-    {
-      let missingData = [];
-      const yearsArray = Object.keys(valuationData.valuation_yearly_inputs).sort();
-      const firstYear = yearsArray[0];
-
-      if (year === firstYear) {
-        // First year, set KPI to '-'
-        kpis.calc_yoy_revenue_growth = '-';
-      } else {
-        const previousYear = parseInt(year) - 1;
-        const prevFinancials = valuationData.valuation_yearly_inputs[previousYear];
-        if (financials.total_revenue != null && prevFinancials && prevFinancials.total_revenue != null) {
-          kpis.calc_yoy_revenue_growth =
-            prevFinancials.total_revenue !== 0
-              ? (financials.total_revenue - prevFinancials.total_revenue) / prevFinancials.total_revenue
-              : null;
-        } else {
-          if (financials.total_revenue == null) missingData.push(`total_revenue (${year})`);
-          if (!prevFinancials || prevFinancials.total_revenue == null) missingData.push(`total_revenue (${previousYear})`);
-          kpis.calc_yoy_revenue_growth = { missingData };
-        }
-      }
-    }
-
-    // Gross Margin
-    {
-      let missingData = [];
-      if (financials.total_revenue != null && financials.costs_of_goods_sold != null) {
-        const revenue = financials.total_revenue;
-        const cogs = financials.costs_of_goods_sold;
-        kpis.calc_gross_margin = revenue !== 0 ? (revenue - cogs) / revenue : null;
-      } else {
-        if (financials.total_revenue == null) missingData.push('total_revenue');
-        if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
-        kpis.calc_gross_margin = { missingData };
-      }
-    }
-
-    // EBITDA Margin
-    {
-      let missingData = [];
-      if (
-        financials.total_revenue != null &&
-        financials.costs_of_goods_sold != null &&
-        financials.costs_of_customer_acquisition != null &&
-        financials.costs_of_r_and_d != null &&
-        financials.costs_of_general_administration != null
-      ) {
-        const totalCosts =
-          financials.costs_of_goods_sold +
-          financials.costs_of_customer_acquisition +
-          financials.costs_of_r_and_d +
-          financials.costs_of_general_administration;
-        const ebitda = financials.total_revenue - totalCosts;
-        kpis.calc_ebitda_margin = financials.total_revenue !== 0 ? ebitda / financials.total_revenue : null;
-      } else {
-        if (financials.total_revenue == null) missingData.push('total_revenue');
-        if (financials.costs_of_goods_sold == null) missingData.push('costs_of_goods_sold');
-        if (financials.costs_of_customer_acquisition == null) missingData.push('costs_of_customer_acquisition');
-        if (financials.costs_of_r_and_d == null) missingData.push('costs_of_r_and_d');
-        if (financials.costs_of_general_administration == null) missingData.push('costs_of_general_administration');
-        kpis.calc_ebitda_margin = { missingData };
-      }
-    }
-
-    // Average Revenue per Customer
-    {
-      let missingData = [];
-      if (financials.total_revenue != null && financials.number_of_customers_end_of_period != null) {
-        const customers = financials.number_of_customers_end_of_period;
-        kpis.calc_average_revenue_per_customer = customers !== 0 ? financials.total_revenue / customers : null;
-      } else {
-        if (financials.total_revenue == null) missingData.push('total_revenue');
-        if (financials.number_of_customers_end_of_period == null) missingData.push('number_of_customers_end_of_period');
-        kpis.calc_average_revenue_per_customer = { missingData };
-      }
-    }
-
-    // Customer Logo Churn
-    {
-      let missingData = [];
-      if (
-        financials.number_of_customers_end_of_period != null &&
-        financials.customers_won_in_period != null &&
-        financials.customers_lost_in_period != null
-      ) {
-        const customersAtEnd = financials.number_of_customers_end_of_period;
-        const customersWon = financials.customers_won_in_period;
-        const customersLost = financials.customers_lost_in_period;
-
-        const customersAtStart = customersAtEnd - customersWon + customersLost;
-
-        if (customersAtStart !== 0) {
-          kpis.calc_customer_logo_churn = customersLost / customersAtStart;
-        } else {
-          kpis.calc_customer_logo_churn = null;
-        }
-      } else {
-        if (financials.number_of_customers_end_of_period == null) missingData.push('number_of_customers_end_of_period');
-        if (financials.customers_won_in_period == null) missingData.push('customers_won_in_period');
-        if (financials.customers_lost_in_period == null) missingData.push('customers_lost_in_period');
-        kpis.calc_customer_logo_churn = { missingData };
-      }
-    }
-
-    // LTV to CAC Ratio
-    {
-      let missingData = [];
-      if (
-        kpis.calc_average_revenue_per_customer != null &&
-        kpis.calc_gross_margin != null &&
-        kpis.calc_customer_logo_churn != null &&
-        financials.costs_of_customer_acquisition != null &&
-        financials.customers_won_in_period != null
-      ) {
-        const avgRevenuePerCustomer = kpis.calc_average_revenue_per_customer;
-        const grossMargin = kpis.calc_gross_margin;
-        const churnRate = kpis.calc_customer_logo_churn;
-
-        const ltv = churnRate !== 0 ? (avgRevenuePerCustomer * grossMargin) / churnRate : null;
-        const cac =
-          financials.customers_won_in_period !== 0
-            ? financials.costs_of_customer_acquisition / financials.customers_won_in_period
-            : null;
-
-        if (ltv != null && cac != null && cac !== 0) {
-          kpis.calc_ltv_to_cac = ltv / cac;
-        } else {
-          kpis.calc_ltv_to_cac = null;
-        }
-      } else {
-        if (kpis.calc_average_revenue_per_customer == null) missingData.push('calc_average_revenue_per_customer');
-        if (kpis.calc_gross_margin == null) missingData.push('calc_gross_margin');
-        if (kpis.calc_customer_logo_churn == null) missingData.push('calc_customer_logo_churn');
-        if (financials.costs_of_customer_acquisition == null) missingData.push('costs_of_customer_acquisition');
-        if (financials.customers_won_in_period == null) missingData.push('customers_won_in_period');
-        kpis.calc_ltv_to_cac = { missingData };
-      }
-    }
-
-  calculatedKPIs[year] = kpis;
-  console.log('calculatedKPIs:', calculatedKPIs);
-  }
-  
-
-
-  function analyseYearlyKPIs() {
-    try {
-      const latestYearValue = latestYear.value;
-
-      // Get KPI definitions with use_for_analysis = true, sorted by rank_for_analysis
-      const kpiDefinitions = rowDefinitionsKPIOutputs.value
-        .filter(kpi => kpi.use_for_analysis)
-        .sort((a, b) => a.rank_for_analysis - b.rank_for_analysis);
-
-      //console.log('Analyzing KPIs for latest year:', latestYearValue);
-
-      // Clear the analysed_kpis before starting
-      Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
-
-      kpiDefinitions.forEach(kpiDef => {
-        const field = kpiDef.field;
-        const kpiValue = calculatedKPIs[latestYearValue]?.[field];
-
-        // Log KPI details before analysis
-        /*console.log('-------------------');
-        console.log(`Processing KPI: ${kpiDef.label}`);
-        console.log(`Field: ${field}`);
-        console.log(`Raw Value: ${kpiValue}`);*/
-
-        // Only proceed if we have a valid numeric value
-        if (kpiValue != null && typeof kpiValue === 'number') {
-          try {
-            const result = getKPIInfo(field, kpiValue);
-            //console.log('Analysis Result:', result);
-
-            // Save kpiDef and result into analysed_kpis
-            analysed_kpis[field] = {
-              ...kpiDef,
-              value: kpiValue,
-              analysisResult: result
-            };
-
-          } catch (error) {
-            console.warn(`Could not analyze ${field}:`, error.message);
-          }
-        } else {
-          console.warn(`Skipping ${field} - invalid or missing value`);
-        }
-      });
-
-    } catch (error) {
-      console.error('Error in testGetKPIInfo:', error.message);
-    }
-  
-  console.log('analysed kpis: ',analysed_kpis)
-
-  // After completing the logic, set loading to false
-  isLoading.value = false;
-  //console.log('is loading: ',isLoading.value)
-  }
-
-
-  function computeCAGR() {
-    const allYears = years.value;
-    if (allYears.length < 2) return null; // Not enough data
-
-    const firstYear = allYears[0];
-    const lastYear = allYears[allYears.length - 1];
-
-    const beginningValue = valuationData.valuation_yearly_inputs[firstYear]?.total_revenue;
-    const endingValue = valuationData.valuation_yearly_inputs[lastYear]?.total_revenue;
-
-    if (beginningValue == null || endingValue == null || beginningValue === 0) {
-      return { missingData: ['total_revenue'] };
-    }
-
-    const n = allYears.length;
-    const cagr = Math.pow((endingValue / beginningValue), 1/(n-1)) - 1;
-
-    // Store it in a new KPI field for the latest year (or a special place)
-    // Since CAGR is not year-specific, you could store it under the latest year for convenience
-    calculatedKPIs[lastYear].calc_cagr_revenue = cagr;
-  }
-
-
-  watchEffect(() => {
-    if (valuationData.valuation_yearly_inputs) {
-      for (const year of years.value) {
-        calculateKPIsForYear(year);
-      }
-      // Compute CAGR now that all years are processed
-      computeCAGR();
-    }
-  });
-
-
-  function doValuationCalculation() {
-    console.log('doValuationCalculation called');
-    
-    // Calculate future growth rate
-    const yoy = analysed_kpis.calc_yoy_revenue_growth?.value;
-    const cagr = analysed_kpis.calc_cagr_revenue?.value;
-    if (typeof yoy === 'number' && typeof cagr === 'number') {
-      valuationCalculation.futureGrowthRate = ((yoy + cagr) / 2).toFixed(4);
-    } else {
-      valuationCalculation.futureGrowthRate = null;
-    }
-
-    // Calculate total ARR and EBITDA multiple impact
-    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
-    const GrossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
-    const EbitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
-
-    const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
-    const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
-
-    //set total_arr_multiple_impact
-    valuationCalculation.total_arr_multiple_impact = 
-      (growthImpact * GrossMarginImpact * recurringImpact * ltvToCacImpact);
-
-    //set total_ebitda_multiple_impact
-    valuationCalculation.total_ebitda_multiple_impact = 
-    ((growthImpact * ((GrossMarginImpact + EbitdaMarginImpact)/2) * recurringImpact * ltvToCacImpact)).toFixed(2);
-
-    // Calculate final ARR multiple
-    if (valuationData.base_arr_multiple && valuationCalculation.total_arr_multiple_impact) {
-      valuationCalculation.final_arr_multiple = (valuationData.base_arr_multiple * valuationCalculation.total_arr_multiple_impact).toFixed(2);
-    } else {
-      valuationCalculation.final_arr_multiple = null;
-    }
-
-    // Calculate final EBITDA multiple
-    if (valuationData.base_ebitda_multiple && valuationCalculation.total_ebitda_multiple_impact) {
-      valuationCalculation.final_ebitda_multiple = (valuationData.base_ebitda_multiple * valuationCalculation.total_ebitda_multiple_impact).toFixed(2);
-    } else {
-      valuationCalculation.final_ebitda_multiple = null;
-    }
-
-    
-    // Calculate company worth ARR
-    if (latestYear.value && valuationData.valuation_yearly_inputs) {
-      const arr = valuationData.valuation_yearly_inputs[latestYear.value]?.recurring_revenue;
-      if (arr != null && valuationCalculation.final_arr_multiple) {
-        valuationCalculation.companyWorthARR = arr * parseFloat(valuationCalculation.final_arr_multiple);
-      } else {
-        valuationCalculation.companyWorthARR = null;
-      }
-    } else {
-      valuationCalculation.companyWorthARR = null;
-    }
-
-    // Calculate company worth EBITDA 1234
-    if (latestYear.value && valuationData.valuation_yearly_inputs) {
-      const ebitda = valuationData.valuation_yearly_inputs[latestYear.value]?.calc_ebitda_net;
-      if (ebitda != null && valuationCalculation.final_arr_multiple) {
-        valuationCalculation.companyWorthEBITDA = ebitda * parseFloat(valuationCalculation.final_ebitda_multiple);
-      } else {
-        valuationCalculation.companyWorthEBITDA = null;
-      }
-    } else {
-      valuationCalculation.companyWorthEBITDA = null;
-    }
-  }
-
-
-  function formatKPIValue(field, value) {
-    const percentageKPIs = [
-      'calc_recurring_revenue_ratio',
-      'calc_yoy_revenue_growth',
-      'calc_gross_margin',
-      'calc_ebitda_margin',
-      'calc_customer_logo_churn', 
-      'calc_cagr_revenue', 
-      'calc_growth_combined'
-    ];
-
-    // Check if field is one of the new currency fields
-    const currencyFields = [
-      'calc_total_revenue',
-      'calc_gross_margin_net',
-      'calc_ebitda_net'
-    ];
-
-    if (value == null || (typeof value === 'object' && value.missingData)) {
-      return 'Missing data';
-    }
-
-    if (percentageKPIs.includes(field)) {
-      return (value * 100).toFixed(2) + '%';
-    } else if (field === 'calc_ltv_to_cac') {
-      return value.toFixed(2);
-    } else if (field === 'calc_average_revenue_per_customer') {
-      return usdFormat(value);
-    } else if (currencyFields.includes(field)) {
-      // Format as currency
-      return usdFormat(value);
-    } else {
-      // Default formatting
-      return value;
-    }
-  }
-
-  //////
-  // END KPI Calculation Functions
-  ///////////////
-
-  
 
   /// change formating of valuation input fields when in focus
   // keep track which cells are focused
@@ -1574,16 +1121,802 @@
     return unformattedValue;
   }
 
+  //////////////////////////////////////////////////////
+  // FINANCIAL DATA INPUT END
+  //////////////////////////////////////////////////////
 
 
-// Format URL wrapper function
-function formatURL() {
-  if (valuationData.company_url) {
-    valuationData.company_url = formatURLUtil(valuationData.company_url);
+  //////////////////////////////////////////////////////
+  // KPI CALCULATION START 
+  //////////////////////////////////////////////////////
+
+  //main function to calculate all yearly kpis and store them in $calculatedKPIs[year]
+  function calculateKPIsForYear(year) {
+    const financials = valuationData.valuation_yearly_inputs?.[year];
+
+    // If there are no financials for the year, set an error and return early
+    if (!financials) {
+      calculatedKPIs[year] = {
+        error: `No financial data available for the year: ${year}`,
+      };
+      return;
+    }
+
+    // Prepare an object to store the final KPI values (numbers, null, or simple strings)
+    const kpis = {
+      missingFields: [],
+    };
+
+    /**
+     * 1) Total Revenue
+     */
+    if (financials.total_revenue != null) {
+      kpis.calc_total_revenue = financials.total_revenue;
+    } else {
+      kpis.calc_total_revenue = null;
+      kpis.missingFields.push('total_revenue');
+    }
+
+    /**
+     * 2) Gross Margin Net = total_revenue - costs_of_goods_sold
+     */
+    if (
+      financials.total_revenue != null &&
+      financials.costs_of_goods_sold != null
+    ) {
+      kpis.calc_gross_margin_net =
+        financials.total_revenue - financials.costs_of_goods_sold;
+    } else {
+      kpis.calc_gross_margin_net = null;
+      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null)
+        kpis.missingFields.push('costs_of_goods_sold');
+    }
+
+    /**
+     * 3) EBITDA Net = total_revenue - (sum of major costs)
+     */
+    if (
+      financials.total_revenue != null &&
+      financials.costs_of_goods_sold != null &&
+      financials.costs_of_customer_acquisition != null &&
+      financials.costs_of_r_and_d != null &&
+      financials.costs_of_general_administration != null
+    ) {
+      const totalCosts =
+        financials.costs_of_goods_sold +
+        financials.costs_of_customer_acquisition +
+        financials.costs_of_r_and_d +
+        financials.costs_of_general_administration;
+      kpis.calc_ebitda_net = financials.total_revenue - totalCosts;
+    } else {
+      kpis.calc_ebitda_net = null;
+      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null)
+        kpis.missingFields.push('costs_of_goods_sold');
+      if (financials.costs_of_customer_acquisition == null)
+        kpis.missingFields.push('costs_of_customer_acquisition');
+      if (financials.costs_of_r_and_d == null)
+        kpis.missingFields.push('costs_of_r_and_d');
+      if (financials.costs_of_general_administration == null)
+        kpis.missingFields.push('costs_of_general_administration');
+    }
+
+    /**
+     * 4) Recurring Revenue Ratio = recurring_revenue / total_revenue
+     */
+    if (
+      financials.recurring_revenue != null &&
+      financials.total_revenue != null
+    ) {
+      kpis.calc_recurring_revenue_ratio =
+        financials.total_revenue !== 0
+          ? financials.recurring_revenue / financials.total_revenue
+          : 0;
+    } else {
+      kpis.calc_recurring_revenue_ratio = null;
+      if (financials.recurring_revenue == null)
+        kpis.missingFields.push('recurring_revenue');
+      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+    }
+
+    /**
+     * 5) Year-over-Year Revenue Growth
+     *    Compare current year's total_revenue to previous year's total_revenue
+     */
+    {
+      const yearsArray = Object.keys(valuationData.valuation_yearly_inputs).sort();
+      const firstYear = yearsArray[0];
+
+      if (year === firstYear) {
+        // For the earliest year, we can't do a YoY comparison
+        kpis.calc_yoy_revenue_growth = '-'; // or null, or any placeholder
+      } else {
+        const previousYear = parseInt(year) - 1;
+        const prevFinancials = valuationData.valuation_yearly_inputs[previousYear];
+
+        if (
+          financials.total_revenue != null &&
+          prevFinancials &&
+          prevFinancials.total_revenue != null
+        ) {
+          if (prevFinancials.total_revenue !== 0) {
+            kpis.calc_yoy_revenue_growth =
+              (financials.total_revenue - prevFinancials.total_revenue) /
+              prevFinancials.total_revenue;
+          } else {
+            kpis.calc_yoy_revenue_growth = null;
+          }
+        } else {
+          kpis.calc_yoy_revenue_growth = null;
+          if (financials.total_revenue == null)
+            kpis.missingFields.push(`total_revenue (${year})`);
+          if (!prevFinancials || prevFinancials.total_revenue == null)
+            kpis.missingFields.push(`total_revenue (${previousYear})`);
+        }
+      }
+    }
+
+    /**
+     * 6) Gross Margin = (total_revenue - costs_of_goods_sold) / total_revenue
+     */
+    if (
+      financials.total_revenue != null &&
+      financials.costs_of_goods_sold != null
+    ) {
+      const revenue = financials.total_revenue;
+      const cogs = financials.costs_of_goods_sold;
+      kpis.calc_gross_margin =
+        revenue !== 0 ? (revenue - cogs) / revenue : 0;
+    } else {
+      kpis.calc_gross_margin = null;
+      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null)
+        kpis.missingFields.push('costs_of_goods_sold');
+    }
+
+    /**
+     * 7) EBITDA Margin = EBITDA / total_revenue
+     */
+    if (
+      financials.total_revenue != null &&
+      financials.costs_of_goods_sold != null &&
+      financials.costs_of_customer_acquisition != null &&
+      financials.costs_of_r_and_d != null &&
+      financials.costs_of_general_administration != null
+    ) {
+      const totalCosts =
+        financials.costs_of_goods_sold +
+        financials.costs_of_customer_acquisition +
+        financials.costs_of_r_and_d +
+        financials.costs_of_general_administration;
+      const ebitda = financials.total_revenue - totalCosts;
+      kpis.calc_ebitda_margin =
+        financials.total_revenue !== 0 ? ebitda / financials.total_revenue : 0;
+    } else {
+      kpis.calc_ebitda_margin = null;
+      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null)
+        kpis.missingFields.push('costs_of_goods_sold');
+      if (financials.costs_of_customer_acquisition == null)
+        kpis.missingFields.push('costs_of_customer_acquisition');
+      if (financials.costs_of_r_and_d == null)
+        kpis.missingFields.push('costs_of_r_and_d');
+      if (financials.costs_of_general_administration == null)
+        kpis.missingFields.push('costs_of_general_administration');
+    }
+
+    /**
+     * 8) Average Revenue per Customer = total_revenue / number_of_customers_end_of_period
+     */
+    if (
+      financials.total_revenue != null &&
+      financials.number_of_customers_end_of_period != null
+    ) {
+      const customers = financials.number_of_customers_end_of_period;
+      kpis.calc_average_revenue_per_customer =
+        customers !== 0 ? financials.total_revenue / customers : 0;
+    } else {
+      kpis.calc_average_revenue_per_customer = null;
+      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+      if (financials.number_of_customers_end_of_period == null)
+        kpis.missingFields.push('number_of_customers_end_of_period');
+    }
+
+    /**
+     * 9) Customer Logo Churn = customers_lost_in_period / (starting number of customers)
+     *    starting number of customers = end_of_period - won_in_period + lost_in_period
+     */
+    if (
+      financials.number_of_customers_end_of_period != null &&
+      financials.customers_won_in_period != null &&
+      financials.customers_lost_in_period != null
+    ) {
+      const endCount = financials.number_of_customers_end_of_period;
+      const won = financials.customers_won_in_period;
+      const lost = financials.customers_lost_in_period;
+
+      const startCount = endCount - won + lost;
+
+      if (startCount !== 0) {
+        kpis.calc_customer_logo_churn = lost / startCount;
+      } else {
+        kpis.calc_customer_logo_churn = null;
+      }
+    } else {
+      kpis.calc_customer_logo_churn = null;
+      if (financials.number_of_customers_end_of_period == null)
+        kpis.missingFields.push('number_of_customers_end_of_period');
+      if (financials.customers_won_in_period == null)
+        kpis.missingFields.push('customers_won_in_period');
+      if (financials.customers_lost_in_period == null)
+        kpis.missingFields.push('customers_lost_in_period');
+    }
+
+    /**
+     * 10) LTV to CAC Ratio
+     *     LTV = (avg_revenue_per_customer * gross_margin) / churn_rate
+     *     CAC = costs_of_customer_acquisition / customers_won_in_period
+     */
+    if (
+      kpis.calc_average_revenue_per_customer != null &&
+      kpis.calc_gross_margin != null &&
+      kpis.calc_customer_logo_churn != null &&
+      financials.costs_of_customer_acquisition != null &&
+      financials.customers_won_in_period != null
+    ) {
+      const avgRevenuePerCustomer = kpis.calc_average_revenue_per_customer;
+      const grossMargin = kpis.calc_gross_margin;
+      const churnRate = kpis.calc_customer_logo_churn;
+
+      const ltv =
+        churnRate !== 0
+          ? (avgRevenuePerCustomer * grossMargin) / churnRate
+          : null;
+
+      const cac =
+        financials.customers_won_in_period !== 0
+          ? financials.costs_of_customer_acquisition /
+            financials.customers_won_in_period
+          : null;
+
+      if (ltv != null && cac != null && cac !== 0) {
+        kpis.calc_ltv_to_cac = ltv / cac;
+      } else {
+        kpis.calc_ltv_to_cac = null;
+      }
+    } else {
+      kpis.calc_ltv_to_cac = null;
+      if (kpis.calc_average_revenue_per_customer == null)
+        kpis.missingFields.push('calc_average_revenue_per_customer');
+      if (kpis.calc_gross_margin == null)
+        kpis.missingFields.push('calc_gross_margin');
+      if (kpis.calc_customer_logo_churn == null)
+        kpis.missingFields.push('calc_customer_logo_churn');
+      if (financials.costs_of_customer_acquisition == null)
+        kpis.missingFields.push('costs_of_customer_acquisition');
+      if (financials.customers_won_in_period == null)
+        kpis.missingFields.push('customers_won_in_period');
+    }
+
+    // Finally, store the newly calculated KPIs in calculatedKPIs
+    calculatedKPIs[year] = kpis;
   }
-}
 
 
+
+
+
+  function computeCAGR() {
+    const allYears = years.value;
+    if (allYears.length < 2) return null; // Not enough data
+
+    const firstYear = allYears[0];
+    const lastYear = allYears[allYears.length - 1];
+
+    const beginningValue = valuationData.valuation_yearly_inputs[firstYear]?.total_revenue;
+    const endingValue = valuationData.valuation_yearly_inputs[lastYear]?.total_revenue;
+
+    if (beginningValue == null || endingValue == null || beginningValue === 0) {
+      return { missingData: ['total_revenue'] };
+    }
+
+    const n = allYears.length;
+    const cagr = Math.pow((endingValue / beginningValue), 1/(n-1)) - 1;
+
+    // Store it in a new KPI field for the latest year (or a special place)
+    // Since CAGR is not year-specific, you could store it under the latest year for convenience
+    calculatedKPIs[lastYear].calc_cagr_revenue = cagr;
+  }
+
+
+
+  /*
+  watchEffect(() => {
+    if (valuationData.valuation_yearly_inputs) {
+      for (const year of years.value) {
+        calculateKPIsForYear(year);
+      }
+      /Compute CAGR now that all years are processed
+      computeCAGR();
+    }
+  });
+  */
+  //////////////////////////////////////////////////////
+  // KPI CALCULATION START 
+  //////////////////////////////////////////////////////
+  
+
+  //////////////////////////////////////////////////////
+  // KPI ANALYSIS START
+  //////////////////////////////////////////////////////
+  const rowDefinitionsKPIOutputs = computed(() => [
+    { label: 'Total Revenue', field: 'calc_total_revenue', use_for_analysis: false, rank_for_analysis: 0 },
+     { label: 'Gross Margin Net', field: 'calc_gross_margin_net', use_for_analysis: false, rank_for_analysis: 0 },
+     { label: 'EBITDA Net', field: 'calc_ebitda_net', use_for_analysis: false, rank_for_analysis: 0 },
+    
+    { label: 'Recurring Revenue Ratio', field: 'calc_recurring_revenue_ratio', use_for_analysis: true, rank_for_analysis: 5 },
+    { label: 'Year-over-Year Growth', field: 'calc_yoy_revenue_growth', use_for_analysis: true, rank_for_analysis: 1 },
+    //{ label: 'CAGR', field: 'calc_cagr_revenue', use_for_analysis: true, rank_for_analysis: 2 },
+    { label: 'Gross Margin', field: 'calc_gross_margin', use_for_analysis: true, rank_for_analysis: 3 },
+    { label: 'EBITDA Margin', field: 'calc_ebitda_margin', use_for_analysis: true, rank_for_analysis: 4 },
+    { label: 'Average Revenue per Customer', field: 'calc_average_revenue_per_customer', use_for_analysis: false, rank_for_analysis: null },
+    { label: 'Customer Logo Churn', field: 'calc_customer_logo_churn', use_for_analysis: false, rank_for_analysis: null },
+    { label: 'LTV to CAC Ratio', field: 'calc_ltv_to_cac', use_for_analysis: true, rank_for_analysis: 6 }
+  ]);
+
+  import getKPIInfo from '@/utils/kpiInterpretation/getKPIInfo';
+
+  //import kpiLearnMoreModals
+  import YearOnYearGrowthModal from '@/components/kpiLearnMoreModals/YearOnYearGrowthModal.vue';
+  import FutureGrowthModal from '@/components/kpiLearnMoreModals/FutureGrowthModal.vue';
+  import GrossMarginModal from '@/components/kpiLearnMoreModals/GrossMarginModal.vue';
+  import EBITDAMarginModal from '@/components/kpiLearnMoreModals/EBITDAMarginModal.vue';
+  import RecurringRevenueRatioModal from '@/components/kpiLearnMoreModals/RecurringRevenueRatioModal.vue';
+  import LtvToCacModal from '@/components/kpiLearnMoreModals/LtvToCacModal.vue';
+
+  //vars for kpi learn more modals 
+  const isDialogOpen = ref(false);
+  const selectedKPI = ref(null);
+
+  // Configuration object: key = KPI field, value = { title, component }
+  const kpiModalConfig = {
+    calc_yoy_revenue_growth: {
+      title: 'Year-over-Year Growth Details',
+      component: YearOnYearGrowthModal
+    },
+    calc_growth_combined: {
+      title: 'Future Growth Details',
+      component: FutureGrowthModal
+    },
+    calc_gross_margin: {
+      title: 'Gross Margin Details',
+      component: GrossMarginModal
+    },
+    calc_ebitda_margin: {
+      title: 'EBITDA Margin Details',
+      component: EBITDAMarginModal
+    },
+    calc_recurring_revenue_ratio: {
+      title: 'Recurring Revenue Ratio Details',
+      component: RecurringRevenueRatioModal
+    },
+    calc_ltv_to_cac: {
+      title: 'LTV to CAC Ratio Details',
+      component: LtvToCacModal
+    }
+  };
+
+  function openModal(key) {
+    selectedKPI.value = key;
+    isDialogOpen.value = true;
+  }
+
+  //// END MODAL DIALOG STATES
+
+  //function to compare yearly kpis to ranges and populate $analysed_kpis 
+  function analyseYearlyKPIs() {
+    try {
+      const latestYearValue = latestYear.value;
+
+      // Get KPI definitions with use_for_analysis = true, sorted by rank_for_analysis
+      const kpiDefinitions = rowDefinitionsKPIOutputs.value
+        .filter(kpi => kpi.use_for_analysis)
+        .sort((a, b) => a.rank_for_analysis - b.rank_for_analysis);
+
+      //console.log('Analyzing KPIs for latest year:', latestYearValue);
+
+      // Clear the analysed_kpis before starting
+      Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
+
+      kpiDefinitions.forEach(kpiDef => {
+        const field = kpiDef.field;
+        const kpiValue = calculatedKPIs[latestYearValue]?.[field];
+
+        // Log KPI details before analysis
+        /*console.log('-------------------');
+        console.log(`Processing KPI: ${kpiDef.label}`);
+        console.log(`Field: ${field}`);
+        console.log(`Raw Value: ${kpiValue}`);*/
+
+        // Only proceed if we have a valid numeric value
+        if (kpiValue != null && typeof kpiValue === 'number') {
+          try {
+            const result = getKPIInfo(field, kpiValue);
+            //console.log('Analysis Result:', result);
+
+            // Save kpiDef and result into analysed_kpis
+            analysed_kpis[field] = {
+              ...kpiDef,
+              value: kpiValue,
+              analysisResult: result
+            };
+
+          } catch (error) {
+            console.warn(`Could not analyze ${field}:`, error.message);
+          }
+        } else {
+          console.warn(`Skipping ${field} - invalid or missing value`);
+        }
+      });
+
+    } catch (error) {
+      console.error('Error in testGetKPIInfo:', error.message);
+    }
+
+  console.log('analysed kpis: ',analysed_kpis)
+
+  // After completing the logic, set loading to false
+  isLoading.value = false;
+  //console.log('is loading: ',isLoading.value)
+  }
+
+  // Function to check if a value is missing
+  function isMissingValue(year, field) {
+    const value = valuationData.valuation_yearly_inputs[year]?.[field];
+    return value == null || value === '';
+  }
+
+  //function to provide the content of the missing fields tooltip 
+  function missingDataTooltipContent(missingFields) {
+    //console.log('missingFields = ', missingFields);
+    if (!Array.isArray(missingFields)) {
+      return '<b>Missing data</b><br>- unknown fields';
+    }
+
+    const labels = missingFields.map(field => {
+      //console.log('Field in missingFields:', field); // <--- Debug log
+      const rowDef = rowDefinitionsFinancialInputs.value.find(r => r.field === field);
+      return rowDef ? rowDef.label : field;
+    });
+
+    return `<b>Missing data</b><br>- ` + labels.join('<br>- ');
+  }
+
+  //function to calculate and analyse combined / derived kpis for evaluation 
+  function analyseOtherKPIs() {
+    try {
+      const latestYearValue = latestYear.value;
+      const latestYearKPIs = calculatedKPIs[latestYearValue];
+
+      if (!latestYearKPIs) {
+        console.warn('No KPI data available for latest year');
+        return;
+      }
+
+      // 1. Calculate Combined Growth Rate (average of YoY and CAGR)
+      if (typeof latestYearKPIs.calc_yoy_revenue_growth === 'number' && 
+          typeof latestYearKPIs.calc_cagr_revenue === 'number') {
+
+        const combinedGrowthRate = (latestYearKPIs.calc_yoy_revenue_growth + latestYearKPIs.calc_cagr_revenue) / 2;
+
+        try {
+          const growthAnalysis = getKPIInfo('calc_growth_general', combinedGrowthRate);
+          analysed_kpis['calc_growth_combined'] = {
+            label: 'Combined Growth Rate',
+            field: 'calc_growth_combined',
+            value: combinedGrowthRate,
+            analysisResult: growthAnalysis
+          };
+        } catch (error) {
+          console.warn('Could not analyze combined growth rate:', error.message);
+        }
+      }
+
+      // 2. Explicitly analyze the CAGR now that it is commented out of rowDefinitionsKPIOutputs
+      if (typeof latestYearKPIs.calc_cagr_revenue === 'number') {
+        try {
+          const cagrValue = latestYearKPIs.calc_cagr_revenue;
+          const cagrAnalysis = getKPIInfo('calc_cagr_revenue', cagrValue); 
+          analysed_kpis['calc_cagr_revenue'] = {
+            label: 'CAGR',
+            field: 'calc_cagr_revenue',
+            value: cagrValue,
+            analysisResult: cagrAnalysis
+          };
+        } catch (error) {
+          console.warn('Could not analyze CAGR:', error.message);
+        }
+      }
+
+      // Here you can add more combined/derived KPI calculations following the same pattern
+
+    } catch (error) {
+      console.error('Error in analyseOtherKPIs:', error.message);
+    }
+  }
+  
+  //////////////////////////////////////////////////////
+  // KPI ANALYSIS END
+  //////////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////////
+  // VALUATION START 
+  //////////////////////////////////////////////////////
+
+  function doValuationCalculation() {
+    console.log('doValuationCalculation called');
+
+    // Calculate future growth rate
+    const yoy = analysed_kpis.calc_yoy_revenue_growth?.value;
+    const cagr = analysed_kpis.calc_cagr_revenue?.value;
+    if (typeof yoy === 'number' && typeof cagr === 'number') {
+      valuationCalculation.futureGrowthRate = ((yoy + cagr) / 2).toFixed(4);
+    } else {
+      valuationCalculation.futureGrowthRate = null;
+    }
+
+    // Calculate total ARR and EBITDA multiple impact
+    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const GrossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+    const EbitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
+
+    const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
+    const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
+
+    //set total_arr_multiple_impact
+    valuationCalculation.total_arr_multiple_impact = 
+      (growthImpact * GrossMarginImpact * recurringImpact * ltvToCacImpact);
+
+    //set total_ebitda_multiple_impact
+    valuationCalculation.total_ebitda_multiple_impact = 
+    ((growthImpact * ((GrossMarginImpact + EbitdaMarginImpact)/2) * recurringImpact * ltvToCacImpact)).toFixed(2);
+
+    // Calculate final ARR multiple
+    if (valuationData.base_arr_multiple && valuationCalculation.total_arr_multiple_impact) {
+      valuationCalculation.final_arr_multiple = (valuationData.base_arr_multiple * valuationCalculation.total_arr_multiple_impact).toFixed(2);
+    } else {
+      valuationCalculation.final_arr_multiple = null;
+    }
+
+    // Calculate final EBITDA multiple
+    if (valuationData.base_ebitda_multiple && valuationCalculation.total_ebitda_multiple_impact) {
+      valuationCalculation.final_ebitda_multiple = (valuationData.base_ebitda_multiple * valuationCalculation.total_ebitda_multiple_impact).toFixed(2);
+    } else {
+      valuationCalculation.final_ebitda_multiple = null;
+    }
+
+
+    // Calculate company worth ARR
+    if (latestYear.value && valuationData.valuation_yearly_inputs) {
+      const arr = valuationData.valuation_yearly_inputs[latestYear.value]?.recurring_revenue;
+      if (arr != null && valuationCalculation.final_arr_multiple) {
+        valuationCalculation.companyWorthARR = arr * parseFloat(valuationCalculation.final_arr_multiple);
+      } else {
+        valuationCalculation.companyWorthARR = null;
+      }
+    } else {
+      valuationCalculation.companyWorthARR = null;
+    }
+
+    // Calculate company worth EBITDA 1234
+    if (latestYear.value && valuationData.valuation_yearly_inputs) {
+      const ebitda = valuationData.valuation_yearly_inputs[latestYear.value]?.calc_ebitda_net;
+      if (ebitda != null && valuationCalculation.final_arr_multiple) {
+        valuationCalculation.companyWorthEBITDA = ebitda * parseFloat(valuationCalculation.final_ebitda_multiple);
+      } else {
+        valuationCalculation.companyWorthEBITDA = null;
+      }
+    } else {
+      valuationCalculation.companyWorthEBITDA = null;
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // VALUATION END
+  //////////////////////////////////////////////////////
+
+  
+  //////////////////////////////////////////////////////
+  // API INTERACTIONS START 
+  //////////////////////////////////////////////////////
+  
+  //get one valuation 
+  async function fetchValuation(id) {
+    try {
+      // Fetch the valuation data
+      const { data } = await axios.get(`${apiBaseURL}/valuations/${id}`)
+
+      console.log('Fetched valuation data:', data);
+
+      // Convert the `valuation_yearly_inputs` array into an object keyed by `time_period`
+      if (data.valuation_yearly_inputs) {
+        data.valuation_yearly_inputs = data.valuation_yearly_inputs.reduce((acc, item) => {
+          acc[item.time_period] = item
+          return acc
+        }, {})
+      }
+
+      // Merge the transformed data into `valuationData`
+      Object.assign(valuationData, data)
+    } catch (error) {
+      console.error('Error fetching valuations:', error)
+    }
+  }
+
+  // Debounced function to update valuation financials
+  const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
+    updateValuationFinancial(field, value, timePeriod);
+  }, 500);
+
+
+  //save valuation data to db
+  async function saveValuation() {
+    // Make an HTTP PUT request to update the lot in the database using Sequelize
+    try {
+      //db console.log('val data ',valuationData)
+      const response = await axios.put(`${apiBaseURL}/valuations/` + thisValuationId.value, valuationData);
+      console.log('valuation updated:', response);
+
+    } catch (error) {
+      console.error('Error updating valuation in db:', error);
+    }
+  }
+
+  // Function to update valuation financials
+  async function updateValuationFinancial(field, value, timePeriod) {
+    try {
+      // Check if the value is null or empty
+      const parsedValue = value === null || value === '' ? null : parseFloat(value);
+
+      // If the value is not null and is not a valid number, handle the error
+      if (parsedValue !== null && isNaN(parsedValue)) {
+        console.error('Invalid number input');
+        return;
+      }
+
+      // Make the API call to update the data
+      const response = await axios.put(
+        `${apiBaseURL}/valuations/yearly-inputs/${thisValuationId.value}/${timePeriod}`,
+        {
+          [field]: parsedValue,
+        }
+      );
+
+      // Update local data
+      valuationData.valuation_yearly_inputs[timePeriod][field] = parsedValue;
+
+      console.log('Valuation Yearly Input updated:', response);
+    } catch (error) {
+      console.error('Error updating valuation financial:', error);
+    }
+  }
+
+  const saveData = debounce(async (data) => {
+    await saveValuation(data);
+  }, 500);
+  
+  //////////////////////////////////////////////////////
+  // API INTERACTIONS END  
+  //////////////////////////////////////////////////////
+
+
+  //////////////////////////////////////////////////////
+  // WATCHER AN LIFECYCLE HOOKS START 
+  //////////////////////////////////////////////////////
+  onMounted(async () => {
+    // Wait for fetchValuation to complete
+    await fetchValuation(thisValuationId.value);
+    await nextTick();
+    //recalculateAllMetrics();
+  });
+
+  
+  // Single watcher for data changes
+  watch(
+    () => valuationData,
+    async () => {
+      try {
+        await saveData(valuationData);
+        //await nextTick();
+      } catch (error) {
+        console.error('Error in watch handler:', error);
+      }
+    },
+    { deep: true }
+  );
+
+  
+  function recalculateAllMetrics() {
+    // Clear existing KPIs
+    Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
+    Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
+
+    // 1. Calculate KPIs for all years
+    years.value.forEach(year => {
+      calculateKPIsForYear(year);
+    });
+
+    // 2. Compute CAGR
+    computeCAGR();
+
+    // 3. Analyse Yearly and Other KPIs
+    analyseYearlyKPIs();
+    analyseOtherKPIs();
+
+    // 4. Perform Valuation Calculation
+    doValuationCalculation();
+
+    // Set loading to false after the first full calculation
+    //isLoading.value = false;
+  }
+  //////////////////////////////////////////////////////
+  // WATCHER AN LIFECYCLE HOOKS START 
+  //////////////////////////////////////////////////////
+
+  
+  //////////////////////////////////////////////////////
+  // FORMATING AND HELPER FUNCTIONS START 
+  //////////////////////////////////////////////////////
+  function formatKPIValue(field, value) {
+    const percentageKPIs = [
+      'calc_recurring_revenue_ratio',
+      'calc_yoy_revenue_growth',
+      'calc_gross_margin',
+      'calc_ebitda_margin',
+      'calc_customer_logo_churn', 
+      'calc_cagr_revenue', 
+      'calc_growth_combined'
+    ];
+
+    // Check if field is one of the new currency fields
+    const currencyFields = [
+      'calc_total_revenue',
+      'calc_gross_margin_net',
+      'calc_ebitda_net'
+    ];
+
+    if (value == null || (typeof value === 'object' && value.missingData)) {
+      return 'Missing data';
+    }
+
+    if (percentageKPIs.includes(field)) {
+      return (value * 100).toFixed(2) + '%';
+    } else if (field === 'calc_ltv_to_cac') {
+      return value.toFixed(2);
+    } else if (field === 'calc_average_revenue_per_customer') {
+      return usdFormat(value);
+    } else if (currencyFields.includes(field)) {
+      // Format as currency
+      return usdFormat(value);
+    } else {
+      // Default formatting
+      return value;
+    }
+  }
+
+  
+  // Format URL wrapper function
+  function formatURL() {
+    if (valuationData.company_url) {
+      valuationData.company_url = formatURLUtil(valuationData.company_url);
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // FORMATING AND HELPER END 
+  //////////////////////////////////////////////////////
   
 </script>
 
