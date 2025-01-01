@@ -1759,7 +1759,7 @@
               <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
               <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business they deem to be a solid SaaS investment case. As a default, we set this multiple at "3".</p>
-            </div>`,
+            </div>
           `,
           description_below_input: `
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
