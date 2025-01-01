@@ -1758,39 +1758,6 @@
      * We use the "standard" version of the old code for all three: minimal, standard, and complete.
      */
     function gatherValuationContent(valuationData, analysed_kpis, latestYear) {
-  // Helper to format values for v-html
-  const formatKPIValueStatic = (field, value) => {
-    if (!value) return 'N/A';
-    if (field.includes('growth') || field.includes('margin') || field.includes('ratio')) {
-      return (value * 100).toFixed(2) + '%';
-    }
-    return value.toFixed(2);
-  };
-
-  const formatCurrencyStatic = (value) => {
-    if (!value) return '$0';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
-  };
-
-  // Pre-calculate values to embed directly
-  const preCalculated = {
-    futureGrowthRate: valuationCalculation.futureGrowthRate * 100,
-    yoyGrowth: formatKPIValueStatic('growth', analysed_kpis.calc_yoy_revenue_growth?.value),
-    cagrGrowth: formatKPIValueStatic('growth', analysed_kpis.calc_cagr_revenue?.value),
-    grossMargin: formatKPIValueStatic('margin', analysed_kpis.calc_gross_margin?.value),
-    ebitdaMargin: formatKPIValueStatic('margin', analysed_kpis.calc_ebitda_margin?.value),
-    recurringRatio: formatKPIValueStatic('ratio', analysed_kpis.calc_recurring_revenue_ratio?.value),
-    ltvToCac: analysed_kpis.calc_ltv_to_cac?.value?.toFixed(2),
-    totalArrImpact: (valuationCalculation.total_arr_multiple_impact * 100).toFixed(2),
-    totalEbitdaImpact: (valuationCalculation.total_ebitda_multiple_impact * 100).toFixed(2),
-    finalArrMultiple: valuationCalculation.final_arr_multiple,
-    finalEbitdaMultiple: valuationCalculation.final_ebitda_multiple,
-    companyWorthARR: formatCurrencyStatic(valuationCalculation.companyWorthARR),
-    companyWorthEBITDA: formatCurrencyStatic(valuationCalculation.companyWorthEBITDA)
-  };
       return {
         arr: {
           /**
