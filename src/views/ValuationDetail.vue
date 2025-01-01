@@ -1747,28 +1747,121 @@
    *  - Returns a single object with 6 main sub-objects: 
    *    arr.minimal, arr.standard, arr.complete, ebitda.minimal, ebitda.standard, ebitda.complete
    */
+  function gatherValuationContent(valuationData, analysed_kpis, latestYear) {
+    // ---------------------------
+    // Helper functions
+    // ---------------------------
+    const formatKPIValue = (key, value) => {
+      if (value == null) return 'N/A';
+      // Example: show as percentage with 2 decimals
+      return `${(value * 100).toFixed(2)}%`;
+    };
+    const usdFormat = (val) => {
+      if (val == null) return 'N/A';
+      return `$${Number(val).toLocaleString()}`;
+    };
+    const multipleImpactPercent = (val) => {
+      if (val == null) return 'N/A';
+      // e.g., "1.20x"
+      return `${val.toFixed(2)}x`;
+    };
 
-  
-    /**
-     * This function gathers all textual content from the "old code"
-     * and returns an object with the same structure that the "new code"
-     * (the dynamic evaluation approach) can use to render identical output.
-     *
-     * We keep the comments from the old code to show what each portion does.
-     * We use the "standard" version of the old code for all three: minimal, standard, and complete.
-     */
-    function gatherValuationContent(valuationData, analysed_kpis, latestYear) {
-      return {
-        arr: {
-          /**
-           * For ARR (earlyStage), we reuse the same "standard" textual content from old code
-           * for minimal, standard, and complete to ensure identical display.
-           */
-          minimal: {
-            description_above_input: `
+    // ---------------------------
+    // Common Calculations
+    // ---------------------------
+    const yoy = analysed_kpis.calc_yoy_revenue_growth?.value || 0;
+    const cagr = analysed_kpis.calc_cagr_revenue?.value || 0;
+    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const grossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+    const ebitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
+    const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
+    const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
+
+    const arrVal = latestYear.value && valuationData.valuation_yearly_inputs
+      ? valuationData.valuation_yearly_inputs[latestYear.value]?.recurring_revenue
+      : null;
+    const ebitdaVal = latestYear.value && valuationData.valuation_yearly_inputs
+      ? valuationData.valuation_yearly_inputs[latestYear.value]?.calc_ebitda_net
+      : null;
+
+    // -------------------------------------------------
+    // ARR - STANDARD / COMPLETE
+    // -------------------------------------------------
+    const futureGrowthRate = (yoy + cagr) / 2;
+    const totalArrImpact = growthImpact * grossMarginImpact * recurringImpact * ltvToCacImpact;
+    const baseArrMultiple = valuationData.base_arr_multiple || 3; // fallback
+    const finalArrMultiple = parseFloat((baseArrMultiple * totalArrImpact).toFixed(2));
+    let companyWorthARR = null;
+    if (arrVal != null && !isNaN(finalArrMultiple)) {
+      companyWorthARR = arrVal * finalArrMultiple;
+    }
+
+    // -------------------------------------------------
+    // EBITDA - STANDARD / COMPLETE
+    // -------------------------------------------------
+    const totalEbitdaImpact =
+      growthImpact *
+      ((grossMarginImpact + ebitdaMarginImpact) / 2) *
+      recurringImpact *
+      ltvToCacImpact;
+    const baseEbitdaMultiple = valuationData.base_ebitda_multiple || 3; // fallback
+    const finalEbitdaMultiple = parseFloat((baseEbitdaMultiple * totalEbitdaImpact).toFixed(2));
+    let companyWorthEBITDA = null;
+    if (ebitdaVal != null && !isNaN(finalEbitdaMultiple)) {
+      companyWorthEBITDA = ebitdaVal * finalEbitdaMultiple;
+    }
+
+    // -------------------------------------------------
+    // ARR - MINIMAL (ignore CAGR, ignore LTV-to-CAC)
+    // -------------------------------------------------
+    const futureGrowthRateMinimalArr = yoy; 
+    const totalArrImpactMinimal = growthImpact * grossMarginImpact * recurringImpact;
+    const finalArrMultipleMinimal = parseFloat((baseArrMultiple * totalArrImpactMinimal).toFixed(2));
+    let companyWorthARRMinimal = null;
+    if (arrVal != null && !isNaN(finalArrMultipleMinimal)) {
+      companyWorthARRMinimal = arrVal * finalArrMultipleMinimal;
+    }
+
+    // -------------------------------------------------
+    // EBITDA - MINIMAL (ignore CAGR, ignore LTV-to-CAC)
+    // -------------------------------------------------
+    const totalEbitdaImpactMinimal =
+      growthImpact *
+      ((grossMarginImpact + ebitdaMarginImpact) / 2) *
+      recurringImpact;
+    const finalEbitdaMultipleMinimal = parseFloat(
+      (baseEbitdaMultiple * totalEbitdaImpactMinimal).toFixed(2)
+    );
+    let companyWorthEBITDAMinimal = null;
+    if (ebitdaVal != null && !isNaN(finalEbitdaMultipleMinimal)) {
+      companyWorthEBITDAMinimal = ebitdaVal * finalEbitdaMultipleMinimal;
+    }
+
+    // -------------------------------------------------
+    // ARR - COMPLETE (same as standard in this example)
+    // -------------------------------------------------
+    const futureGrowthRateCompleteArr = futureGrowthRate; 
+    const totalArrImpactComplete = totalArrImpact;
+    const finalArrMultipleComplete = finalArrMultiple;
+    const companyWorthARRComplete = companyWorthARR;
+
+    // -------------------------------------------------
+    // EBITDA - COMPLETE (same as standard in this example)
+    // -------------------------------------------------
+    const totalEbitdaImpactComplete = totalEbitdaImpact;
+    const finalEbitdaMultipleComplete = finalEbitdaMultiple;
+    const companyWorthEBITDAComplete = companyWorthEBITDA;
+
+    // -----------------------------------------
+    // Return the full object
+    // -----------------------------------------
+    return {
+      arr: {
+        minimal: {
+          description_above_input: `
               <!-- EARLY STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
+              <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
 
               <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
 
@@ -1777,500 +1870,145 @@
                 As a default we set this multiple at "3". 
               </p>
             `,
-            description_below_input: `
+          description_below_input: `
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
-              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
+              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
 
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
-              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
-              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
-              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+              <p class="text-body-2 mb-2">In our evaluation we will use your "current growth" (i.e. last Year-on-Year growth) and ignore the CAGR. We will use your "current Gross Margin" to estimate the profit potential of your business. LTV-to-CAC is not factored in minimal valuations.</p>
             `,
-            table: {
-              growth: {
-                description: `
+          table: {
+            growth: {
+              description: `
                   <!-- GROWTH ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Growth</p>
                     <p class="text-body-2 mb-2">
-                      Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
-                      Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
+                      Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
 
-                      For valuation purposes we will calculate your future growth rate at <br>
-                      ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
-                       + 
-                      {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                      / 2 = 
-                      {{valuationCalculation.futureGrowthRate*100}}%
+                      For valuation purposes in the minimal case, we ignore CAGR.<br>
+                      Minimal future growth rate = ${(
+                        futureGrowthRateMinimalArr * 100
+                      ).toFixed(2)}%.
 
                       <br><br>
-                      A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
+                      A growth rate of ${(
+                        futureGrowthRateMinimalArr * 100
+                      ).toFixed(2)}% is ${
+                analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              }.
 
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_growth_combined')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }}`
-              },
-              profitability: {
-                description: `
+              impact: `${multipleImpactPercent(growthImpact)}`,
+            },
+            profitability: {
+              description: `
                   <!-- PROFITABILITY ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
                     <p class="text-body-2 mb-2">
-                      When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
+                      When using the ARR Valuation (minimal), we determine your profitability based on your Gross Margin. <br>
 
-                      Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> <br>
+                      Your current Gross Margin is ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.
-
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_gross_margin')"
-                      ></v-btn>
+                      A Gross Margin of ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage) }}`
-              },
-              recurringRevenueRatio: {
-                description: `
+              impact: `${multipleImpactPercent(grossMarginImpact)}`,
+            },
+            recurringRevenueRatio: {
+              description: `
                   <!-- RECURRING REVENUE ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
+                      Your current Recurring Revenue Ratio is ${
+                        analysed_kpis.calc_recurring_revenue_ratio
+                          ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_recurring_revenue_ratio')"
-                      ></v-btn>
+                      This is ${
+                analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}`
-              },
-              ltvToCac: {
-                description: `
+              impact: `${multipleImpactPercent(recurringImpact)}`,
+            },
+            ltvToCac: {
+              // In minimal, LTV-to-CAC is not factored, so we can mark it as skipped or just show '-'
+              description: `
                   <!-- LTV TO CAC ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
-
-                      This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_ltv_to_cac')"
-                      ></v-btn>
+                      Not used in minimal valuation.<br>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}`
-              },
-              final: {
-                description: `
+              impact: '-',
+            },
+            final: {
+              description: `
                   <!-- TOTAL IMPACT ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
                     <p class="text-body-2 mb-2">
-                      ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
+                      (${growthImpact} *
+                      ${grossMarginImpact} *
+                      ${recurringImpact})
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(valuationCalculation.total_arr_multiple_impact) }}`
-              }
+              impact: `${multipleImpactPercent(totalArrImpactMinimal)}`,
             },
-            evaluation_content: `
-              <!-- FINAL EVALUATION CONTENT -->
-              <p class="mb-2 mt-6">
-                Based on your business' performance, we need to adjust the ARR Base Multiple of {{valuationData.base_arr_multiple}} by {{multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}}.  
-              </p>
-              <p class="mb-2">
-                i.e. {{valuationData.base_arr_multiple}} 
-                *  {{valuationCalculation.total_arr_multiple_impact.toFixed(2)}} = {{valuationCalculation.final_arr_multiple}}
-              </p>
-              <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  {{valuationCalculation.final_arr_multiple}}.</p>
-
-              <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
-              <p class="mb-2">
-                To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
-                i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)}} *     {{valuationCalculation.final_arr_multiple}}    
-                = {{usdFormat(valuationCalculation.companyWorthARR)}} 
-              </p>
-              <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
-            `
           },
-          /**
-           * We reuse the same text from above for "standard" and "complete"
-           */
-          standard: {
-            description_above_input: `
-              <!-- EARLY STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
-
-              <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
-
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
-              <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
-                As a default we set this multiple at "3". 
-              </p>
-            `,
-            description_below_input: `
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
-              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
-
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
-              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
-              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
-              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
-            `,
-            table: {
-              growth: {
-                description: `
-                  <!-- GROWTH ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Growth</p>
-                    <p class="text-body-2 mb-2">
-                      Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
-                      Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
-
-                      For valuation purposes we will calculate your future growth rate at <br>
-                      ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
-                       + 
-                      {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                      / 2 = 
-                      {{valuationCalculation.futureGrowthRate*100}}%
-
-                      <br><br>
-                      A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
-
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_growth_combined')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }}`
-              },
-              profitability: {
-                description: `
-                  <!-- PROFITABILITY ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
-                    <p class="text-body-2 mb-2">
-                      When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
-
-                      Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> <br>
-
-                      A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.
-
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_gross_margin')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage) }}`
-              },
-              recurringRevenueRatio: {
-                description: `
-                  <!-- RECURRING REVENUE ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
-                    <p class="text-body-2 mb-2">
-                      Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
-
-                      This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_recurring_revenue_ratio')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}`
-              },
-              ltvToCac: {
-                description: `
-                  <!-- LTV TO CAC ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
-                    <p class="text-body-2 mb-2">
-                      Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
-
-                      This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_ltv_to_cac')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}`
-              },
-              final: {
-                description: `
-                  <!-- TOTAL IMPACT ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
-                    <p class="text-body-2 mb-2">
-                      ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(valuationCalculation.total_arr_multiple_impact) }}`
-              }
-            },
-            evaluation_content: `
+          evaluation_content: `
               <!-- FINAL EVALUATION CONTENT -->
               <p class="mb-2 mt-6">
-                Based on your business' performance, we need to adjust the ARR Base Multiple of {{valuationData.base_arr_multiple}} by {{multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}}.  
+                Based on your business' performance, we need to adjust the ARR Base Multiple of ${baseArrMultiple} by ${multipleImpactPercent(
+            totalArrImpactMinimal
+          )}.
               </p>
               <p class="mb-2">
-                i.e. {{valuationData.base_arr_multiple}} 
-                *  {{valuationCalculation.total_arr_multiple_impact.toFixed(2)}} = {{valuationCalculation.final_arr_multiple}}
+                i.e. ${baseArrMultiple}
+                *  ${totalArrImpactMinimal.toFixed(2)} = ${finalArrMultipleMinimal}
               </p>
-              <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  {{valuationCalculation.final_arr_multiple}}.</p>
+              <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${finalArrMultipleMinimal}.</p>
 
-              <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
+              <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
               <p class="mb-2">
-                To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
-                i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)}} *     {{valuationCalculation.final_arr_multiple}}    
-                = {{usdFormat(valuationCalculation.companyWorthARR)}} 
+                To evaluate the worth of your business using the ARR Multiple Method (minimal version), we multiply your current ARR by the final multiple. <br>
+                i.e. ${usdFormat(arrVal)} * ${finalArrMultipleMinimal}
+                = ${usdFormat(companyWorthARRMinimal)}
               </p>
-              <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
-            `
-          },
-          complete: {
-            description_above_input: `
-              <!-- EARLY STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
-
-              <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
-
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
-              <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
-                As a default we set this multiple at "3". 
-              </p>
+              <p class="mb62 font-weight-bold">Your business' valuation (minimal) using the ARR-Multiple-Method is ${usdFormat(
+            companyWorthARRMinimal
+          )}.</p>
             `,
-            description_below_input: `
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
-              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
-
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
-              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
-              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
-              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
-            `,
-            table: {
-              growth: {
-                description: `
-                  <!-- GROWTH ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Growth</p>
-                    <p class="text-body-2 mb-2">
-                      Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
-                      Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
-
-                      For valuation purposes we will calculate your future growth rate at <br>
-                      ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
-                       + 
-                      {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                      / 2 = 
-                      {{valuationCalculation.futureGrowthRate*100}}%
-
-                      <br><br>
-                      A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
-
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_growth_combined')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }}`
-              },
-              profitability: {
-                description: `
-                  <!-- PROFITABILITY ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
-                    <p class="text-body-2 mb-2">
-                      When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
-
-                      Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> <br>
-
-                      A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.
-
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_gross_margin')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage) }}`
-              },
-              recurringRevenueRatio: {
-                description: `
-                  <!-- RECURRING REVENUE ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
-                    <p class="text-body-2 mb-2">
-                      Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
-
-                      This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_recurring_revenue_ratio')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}`
-              },
-              ltvToCac: {
-                description: `
-                  <!-- LTV TO CAC ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
-                    <p class="text-body-2 mb-2">
-                      Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
-
-                      This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
-                      <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_ltv_to_cac')"
-                      ></v-btn>
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}`
-              },
-              final: {
-                description: `
-                  <!-- TOTAL IMPACT ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
-                    <p class="text-body-2 mb-2">
-                      ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
-                    </p>
-                  </div>
-                `,
-                impact: `{{ multipleImpactPercent(valuationCalculation.total_arr_multiple_impact) }}`
-              }
-            },
-            evaluation_content: `
-              <!-- FINAL EVALUATION CONTENT -->
-              <p class="mb-2 mt-6">
-                Based on your business' performance, we need to adjust the ARR Base Multiple of {{valuationData.base_arr_multiple}} by {{multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}}.  
-              </p>
-              <p class="mb-2">
-                i.e. {{valuationData.base_arr_multiple}} 
-                *  {{valuationCalculation.total_arr_multiple_impact.toFixed(2)}} = {{valuationCalculation.final_arr_multiple}}
-              </p>
-              <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  {{valuationCalculation.final_arr_multiple}}.</p>
-
-              <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
-              <p class="mb-2">
-                To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
-                i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)}} *     {{valuationCalculation.final_arr_multiple}}    
-                = {{usdFormat(valuationCalculation.companyWorthARR)}} 
-              </p>
-              <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthARR)}}.</p>
-            `
-          }
         },
 
-        ebitda: {
-          /**
-           * For EBITDA (laterStage), we also reuse the "standard" textual content from old code
-           * for minimal, standard, and complete.
-           */
-          minimal: {
-            description_above_input: `
-              <!-- LATER STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valueing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
+        standard: {
+          description_above_input: `
+              <!-- EARLY STAGE -->
+              <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
 
               <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
 
@@ -2279,171 +2017,158 @@
                 As a default we set this multiple at "3". 
               </p>
             `,
-            description_below_input: `
+          description_below_input: `
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
-              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
+              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
 
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
-              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
-              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
-              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
             `,
-            table: {
-              growth: {
-                description: `
+          table: {
+            growth: {
+              description: `
                   <!-- GROWTH ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Growth</p>
                     <p class="text-body-2 mb-2">
-                      Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
-                      Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
+                      Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
+                      Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', cagr)}. <br>
 
                       For valuation purposes we will calculate your future growth rate at <br>
-                      ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
+                      (${formatKPIValue('calc_yoy_revenue_growth', yoy)}
                        + 
-                      {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                      / 2 = 
-                      {{valuationCalculation.futureGrowthRate*100}}%
+                      ${formatKPIValue('calc_cagr_revenue', cagr)})
+                      / 2 = ${(futureGrowthRate * 100).toFixed(2)}%
 
                       <br><br>
-                      A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
+                      A future growth rate of ${(futureGrowthRate * 100).toFixed(2)}% is ${
+                analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              }.
 
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_growth_combined')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }}`
-              },
-              profitability: {
-                description: `
+              impact: `${multipleImpactPercent(growthImpact)}`,
+            },
+            profitability: {
+              description: `
                   <!-- PROFITABILITY ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
                     <p class="text-body-2 mb-2">
-                      When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+                      When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
 
-                      Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> 
+                      Your current Gross Margin is ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      }.<br><br>
 
-                      A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.<br> <br>
+                      A Gross Margin of ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.
 
-                      Your current EBITDA Margin is {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }}.<br> 
-
-                      An EBITDA Margin of {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }} is {{analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}}. <br> <br>
-
-                      To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and devide them by 2. <br>
-
-                      i.e. ({{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} + {{analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}}) / 2 = {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}}. <br>
-
-
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_gross_margin')"
-                      ></v-btn>
+                      <br>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2) }}`
-              },
-              recurringRevenueRatio: {
-                description: `
+              impact: `${multipleImpactPercent(grossMarginImpact)}`,
+            },
+            recurringRevenueRatio: {
+              description: `
                   <!-- RECURRING REVENUE ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
+                      Your current Recurring Revenue Ratio is ${
+                        analysed_kpis.calc_recurring_revenue_ratio
+                          ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
+                      This is ${
+                analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_recurring_revenue_ratio')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}`
-              },
-              ltvToCac: {
-                description: `
+              impact: `${multipleImpactPercent(recurringImpact)}`,
+            },
+            ltvToCac: {
+              description: `
                   <!-- LTV TO CAC ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
+                      Your current LTV-to-CAC Ratio is ${
+                        analysed_kpis.calc_ltv_to_cac
+                          ? formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
+                      This is ${
+                analysed_kpis.calc_ltv_to_cac?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_ltv_to_cac')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}`
-              },
-              final: {
-                description: `
+              impact: `${multipleImpactPercent(ltvToCacImpact)}`,
+            },
+            final: {
+              description: `
                   <!-- TOTAL IMPACT ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
                     <p class="text-body-2 mb-2">
-                      ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
-                      {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}} *
-                      {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
+                      (${growthImpact} *
+                      ${grossMarginImpact} *
+                      ${recurringImpact} *
+                      ${ltvToCacImpact})
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact) }}`
-              }
+              impact: `${multipleImpactPercent(totalArrImpact)}`,
             },
-            evaluation_content: `
-              <!-- FINAL EVALUATION CONTENT -->
-              <p class="mb-2 mt-6">
-                Based on your business' performance, we need to adjust the EBITDA Base Multiple of {{valuationData.base_ebitda_multiple}} by {{multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}}.  
-              </p>
-              <p class="mb-2">
-                i.e. {{valuationData.base_ebitda_multiple}} 
-                *  {{valuationCalculation.total_ebitda_multiple_impact}} = {{valuationCalculation.final_ebitda_multiple}}
-              </p>
-              <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  {{valuationCalculation.final_ebitda_multiple}}.</p>
-
-              <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
-              <p class="mb-2">
-                To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
-                i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)}} *     {{valuationCalculation.final_ebitda_multiple}}    
-                = {{usdFormat(valuationCalculation.companyWorthEBITDA)}} 
-              </p>
-              <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthEBITDA)}}.</p>
-            `
           },
-          standard: {
-            // For "standard" we reuse the same text from minimal (the standard scenario in old code).
-            description_above_input: `
-              <!-- LATER STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valueing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
+          evaluation_content: `
+              <!-- FINAL EVALUATION CONTENT -->
+              <p class="mb-2 mt-6">
+                Based on your business' performance, we need to adjust the ARR Base Multiple of ${baseArrMultiple} by ${multipleImpactPercent(
+            totalArrImpact
+          )}.
+              </p>
+              <p class="mb-2">
+                i.e. ${baseArrMultiple}
+                *  ${totalArrImpact.toFixed(2)} = ${finalArrMultiple}
+              </p>
+              <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${finalArrMultiple}.</p>
+
+              <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+              <p class="mb-2">
+                To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is multiply your current ARR with the final multiple. <br>
+                i.e. ${usdFormat(arrVal)} * ${finalArrMultiple}
+                = ${usdFormat(companyWorthARR)}
+              </p>
+              <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(
+            companyWorthARR
+          )}.</p>
+            `,
+        },
+
+        complete: {
+          description_above_input: `
+              <!-- EARLY STAGE -->
+              <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
 
               <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
 
@@ -2452,171 +2177,160 @@
                 As a default we set this multiple at "3". 
               </p>
             `,
-            description_below_input: `
+          description_below_input: `
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
-              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
+              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
 
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
-              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
-              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
-              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
             `,
-            table: {
-              growth: {
-                description: `
+          table: {
+            growth: {
+              description: `
                   <!-- GROWTH ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Growth</p>
                     <p class="text-body-2 mb-2">
-                      Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
-                      Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
+                      Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
+                      Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', cagr)}. <br>
 
                       For valuation purposes we will calculate your future growth rate at <br>
-                      ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
+                      (${formatKPIValue('calc_yoy_revenue_growth', yoy)}
                        + 
-                      {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                      / 2 = 
-                      {{valuationCalculation.futureGrowthRate*100}}%
+                      ${formatKPIValue('calc_cagr_revenue', cagr)})
+                      / 2 = ${(futureGrowthRateCompleteArr * 100).toFixed(2)}%
 
                       <br><br>
-                      A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
+                      A future growth rate of ${(futureGrowthRateCompleteArr * 100).toFixed(2)}% is ${
+                analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              }.
 
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_growth_combined')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }}`
-              },
-              profitability: {
-                description: `
+              impact: `${multipleImpactPercent(growthImpact)}`,
+            },
+            profitability: {
+              description: `
                   <!-- PROFITABILITY ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
                     <p class="text-body-2 mb-2">
-                      When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+                      When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
 
-                      Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> 
+                      Your current Gross Margin is ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      }.<br><br>
 
-                      A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.<br> <br>
+                      A Gross Margin of ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.
 
-                      Your current EBITDA Margin is {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }}.<br> 
-
-                      An EBITDA Margin of {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }} is {{analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}}. <br> <br>
-
-                      To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and devide them by 2. <br>
-
-                      i.e. ({{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} + {{analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}}) / 2 = {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}}. <br>
-
-
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_gross_margin')"
-                      ></v-btn>
+                      <br>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2) }}`
-              },
-              recurringRevenueRatio: {
-                description: `
+              impact: `${multipleImpactPercent(grossMarginImpact)}`,
+            },
+            recurringRevenueRatio: {
+              description: `
                   <!-- RECURRING REVENUE ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
+                      Your current Recurring Revenue Ratio is ${
+                        analysed_kpis.calc_recurring_revenue_ratio
+                          ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
+                      This is ${
+                analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_recurring_revenue_ratio')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}`
-              },
-              ltvToCac: {
-                description: `
+              impact: `${multipleImpactPercent(recurringImpact)}`,
+            },
+            ltvToCac: {
+              description: `
                   <!-- LTV TO CAC ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
+                      Your current LTV-to-CAC Ratio is ${
+                        analysed_kpis.calc_ltv_to_cac
+                          ? formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
+                      This is ${
+                analysed_kpis.calc_ltv_to_cac?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_ltv_to_cac')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}`
-              },
-              final: {
-                description: `
+              impact: `${multipleImpactPercent(ltvToCacImpact)}`,
+            },
+            final: {
+              description: `
                   <!-- TOTAL IMPACT ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
                     <p class="text-body-2 mb-2">
-                      ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
-                      {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}} *
-                      {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
+                      (${growthImpact} *
+                      ${grossMarginImpact} *
+                      ${recurringImpact} *
+                      ${ltvToCacImpact})
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact) }}`
-              }
+              impact: `${multipleImpactPercent(totalArrImpactComplete)}`,
             },
-            evaluation_content: `
-              <!-- FINAL EVALUATION CONTENT -->
-              <p class="mb-2 mt-6">
-                Based on your business' performance, we need to adjust the EBITDA Base Multiple of {{valuationData.base_ebitda_multiple}} by {{multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}}.  
-              </p>
-              <p class="mb-2">
-                i.e. {{valuationData.base_ebitda_multiple}} 
-                *  {{valuationCalculation.total_ebitda_multiple_impact}} = {{valuationCalculation.final_ebitda_multiple}}
-              </p>
-              <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  {{valuationCalculation.final_ebitda_multiple}}.</p>
-
-              <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
-              <p class="mb-2">
-                To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
-                i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)}} *     {{valuationCalculation.final_ebitda_multiple}}    
-                = {{usdFormat(valuationCalculation.companyWorthEBITDA)}} 
-              </p>
-              <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthEBITDA)}}.</p>
-            `
           },
-          complete: {
-            // For "complete" we reuse the same text from minimal (the standard scenario in old code).
-            description_above_input: `
+          evaluation_content: `
+              <!-- FINAL EVALUATION CONTENT -->
+              <p class="mb-2 mt-6">
+                Based on your business' performance, we need to adjust the ARR Base Multiple of ${baseArrMultiple} by ${multipleImpactPercent(
+            totalArrImpactComplete
+          )}.
+              </p>
+              <p class="mb-2">
+                i.e. ${baseArrMultiple}
+                *  ${totalArrImpactComplete.toFixed(2)} = ${finalArrMultipleComplete}
+              </p>
+              <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${finalArrMultipleComplete}.</p>
+
+              <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+              <p class="mb-2">
+                To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
+                i.e. ${usdFormat(arrVal)} * ${finalArrMultipleComplete}
+                = ${usdFormat(companyWorthARRComplete)}
+              </p>
+              <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(
+            companyWorthARRComplete
+          )}.</p>
+            `,
+        },
+      },
+
+      ebitda: {
+        minimal: {
+          description_above_input: `
               <!-- LATER STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valueing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
+              <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
 
               <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
 
@@ -2625,244 +2339,1533 @@
                 As a default we set this multiple at "3". 
               </p>
             `,
-            description_below_input: `
+          description_below_input: `
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
-              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
+              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
 
-              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
-              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be. </p>
-              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financial to get a "future growth rate".  </p>
-              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future. </p>
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+              <p class="text-body-2 mb-2">In our evaluation (minimal), we consider your "current growth" (yoy only) and your "current Gross Margin" and "current EBITDA Margin." We do not factor in CAGR or LTV-to-CAC for minimal mode.</p>
             `,
-            table: {
-              growth: {
-                description: `
+          table: {
+            growth: {
+              description: `
                   <!-- GROWTH ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Growth</p>
                     <p class="text-body-2 mb-2">
-                      Your current growth is {{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value) }}. <br>
-                      Your compounded growth (CAGR) is {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value) }}. <br>
-
-                      For valuation purposes we will calculate your future growth rate at <br>
-                      ({{ formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value) }}
-                       + 
-                      {{ formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value) }})
-                      / 2 = 
-                      {{valuationCalculation.futureGrowthRate*100}}%
-
+                      Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
+                      For minimal, we ignore CAGR.
                       <br><br>
-                      A future growth rate of {{valuationCalculation.futureGrowthRate*100}}% is {{analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}}.
-
+                      A growth rate of ${(yoy * 100)}% is ${
+                analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_growth_combined')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage) }}`
-              },
-              profitability: {
-                description: `
+              impact: `${multipleImpactPercent(growthImpact)}`,
+            },
+            profitability: {
+              description: `
+                  <!-- PROFITABILITY ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                    <p class="text-body-2 mb-2">
+                      When using the EBITDA Valuation (minimal), we determine your profitability based on your Gross Margin and your EBITDA Margin. <br><br>
+
+                      Your current Gross Margin is ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      }. <br>
+                      Your current EBITDA Margin is ${
+                        analysed_kpis.calc_ebitda_margin
+                          ? formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)
+                          : 'N/A'
+                      }. <br><br>
+
+                      A Gross Margin of ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.<br>
+                      An EBITDA Margin of ${
+                        analysed_kpis.calc_ebitda_margin
+                          ? formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_ebitda_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.<br><br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(
+                (grossMarginImpact + ebitdaMarginImpact) / 2
+              )}`,
+            },
+            recurringRevenueRatio: {
+              description: `
+                  <!-- RECURRING REVENUE ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                    <p class="text-body-2 mb-2">
+                      Your current Recurring Revenue Ratio is ${
+                        analysed_kpis.calc_recurring_revenue_ratio
+                          ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
+                          : 'N/A'
+                      }. <br><br>
+
+                      This is ${
+                analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
+              }.
+                      <br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(recurringImpact)}`,
+            },
+            ltvToCac: {
+              description: `
+                  <!-- LTV TO CAC ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                    <p class="text-body-2 mb-2">
+                      Not used in minimal EBITDA valuation.<br>
+                    </p>
+                  </div>
+                `,
+              impact: '-',
+            },
+            final: {
+              description: `
+                  <!-- TOTAL IMPACT ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                    <p class="text-body-2 mb-2">
+                      (${growthImpact} *
+                      ${(grossMarginImpact + ebitdaMarginImpact) / 2} *
+                      ${recurringImpact})
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(totalEbitdaImpactMinimal)}`,
+            },
+          },
+          evaluation_content: `
+              <!-- FINAL EVALUATION CONTENT -->
+              <p class="mb-2 mt-6">
+                Based on your business' performance, we need to adjust the EBITDA Base Multiple of ${baseEbitdaMultiple} by ${multipleImpactPercent(
+            totalEbitdaImpactMinimal
+          )}.
+              </p>
+              <p class="mb-2">
+                i.e. ${baseEbitdaMultiple}
+                *  ${totalEbitdaImpactMinimal.toFixed(2)} = ${finalEbitdaMultipleMinimal}
+              </p>
+              <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  ${finalEbitdaMultipleMinimal}.</p>
+
+              <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+              <p class="mb-2">
+                To evaluate the worth of your business using the EBITDA-Multiple-Method (minimal), multiply your current EBITDA with the final multiple. <br>
+                i.e. ${usdFormat(ebitdaVal)} * ${finalEbitdaMultipleMinimal}
+                = ${usdFormat(companyWorthEBITDAMinimal)}
+              </p>
+              <p class="mb62 font-weight-bold">Your business' valuation (minimal) using the EBITDA-Multiple-Method is ${usdFormat(
+            companyWorthEBITDAMinimal
+          )}.</p>
+            `,
+        },
+
+        standard: {
+          description_above_input: `
+              <!-- LATER STAGE -->
+              <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+              <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+              <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+                As a default we set this multiple at "3". 
+              </p>
+            `,
+          description_below_input: `
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+            `,
+          table: {
+            growth: {
+              description: `
+                  <!-- GROWTH ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                    <p class="text-body-2 mb-2">
+                      Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
+                      Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', cagr)}. <br>
+
+                      For valuation purposes we will calculate your future growth rate at <br>
+                      (${formatKPIValue('calc_yoy_revenue_growth', yoy)}
+                       + 
+                      ${formatKPIValue('calc_cagr_revenue', cagr)})
+                      / 2 = ${(futureGrowthRate * 100).toFixed(2)}%
+
+                      <br><br>
+                      A future growth rate of ${(futureGrowthRate * 100).toFixed(2)}% is ${
+                analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              }.
+
+                      <br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(growthImpact)}`,
+            },
+            profitability: {
+              description: `
                   <!-- PROFITABILITY ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
                     <p class="text-body-2 mb-2">
                       When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
 
-                      Your current Gross Margin is {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }}.<br> 
+                      Your current Gross Margin is ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      }.<br>
+                      A Gross Margin of ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.<br><br>
 
-                      A Gross Margin of {{ formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value) }} is {{analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}}.<br> <br>
+                      Your current EBITDA Margin is ${
+                        analysed_kpis.calc_ebitda_margin
+                          ? formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)
+                          : 'N/A'
+                      }.<br>
+                      An EBITDA Margin of ${
+                        analysed_kpis.calc_ebitda_margin
+                          ? formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_ebitda_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }. <br><br>
 
-                      Your current EBITDA Margin is {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }}.<br> 
-
-                      An EBITDA Margin of {{ formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value) }} is {{analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}}. <br> <br>
-
-                      To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and devide them by 2. <br>
-
-                      i.e. ({{analysed_kpis.calc_gross_margin.analysisResult.impactPercentage}} + {{analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}}) / 2 = {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}}. <br>
-
-
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_gross_margin')"
-                      ></v-btn>
+                      To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and divide by 2. <br>
+                      i.e. (${grossMarginImpact} + ${ebitdaMarginImpact}) / 2 = ${(
+                (grossMarginImpact + ebitdaMarginImpact) /
+                2
+              ).toFixed(2)}. <br>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2) }}`
-              },
-              recurringRevenueRatio: {
-                description: `
+              impact: `${multipleImpactPercent(
+                (grossMarginImpact + ebitdaMarginImpact) / 2
+              )}`,
+            },
+            recurringRevenueRatio: {
+              description: `
                   <!-- RECURRING REVENUE ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current Recurring Revenue Ratio is {{ formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value) }}. <br><br>
+                      Your current Recurring Revenue Ratio is ${
+                        analysed_kpis.calc_recurring_revenue_ratio
+                          ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}}.
+                      This is ${
+                analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_recurring_revenue_ratio')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage) }}`
-              },
-              ltvToCac: {
-                description: `
+              impact: `${multipleImpactPercent(recurringImpact)}`,
+            },
+            ltvToCac: {
+              description: `
                   <!-- LTV TO CAC ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
                     <p class="text-body-2 mb-2">
-                      Your current LTV-to-CAC Ratio is {{ formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value) }}. <br><br>
+                      Your current LTV-to-CAC Ratio is ${
+                        analysed_kpis.calc_ltv_to_cac
+                          ? formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)
+                          : 'N/A'
+                      }. <br><br>
 
-                      This is {{analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}}.
+                      This is ${
+                analysed_kpis.calc_ltv_to_cac?.analysisResult?.evaluationDescription || 'N/A'
+              }.
                       <br>
-                      <v-btn
-                        color="blue-lighten-2"
-                        variant="tonal"
-                        density="compact"
-                        text="Learn More"
-                        class="mt-4"
-                        @click="openModal('calc_ltv_to_cac')"
-                      ></v-btn>
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage) }}`
-              },
-              final: {
-                description: `
+              impact: `${multipleImpactPercent(ltvToCacImpact)}`,
+            },
+            final: {
+              description: `
                   <!-- TOTAL IMPACT ROW -->
                   <div class="py-2">
                     <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
                     <p class="text-body-2 mb-2">
-                      ({{analysed_kpis.calc_growth_combined.analysisResult.impactPercentage}} *
-                      {{(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage)/2}} *
-                      {{analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage}} *
-                      {{analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage}})
+                      (${growthImpact} *
+                      ${(grossMarginImpact + ebitdaMarginImpact) / 2} *
+                      ${recurringImpact} *
+                      ${ltvToCacImpact})
                     </p>
                   </div>
                 `,
-                impact: `{{ multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact) }}`
-              }
+              impact: `${multipleImpactPercent(totalEbitdaImpact)}`,
             },
-            evaluation_content: `
+          },
+          evaluation_content: `
               <!-- FINAL EVALUATION CONTENT -->
               <p class="mb-2 mt-6">
-                Based on your business' performance, we need to adjust the EBITDA Base Multiple of {{valuationData.base_ebitda_multiple}} by {{multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}}.  
+                Based on your business' performance, we need to adjust the EBITDA Base Multiple of ${baseEbitdaMultiple} by ${multipleImpactPercent(
+            totalEbitdaImpact
+          )}.
               </p>
               <p class="mb-2">
-                i.e. {{valuationData.base_ebitda_multiple}} 
-                *  {{valuationCalculation.total_ebitda_multiple_impact}} = {{valuationCalculation.final_ebitda_multiple}}
+                i.e. ${baseEbitdaMultiple}
+                *  ${totalEbitdaImpact.toFixed(2)} = ${finalEbitdaMultiple}
               </p>
-              <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  {{valuationCalculation.final_ebitda_multiple}}.</p>
+              <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  ${finalEbitdaMultiple}.</p>
 
-              <h3 class="text-h6 mb-2 mt-6">Calcuating the worth of your company</h3>
+              <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
               <p class="mb-2">
                 To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
-                i.e.{{usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)}} *     {{valuationCalculation.final_ebitda_multiple}}    
-                = {{usdFormat(valuationCalculation.companyWorthEBITDA)}} 
+                i.e. ${usdFormat(ebitdaVal)} * ${finalEbitdaMultiple}
+                = ${usdFormat(companyWorthEBITDA)}
               </p>
-              <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthEBITDA)}}.</p>
-            `
-          }
-        }
-      };
+              <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(
+            companyWorthEBITDA
+          )}.</p>
+            `,
+        },
+
+        complete: {
+          description_above_input: `
+              <!-- LATER STAGE -->
+              <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+              <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+              <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+                As a default we set this multiple at "3". 
+              </p>
+            `,
+          description_below_input: `
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+              <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+              <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+              <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+              <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+            `,
+          table: {
+            growth: {
+              description: `
+                  <!-- GROWTH ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                    <p class="text-body-2 mb-2">
+                      Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
+                      Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', cagr)}. <br>
+
+                      For valuation purposes we will calculate your future growth rate at <br>
+                      (${formatKPIValue('calc_yoy_revenue_growth', yoy)}
+                       + 
+                      ${formatKPIValue('calc_cagr_revenue', cagr)})
+                      / 2 = ${(futureGrowthRateCompleteArr * 100).toFixed(2)}%
+
+                      <br><br>
+                      A future growth rate of ${(futureGrowthRateCompleteArr * 100).toFixed(2)}% is ${
+                analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              }.
+
+                      <br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(growthImpact)}`,
+            },
+            profitability: {
+              description: `
+                  <!-- PROFITABILITY ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                    <p class="text-body-2 mb-2">
+                      When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+
+                      Your current Gross Margin is ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      }.<br>
+                      A Gross Margin of ${
+                        analysed_kpis.calc_gross_margin
+                          ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.<br><br>
+
+                      Your current EBITDA Margin is ${
+                        analysed_kpis.calc_ebitda_margin
+                          ? formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)
+                          : 'N/A'
+                      }.<br>
+                      An EBITDA Margin of ${
+                        analysed_kpis.calc_ebitda_margin
+                          ? formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)
+                          : 'N/A'
+                      } is ${
+                analysed_kpis.calc_ebitda_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }. <br><br>
+
+                      To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and divide them by 2. <br>
+                      i.e. (${grossMarginImpact} + ${ebitdaMarginImpact}) / 2 = ${(
+                (grossMarginImpact + ebitdaMarginImpact) /
+                2
+              ).toFixed(2)}. <br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(
+                (grossMarginImpact + ebitdaMarginImpact) / 2
+              )}`,
+            },
+            recurringRevenueRatio: {
+              description: `
+                  <!-- RECURRING REVENUE ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                    <p class="text-body-2 mb-2">
+                      Your current Recurring Revenue Ratio is ${
+                        analysed_kpis.calc_recurring_revenue_ratio
+                          ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
+                          : 'N/A'
+                      }. <br><br>
+
+                      This is ${
+                analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
+              }.
+                      <br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(recurringImpact)}`,
+            },
+            ltvToCac: {
+              description: `
+                  <!-- LTV TO CAC ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                    <p class="text-body-2 mb-2">
+                      Your current LTV-to-CAC Ratio is ${
+                        analysed_kpis.calc_ltv_to_cac
+                          ? formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)
+                          : 'N/A'
+                      }. <br><br>
+
+                      This is ${
+                analysed_kpis.calc_ltv_to_cac?.analysisResult?.evaluationDescription || 'N/A'
+              }.
+                      <br>
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(ltvToCacImpact)}`,
+            },
+            final: {
+              description: `
+                  <!-- TOTAL IMPACT ROW -->
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                    <p class="text-body-2 mb-2">
+                      (${growthImpact} *
+                      ${(grossMarginImpact + ebitdaMarginImpact) / 2} *
+                      ${recurringImpact} *
+                      ${ltvToCacImpact})
+                    </p>
+                  </div>
+                `,
+              impact: `${multipleImpactPercent(totalEbitdaImpactComplete)}`,
+            },
+          },
+          evaluation_content: `
+              <!-- FINAL EVALUATION CONTENT -->
+              <p class="mb-2 mt-6">
+                Based on your business' performance, we need to adjust the EBITDA Base Multiple of ${baseEbitdaMultiple} by ${multipleImpactPercent(
+            totalEbitdaImpactComplete
+          )}.
+              </p>
+              <p class="mb-2">
+                i.e. ${baseEbitdaMultiple}
+                *  ${totalEbitdaImpactComplete.toFixed(2)} = ${finalEbitdaMultipleComplete}
+              </p>
+              <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  ${finalEbitdaMultipleComplete}.</p>
+
+              <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+              <p class="mb-2">
+                To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
+                i.e. ${usdFormat(ebitdaVal)} * ${finalEbitdaMultipleComplete}
+                = ${usdFormat(companyWorthEBITDAComplete)}
+              </p>
+              <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(
+            companyWorthEBITDAComplete
+          )}.</p>
+            `,
+        },
+      },
+    };
+  }
+
   
+  function buk_gatherValuationContent(valuationData, analysed_kpis, latestYear) {
+    return {
+      arr: {
+        /**
+         * For ARR (earlyStage), we reuse the same "standard" textual content from old code
+         * for minimal, standard, and complete to ensure identical display.
+         */
+        minimal: {
+          description_above_input: `
+            <!-- EARLY STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+            <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+              As a default we set this multiple at "3". 
+            </p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)}
+                     + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)})
+                    / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br><br>
+
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the ARR Base Multiple of ${valuationData.base_arr_multiple} by ${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}.
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_arr_multiple}
+              *  ${valuationCalculation.total_arr_multiple_impact.toFixed(2)} = ${valuationCalculation.final_arr_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${valuationCalculation.final_arr_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple}
+              = ${usdFormat(valuationCalculation.companyWorthARR)} 
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+          `
+        },
+
+        /**
+         * We reuse the same text from above for "standard" and "complete"
+         */
+        standard: {
+          description_above_input: `
+            <!-- EARLY STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+            <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+              As a default we set this multiple at "3". 
+            </p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)}
+                     + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)})
+                    / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br><br>
+
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the ARR Base Multiple of ${valuationData.base_arr_multiple} by ${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}.
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_arr_multiple}
+              *  ${valuationCalculation.total_arr_multiple_impact.toFixed(2)} = ${valuationCalculation.final_arr_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${valuationCalculation.final_arr_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple}
+              = ${usdFormat(valuationCalculation.companyWorthARR)}
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+          `
+        },
+        complete: {
+          description_above_input: `
+            <!-- EARLY STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+            <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+              As a default we set this multiple at "3". 
+            </p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)}
+                     + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)})
+                    / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br><br>
+
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the ARR Base Multiple of ${valuationData.base_arr_multiple} by ${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}.
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_arr_multiple}
+              *  ${valuationCalculation.total_arr_multiple_impact.toFixed(2)} = ${valuationCalculation.final_arr_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${valuationCalculation.final_arr_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple}
+              = ${usdFormat(valuationCalculation.companyWorthARR)}
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+          `
+        }
+      },
+
+      ebitda: {
+        /**
+         * For EBITDA (laterStage), we also reuse the "standard" textual content from old code
+         * for minimal, standard, and complete.
+         */
+        minimal: {
+          description_above_input: `
+            <!-- LATER STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+            <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+              As a default we set this multiple at "3". 
+            </p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)}
+                     + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)})
+                    / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br>
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.<br><br>
+
+                    Your current EBITDA Margin is ${formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)}.<br>
+                    An EBITDA Margin of ${formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)} is ${analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}. <br><br>
+
+                    To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and divide them by 2. <br>
+                    i.e. (${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} + ${analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}) / 2 = ${(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2}. <br>
+
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the EBITDA Base Multiple of ${valuationData.base_ebitda_multiple} by ${multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}.
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_ebitda_multiple}
+              *  ${valuationCalculation.total_ebitda_multiple_impact} = ${valuationCalculation.final_ebitda_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  ${valuationCalculation.final_ebitda_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)} * ${valuationCalculation.final_ebitda_multiple}
+              = ${usdFormat(valuationCalculation.companyWorthEBITDA)}
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEBITDA)}.</p>
+          `
+        },
+        standard: {
+          // For "standard" we reuse the same text from minimal (the standard scenario in old code).
+          description_above_input: `
+            <!-- LATER STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+            <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+              As a default we set this multiple at "3". 
+            </p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)}
+                     + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)})
+                    / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br>
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.<br><br>
+
+                    Your current EBITDA Margin is ${formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)}.<br>
+                    An EBITDA Margin of ${formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)} is ${analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}. <br><br>
+
+                    To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and divide them by 2. <br>
+                    i.e. (${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} + ${analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}) / 2 = ${(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2}. <br>
+
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the EBITDA Base Multiple of ${valuationData.base_ebitda_multiple} by ${multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}.
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_ebitda_multiple}
+              *  ${valuationCalculation.total_ebitda_multiple_impact} = ${valuationCalculation.final_ebitda_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  ${valuationCalculation.final_ebitda_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)} * ${valuationCalculation.final_ebitda_multiple}
+              = ${usdFormat(valuationCalculation.companyWorthEBITDA)}
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEBITDA)}.</p>
+          `
+        },
+        complete: {
+          // For "complete" we reuse the same text from minimal (the standard scenario in old code).
+          description_above_input: `
+            <!-- LATER STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
+            <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
+              As a default we set this multiple at "3". 
+            </p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple).</p> 
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation we will use the average of your "current growth" (i.e. last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin, because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)}
+                     + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)})
+                    / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the EBITDA Valuation, we determine your profitability based on your Gross Margin as well as your EBITDA Margin. <br><br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br>
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.<br><br>
+
+                    Your current EBITDA Margin is ${formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)}.<br>
+                    An EBITDA Margin of ${formatKPIValue('calc_ebitda_margin', analysed_kpis.calc_ebitda_margin.value)} is ${analysed_kpis.calc_ebitda_margin.analysisResult.evaluationDescription}. <br><br>
+
+                    To calculate the total impact of your Gross Margin and EBITDA Margin, we add them together and divide them by 2. <br>
+                    i.e. (${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} + ${analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage}) / 2 = ${(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2}. <br>
+
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent((analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage + analysed_kpis.calc_ebitda_margin.analysisResult.impactPercentage) / 2} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the EBITDA Base Multiple of ${valuationData.base_ebitda_multiple} by ${multipleImpactPercent(valuationCalculation.total_ebitda_multiple_impact)}.
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_ebitda_multiple}
+              *  ${valuationCalculation.total_ebitda_multiple_impact} = ${valuationCalculation.final_ebitda_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final EBITDA-Multiple is  ${valuationCalculation.final_ebitda_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)} * ${valuationCalculation.final_ebitda_multiple}
+              = ${usdFormat(valuationCalculation.companyWorthEBITDA)}
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEBITDA)}.</p>
+          `
+        }
+      }
+    };
+  
+  //1234
 
 
     // ------------------------------------------------
     // Fill in the object now
     // ------------------------------------------------
 
-    // ARR minimal
-    evaluationContent.arr.minimal = {
-      description_above_input: 'Description above input for ARR minimal...',
-      description_below_input: 'Description below input for ARR minimal...',
-      table: buildArrRows({
-        futureGrowth: futureGrowthRateMinimalArr,
-        totalImpact: totalArrImpactMinimal,
-        finalMultiple: finalArrMultipleMinimal,
-        worth: companyWorthARRMinimal,
-      }),
-    };
-
-    // ARR standard
-    evaluationContent.arr.standard = {
-      description_above_input: 'Description above input for ARR standard...',
-      description_below_input: 'Description below input for ARR standard...',
-      table: buildArrRows({
-        futureGrowth: futureGrowthRate,
-        totalImpact: totalArrImpact,
-        finalMultiple: finalArrMultiple,
-        worth: companyWorthARR,
-      }),
-    };
-
-    // ARR complete
-    evaluationContent.arr.complete = {
-      description_above_input: 'Description above input for ARR complete...',
-      description_below_input: 'Description below input for ARR complete...',
-      table: buildArrRows({
-        futureGrowth: futureGrowthRateCompleteArr,
-        totalImpact: totalArrImpactComplete,
-        finalMultiple: finalArrMultipleComplete,
-        worth: companyWorthARRComplete,
-      }),
-    };
-
-    // EBITDA minimal
-    evaluationContent.ebitda.minimal = {
-      description_above_input: 'Description above input for EBITDA minimal...',
-      description_below_input: 'Description below input for EBITDA minimal...',
-      table: buildEbitdaRows({
-        totalImpact: totalEbitdaImpactMinimal,
-        finalMultiple: finalEbitdaMultipleMinimal,
-        worth: companyWorthEBITDAMinimal,
-      }),
-    };
-
-    // EBITDA standard
-    evaluationContent.ebitda.standard = {
-      description_above_input: 'Description above input for EBITDA standard...',
-      description_below_input: 'Description below input for EBITDA standard...',
-      table: buildEbitdaRows({
-        totalImpact: totalEbitdaImpact,
-        finalMultiple: finalEbitdaMultiple,
-        worth: companyWorthEBITDA,
-      }),
-    };
-
-    // EBITDA complete
-    evaluationContent.ebitda.complete = {
-      description_above_input: 'Description above input for EBITDA complete...',
-      description_below_input: 'Description below input for EBITDA complete...',
-      table: buildEbitdaRows({
-        totalImpact: totalEbitdaImpactComplete,
-        finalMultiple: finalEbitdaMultipleComplete,
-        worth: companyWorthEBITDAComplete,
-      }),
-    };
-
-    return evaluationContent;
+  
   }
 
   // We gather all possible scenarios once:
@@ -2889,6 +3892,8 @@
 
     // if either is missing, return empty
     if (!method || !detail) return {};
+
+    console.log('currentEvaluation', currentEvaluation)
 
     return allEvaluationContent.value[method][detail];
   });
