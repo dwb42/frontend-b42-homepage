@@ -6,10 +6,12 @@
     </h1>
     <a :href="valuationData.company_url" target="_blank" class="text-body-1 mr-6">{{ valuationData.company_url }}</a>
 
-    <div class="mt-6"></div>
-    
-    <v-card variant="elevated" class="pa-3 mb-6">
-      <h2 class="text-h5 mb-2">General Info</h2>
+    <div class="mt-10"></div>
+
+    <h2 class="text-h5 mb-2"><b>(1) Provide general info + select stage / analisys depth</b></h2>
+    <v-card variant="elevated" class="pa-3 mb-12">
+      
+      
       <v-form @submit.prevent="">
         <v-text-field v-model="valuationData.company_name" id="company_name" label="Company Name" required hide-details class="mb-6"></v-text-field>
         <v-text-field 
@@ -26,7 +28,7 @@
         <v-text-field v-model="valuationData.operational_since" id="operational_since" label="Operational since" required hide-details class="mb-6"></v-text-field>
         <v-text-field v-model="valuationData.number_of_employees" id="number_of_employees" label="Number of employees (incl. active founders)" required hide-details class="mb-6"></v-text-field>
 
-        <h3 class="text-h6 mb-2 mt-6">What best describes your current state of business?</h3>
+        <h3 class="text-h6 mb-2 mt-6">What best describes your current stage of business?</h3>
         <v-radio-group v-model="valuationData.state_of_business">
           <v-radio value="preRevenue">
             <template v-slot:label>
@@ -44,6 +46,13 @@
             </template>
           </v-radio>
         </v-radio-group>
+
+        <v-alert
+          v-if="valuationData.state_of_business === 'preRevenue'"
+          text="but our valuation method does not work for pre-revenue businesses. 🤷‍♂️"
+          title="Sorry ... "
+          type="error"
+        ></v-alert>
 
         <h3 class="text-h6 mb-2 mt-2">What kind of valuation do you want to do?</h3>
         <v-radio-group v-model="valuationData.valuation_type">
@@ -64,33 +73,33 @@
           </v-radio>
         </v-radio-group>
 
-        <v-btn 
+        <!--v-btn 
           color="primary" 
           type="submit"
           :disabled="!isGeneralInfoComplete"
         >
           Enter Financial Information
-        </v-btn>
+        </v-btn-->
 
       </v-form>
     </v-card>
+    
 
 
     <!-- ///////////////////////// -->
     <!-- YEARLY INPUTS START        -->
     <!-- /////////////////////////  -->
-    
-    <v-card 
-      v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''" 
-      variant="elevated" 
-      class="pa-3 mb-6"
+
+    <template 
+      v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''"
       >
-      <!--h2 class="text-h5 mb-2">Your Financial KPIs</h2-->
+    <h2 class="text-h5 mb-2"><b>(2) Enter your financial data :: {{valuationData.valuation_type}} version</b></h2>
+    <v-card variant="elevated" class="pa-3 mb-10">
       <v-table>
         <thead>
           <tr>
             <th class="text-left">
-              <h2 class="text-h5 mb-2"><b>Your Yearly Performance</b></h2>
+              <!--h2 class="text-h5 mb-2"><b>Your Yearly Performance</b></h2-->
             </th>
             <template v-for="year in years" :key="year">
               <th class="text-right">{{ year }}</th>
@@ -133,6 +142,7 @@
       </v-btn>
 
     </v-card>
+    </template>
 
     <!-- ///////////////////////// -->
     <!-- YEARLY INPUTS END          -->
@@ -144,72 +154,7 @@
     <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
 
 
-    <!-- ///////////////////////// -->
-    <!-- KPI YEARLY TABLE START           TEMP123 --> 
-    <!-- /////////////////////////  -->
-    
-    <v-card variant="elevated" class="pa-3 mb-6" v-if="!isLoading">
-      <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
-      <v-table>
-        <thead>
-          <tr>
-            <th class="text-left"><h2 class="text-h5 mb-2"><b>Calculated Yearly KPIs</b></h2></th>
-            <template v-for="year in years" :key="year">
-              <th class="text-right">{{ year }}</th>
-            </template>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in rowDefinitionsKPIOutputs" :key="row.field">
-            <td>{{ row.label }}</td>
-            <template v-for="year in years" :key="year">
-              <td class="text-right">
-                <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
-                  <!-- Display dash for first year -->
-                  <template v-if="calculatedKPIs[year][row.field] === '-'">
-                    -
-                  </template>
-                  <!-- Check if KPI value is a number -->
-                  <template v-else-if="typeof calculatedKPIs[year][row.field] === 'number'">
-                    {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
-                  </template>
-                  <!-- If KPI value is an object with missing data -->
-                  
-                  <template v-else-if="calculatedKPIs[year][row.field].missingData">
-                    <v-tooltip location="top">
-                      <template #activator="{ props }">
-                        <v-icon
-                          v-bind="props"
-                          color="red"
-                          icon="mdi-progress-question"
-                        ></v-icon>
-                      </template>
-                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
-                    </v-tooltip>
-                  </template>
-                </template>
-                <template v-else>
-                  <span style="color: red;">No data</span>
-                </template>
-              </td>
-            </template>
-          </tr>
-        </tbody>
-      </v-table>
-      
-      <div 
-        v-if="calculatedKPIs[latestYear] && calculatedKPIs[latestYear].calc_cagr_revenue != null"
-        class="mt-2 ml-4 text-body-2"
-        >
-        Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
-        {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
-      </div>
-    </v-card>
 
-
-    <!-- ///////////////////////// -->
-    <!-- KPI YEARLY TABLE END           -->
-    <!-- /////////////////////////  -->
 
 
     
@@ -263,15 +208,15 @@
     </v-card-->
 
     
-    <!-- The Dialog that will show the selected KPI details -->
+    <!-- The Dialog that will show the selected KPI details >
     <v-dialog v-model="isDialogOpen" :style="{ maxWidth: '800px' }">
       <v-card>
         <v-card-title>
-          <!-- Display the title based on selectedKPI -->
+          <!-- Display the title based on selectedKPI >
           {{ selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'KPI Details' }}
         </v-card-title>
         <v-card-text>
-          <!-- Dynamically render the component -->
+          <!-- Dynamically render the component >
           <component 
             v-if="selectedKPI && kpiModalConfig[selectedKPI]" 
             :is="kpiModalConfig[selectedKPI].component"
@@ -283,7 +228,7 @@
           <v-btn text @click="isDialogOpen = false">Close</v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </v-dialog-->
 
     <!-- ///////////////////////// -->
     <!-- KPI KACHELN END           -->
@@ -294,22 +239,97 @@
     <!-- EVALUATION START           -->
     <!-- /////////////////////////  -->
 
-    
+    1234
     <template v-if="!isLoading">
-      <v-card variant="elevated" class="pa-3 mb-6" :style="{ maxWidth: '800px' }" >
-        <h2 class="text-h4 mb-2"><b>Valuation of your SaaS business</b></h2>
-        <p class="mb-6 text-body-1">Depending on which phase your business is, in we will evaluate its worth using the ARR- or the EBITDA-Multiple Method.  </p>
+      <h2 class="text-h5 mb-2"><b>(3) Review valuation of your SaaS business :: {{valuationData.valuation_type}} version</b></h2>
+
+        <v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }">
+
+          <!-- Description above base multiple input -->
+          <p v-html="currentEvaluation.description_above_input"></p>
+
+          <!-- Base multiple input -->
+          <v-text-field
+            v-model="baseMultiple"
+            :label="currentEvaluationMethod === 'arr' ? 'Base ARR-Multiple' : 'Base EBITDA-Multiple'"
+            type="number"
+            :rules="[v => v >= 0 || 'Multiple must be non-negative']"
+            style="width:300px"
+            class="mb-6"
+          ></v-text-field>
+
+          <!-- Description below base multiple input -->
+          <p class="mb-6 text-body-1" v-html="currentEvaluation.description_below_input"></p>
+
+          <!-- Table structure with 5 rows -->
+          <v-table>
+            <thead>
+              <tr>
+                <th class="text-left" width="75%">Factor / Description</th>
+                <th class="text-right" width="25%">Impact %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <!-- Growth -->
+                <td>
+                  <div class="py-2" v-html="currentEvaluation.table.growth.description"></div>
+                </td>
+                <td class="text-right">
+                  <span>{{ currentEvaluation.table.growth.impact }}</span>
+                </td>
+              </tr>
+              <tr>
+                <!-- Profitability -->
+                <td>
+                  <div class="py-2" v-html="currentEvaluation.table.profitability.description"></div>
+                </td>
+                <td class="text-right">
+                  <span>{{ currentEvaluation.table.profitability.impact }}</span>
+                </td>
+              </tr>
+              <tr>
+                <!-- Recurring Revenue Ratio -->
+                <td>
+                  <div class="py-2" v-html="currentEvaluation.table.recurringRevenueRatio.description"></div>
+                </td>
+                <td class="text-right">
+                  <span>{{ currentEvaluation.table.recurringRevenueRatio.impact }}</span>
+                </td>
+              </tr>
+              <tr>
+                <!-- LTV-to-CAC Ratio -->
+                <td>
+                  <div class="py-2" v-html="currentEvaluation.table.ltvToCac.description"></div>
+                </td>
+                <td class="text-right">
+                  <span>{{ currentEvaluation.table.ltvToCac.impact }}</span>
+                </td>
+              </tr>
+              <tr>
+                <!-- Final Impact -->
+                <td>
+                  <div class="py-2" v-html="currentEvaluation.table.final.description"></div>
+                </td>
+                <td class="text-right font-weight-bold">
+                  <span>{{ currentEvaluation.table.final.impact }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+
+          <!-- Final valuation content -->
+          <div class="mt-6" v-html="currentEvaluation.evaluation_content"></div>
+
+        </v-card>
 
 
 
-        <!-- STARTING OUTPUT DEPENDING ON RADIO SELECTION -->
-        <!-- PRE REVENUE ... WONT DO -->
-        <template v-if="valuationData.state_of_business === 'preRevenue'">
-          <p class="text-body-1">
-            ❌ Our valuation method does not work for pre-revenue businesses. 🤷‍♂️
-          </p>
-        </template>
+    
+    
 
+      
+      <v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }" >
 
         <!-- EARLY STAGE -->
         <template v-if="valuationData.state_of_business === 'earlyStage'">
@@ -741,14 +761,81 @@
        </template>
 
       </v-card>
-      <pre>valuationData<br>{{valuationData}}</pre>
+      <!--pre>valuationData<br>{{valuationData}}</pre>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
-      <pre>valuationCalculation<br>{{valuationCalculation}}</pre>
+      <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
 
     </template>
 
     <!-- ///////////////////////// -->
     <!-- EVALUATION END           -->
+    <!-- /////////////////////////  -->
+
+    <!-- ///////////////////////// -->
+    <!-- KPI YEARLY TABLE START    --> 
+    <!-- /////////////////////////  -->
+
+    <v-card variant="elevated" class="pa-3 mb-6" v-if="!isLoading">
+      <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
+      <v-table>
+        <thead>
+          <tr>
+            <th class="text-left"><h2 class="text-h5 mb-2"><b>Calculated Yearly KPIs</b></h2></th>
+            <template v-for="year in years" :key="year">
+              <th class="text-right">{{ year }}</th>
+            </template>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in rowDefinitionsKPIOutputs" :key="row.field">
+            <td>{{ row.label }}</td>
+            <template v-for="year in years" :key="year">
+              <td class="text-right">
+                <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
+                  <!-- Display dash for first year -->
+                  <template v-if="calculatedKPIs[year][row.field] === '-'">
+                    -
+                  </template>
+                  <!-- Check if KPI value is a number -->
+                  <template v-else-if="typeof calculatedKPIs[year][row.field] === 'number'">
+                    {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
+                  </template>
+                  <!-- If KPI value is an object with missing data -->
+
+                  <template v-else-if="calculatedKPIs[year][row.field].missingData">
+                    <v-tooltip location="top">
+                      <template #activator="{ props }">
+                        <v-icon
+                          v-bind="props"
+                          color="red"
+                          icon="mdi-progress-question"
+                        ></v-icon>
+                      </template>
+                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
+                    </v-tooltip>
+                  </template>
+                </template>
+                <template v-else>
+                  <span style="color: red;">No data</span>
+                </template>
+              </td>
+            </template>
+          </tr>
+        </tbody>
+      </v-table>
+
+      <div 
+        v-if="calculatedKPIs[latestYear] && calculatedKPIs[latestYear].calc_cagr_revenue != null"
+        class="mt-2 ml-4 text-body-2"
+        >
+        Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
+        {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
+      </div>
+    </v-card>
+
+
+    <!-- ///////////////////////// -->
+    <!-- KPI YEARLY TABLE END           -->
     <!-- /////////////////////////  -->
     
   </v-container>  
@@ -776,7 +863,7 @@
   const valuationData = reactive({}); 
   
   // Initialize reactive object to store KPIs and calculated metrics
-  const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
+  //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
   const calculatedKPIs = reactive({}); // var to save the output of calculateKPIsForYear 
   
@@ -1653,6 +1740,312 @@
   // VALUATION START 
   //////////////////////////////////////////////////////
 
+  /** 1234
+     * This function gathers all textual content from the "old code"
+     * and returns an object with the same structure that the "new code"
+     * (the dynamic evaluation approach) can use to render identical output.
+     *
+     * We keep the comments from the old code to show what each portion does.
+     * We use the "standard" version of the old code for all three: minimal, standard, and complete.
+     */
+  function gatherValuationContent(valuationData, analysed_kpis, latestYear) {
+    return {
+      arr: {
+        minimal: {
+          description_above_input: `
+            <!-- EARLY STAGE -->
+            <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+            <p class="mb-6">Since early-stage businesses often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+
+            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business they deem to be a solid SaaS investment case. As a default, we set this multiple at "3".</p>
+          `,
+          description_below_input: `
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
+            <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e., have no impact on your multiple), "better than average" (i.e., increase your multiple), or if they are "worse than average" (i.e., decrease your multiple).</p>
+
+            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analyzing Growth & Profitability</h4>
+            <p class="text-body-2 mb-2">Every investor will want to get a good sense of how fast you will be growing your revenue and how profitable your business will be.</p>
+            <p class="text-body-2 mb-2">In our evaluation, we will use the average of your "current growth" (i.e., last Year-on-Year growth) and your "compounded growth (CAGR)" over the time period you have provided financials to get a "future growth rate".</p>
+            <p class="text-body-2 mb-2">We will use your "current Gross Margin" to estimate the profit potential of your business. We will ignore your EBITDA Margin because it is negatively affected by too many costs that you will grow out of or won't have in the future.</p>
+          `,
+          table: {
+            growth: {
+              description: `
+                <!-- GROWTH ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Growth</p>
+                  <p class="text-body-2 mb-2">
+                    Your current growth is ${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth?.value)}. <br>
+                    Your compounded growth (CAGR) is ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue?.value)}. <br>
+
+                    For valuation purposes, we will calculate your future growth rate at <br>
+                    (${formatKPIValue('calc_yoy_revenue_growth', analysed_kpis.calc_yoy_revenue_growth.value)} + 
+                    ${formatKPIValue('calc_cagr_revenue', analysed_kpis.calc_cagr_revenue.value)}) / 2 = 
+                    ${valuationCalculation.futureGrowthRate * 100}%
+
+                    <br><br>
+                    A future growth rate of ${valuationCalculation.futureGrowthRate * 100}% is ${analysed_kpis.calc_growth_combined.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_growth_combined')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_growth_combined.analysisResult.impactPercentage)}`
+            },
+            profitability: {
+              description: `
+                <!-- PROFITABILITY ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                  <p class="text-body-2 mb-2">
+                    When using the ARR Valuation, we determine your profitability based on your Gross Margin. <br>
+
+                    Your current Gross Margin is ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)}.<br> <br>
+
+                    A Gross Margin of ${formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)} is ${analysed_kpis.calc_gross_margin.analysisResult.evaluationDescription}.
+
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_gross_margin')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_gross_margin.analysisResult.impactPercentage)}`
+            },
+            recurringRevenueRatio: {
+              description: `
+                <!-- RECURRING REVENUE ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current Recurring Revenue Ratio is ${formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage)}`
+            },
+            ltvToCac: {
+              description: `
+                <!-- LTV TO CAC ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                  <p class="text-body-2 mb-2">
+                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+
+                    This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
+                    <br>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage)}`
+            },
+            final: {
+              description: `
+                <!-- TOTAL IMPACT ROW -->
+                <div class="py-2">
+                  <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                  <p class="text-body-2 mb-2">
+                    (${analysed_kpis.calc_growth_combined.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_gross_margin.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_recurring_revenue_ratio.analysisResult.impactPercentage} *
+                    ${analysed_kpis.calc_ltv_to_cac.analysisResult.impactPercentage})
+                  </p>
+                </div>
+              `,
+              impact: `${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}`
+            }
+          },
+          evaluation_content: `
+            <!-- FINAL EVALUATION CONTENT -->
+            <p class="mb-2 mt-6">
+              Based on your business' performance, we need to adjust the ARR Base Multiple of ${valuationData.base_arr_multiple} by ${multipleImpactPercent(valuationCalculation.total_arr_multiple_impact)}.  
+            </p>
+            <p class="mb-2">
+              i.e. ${valuationData.base_arr_multiple} 
+              *  ${valuationCalculation.total_arr_multiple_impact.toFixed(2)} = ${valuationCalculation.final_arr_multiple}
+            </p>
+            <p class="mb-2 font-weight-bold">Your final ARR-Multiple is  ${valuationCalculation.final_arr_multiple}.</p>
+
+            <h3 class="text-h6 mb-2 mt-6">Calculating the worth of your company</h3>
+            <p class="mb-2">
+              To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
+              i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple} = ${usdFormat(valuationCalculation.companyWorthARR)} 
+            </p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+          `
+        }
+      }
+    };
+  }
+
+  
+
+
+    // ------------------------------------------------
+    // Fill in the object now
+    // ------------------------------------------------
+
+    // ARR minimal
+    evaluationContent.arr.minimal = {
+      description_above_input: 'Description above input for ARR minimal...',
+      description_below_input: 'Description below input for ARR minimal...',
+      table: buildArrRows({
+        futureGrowth: futureGrowthRateMinimalArr,
+        totalImpact: totalArrImpactMinimal,
+        finalMultiple: finalArrMultipleMinimal,
+        worth: companyWorthARRMinimal,
+      }),
+    };
+
+    // ARR standard
+    evaluationContent.arr.standard = {
+      description_above_input: 'Description above input for ARR standard...',
+      description_below_input: 'Description below input for ARR standard...',
+      table: buildArrRows({
+        futureGrowth: futureGrowthRate,
+        totalImpact: totalArrImpact,
+        finalMultiple: finalArrMultiple,
+        worth: companyWorthARR,
+      }),
+    };
+
+    // ARR complete
+    evaluationContent.arr.complete = {
+      description_above_input: 'Description above input for ARR complete...',
+      description_below_input: 'Description below input for ARR complete...',
+      table: buildArrRows({
+        futureGrowth: futureGrowthRateCompleteArr,
+        totalImpact: totalArrImpactComplete,
+        finalMultiple: finalArrMultipleComplete,
+        worth: companyWorthARRComplete,
+      }),
+    };
+
+    // EBITDA minimal
+    evaluationContent.ebitda.minimal = {
+      description_above_input: 'Description above input for EBITDA minimal...',
+      description_below_input: 'Description below input for EBITDA minimal...',
+      table: buildEbitdaRows({
+        totalImpact: totalEbitdaImpactMinimal,
+        finalMultiple: finalEbitdaMultipleMinimal,
+        worth: companyWorthEBITDAMinimal,
+      }),
+    };
+
+    // EBITDA standard
+    evaluationContent.ebitda.standard = {
+      description_above_input: 'Description above input for EBITDA standard...',
+      description_below_input: 'Description below input for EBITDA standard...',
+      table: buildEbitdaRows({
+        totalImpact: totalEbitdaImpact,
+        finalMultiple: finalEbitdaMultiple,
+        worth: companyWorthEBITDA,
+      }),
+    };
+
+    // EBITDA complete
+    evaluationContent.ebitda.complete = {
+      description_above_input: 'Description above input for EBITDA complete...',
+      description_below_input: 'Description below input for EBITDA complete...',
+      table: buildEbitdaRows({
+        totalImpact: totalEbitdaImpactComplete,
+        finalMultiple: finalEbitdaMultipleComplete,
+        worth: companyWorthEBITDAComplete,
+      }),
+    };
+
+    return evaluationContent;
+  }
+
+  // We gather all possible scenarios once:
+  const allEvaluationContent = ref(null);
+
+  const currentEvaluationMethod = computed(() => {
+    if (valuationData.state_of_business === 'earlyStage') {
+      return 'arr';
+    } else if (valuationData.state_of_business === 'laterStage') {
+      return 'ebitda';
+    } else {
+      // fallback if it's neither earlyStage nor laterStage
+      return null; 
+    }
+  });
+  
+
+  // The final “currentEvaluation” is:
+  const currentEvaluation = computed(() => {
+    if (!allEvaluationContent.value) return {};
+
+    const method = currentEvaluationMethod.value;      // 'arr' or 'ebitda'
+    const detail = valuationData.valuation_type;       // 'minimal', 'standard', or 'complete'
+
+    // if either is missing, return empty
+    if (!method || !detail) return {};
+
+    return allEvaluationContent.value[method][detail];
+  });
+
+
+
+  // We also track a "baseMultiple" as used in the input
+  const baseMultiple = computed({
+    get() {
+      if (currentEvaluationMethod.value === 'arr') {
+        return valuationData.base_arr_multiple;
+      } else {
+        return valuationData.base_ebitda_multiple;
+      }
+    },
+    set(val) {
+      if (currentEvaluationMethod.value === 'arr') {
+        valuationData.base_arr_multiple = val;
+      } else {
+        valuationData.base_ebitda_multiple = val;
+      }
+    },
+  });
+
+
+
+  ///// END chat gpt input 
+  
+
   function doValuationCalculation() {
     console.log('doValuationCalculation called');
 
@@ -1708,7 +2101,7 @@
       valuationCalculation.companyWorthARR = null;
     }
 
-    // Calculate company worth EBITDA 1234
+    // Calculate company worth EBITDA 
     if (latestYear.value && valuationData.valuation_yearly_inputs) {
       const ebitda = valuationData.valuation_yearly_inputs[latestYear.value]?.calc_ebitda_net;
       if (ebitda != null && valuationCalculation.final_arr_multiple) {
@@ -1756,7 +2149,7 @@
   // Debounced function to update valuation financials
   const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
     updateValuationFinancial(field, value, timePeriod);
-  }, 500);
+  }, 1000);
 
 
   //save valuation data to db
@@ -1838,7 +2231,7 @@
   
   function recalculateAllMetrics() {
     // Clear existing KPIs
-    Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
+    //Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
     Object.keys(analysed_kpis).forEach(key => delete analysed_kpis[key]);
 
     // 1. Calculate KPIs for all years
@@ -1855,6 +2248,9 @@
 
     // 4. Perform Valuation Calculation
     doValuationCalculation();
+
+    // 5. *** Rebuild textual content for minimal, standard, complete ***
+    allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
 
     // Set loading to false after the first full calculation
     //isLoading.value = false;
