@@ -1753,14 +1753,13 @@
       arr: {
         minimal: {
           description_above_input: `
-            <!-- EARLY STAGE -->
-            <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
-            <p class="mb-6">Since early-stage businesses often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
-
-            <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
-
-            <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
-            <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business they deem to be a solid SaaS investment case. As a default, we set this multiple at "3".</p>
+            <div class="valuation-content">
+              <h3 class="text-h5 mb-2 mt-4">Valuing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
+              <p class="mb-6">Since early-stage businesses often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+              <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+              <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
+              <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business they deem to be a solid SaaS investment case. As a default, we set this multiple at "3".</p>
+            </div>`,
           `,
           description_below_input: `
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
@@ -2328,4 +2327,13 @@
     background-color: #f6f6f6;
   }
 
+  .valuation-content {
+    padding: 16px;
+  }
+
+  .valuation-content h3,
+  .valuation-content h4,
+  .valuation-content p {
+    margin-bottom: 16px;
+  }
 </style>
