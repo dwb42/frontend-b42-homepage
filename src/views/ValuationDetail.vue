@@ -1749,7 +1749,7 @@
      * We use the "standard" version of the old code for all three: minimal, standard, and complete.
      */
   function gatherValuationContent(valuationData, analysed_kpis, latestYear) {
-    return {
+    const evaluationContent = {
       arr: {
         minimal: {
           description_above_input: `
@@ -2072,6 +2072,7 @@
     };
     
     return evaluationContent;
+  }
   }
 
   // We gather all possible scenarios once:
