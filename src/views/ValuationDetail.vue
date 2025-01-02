@@ -54,7 +54,7 @@
           type="error"
         ></v-alert>
 
-        <h3 class="text-h6 mb-2 mt-2">What kind of valuation do you want to do?</h3>
+        <h3 class="text-h6 mb-2 mt-2">What type of valuation do you want to do?</h3>
         <v-radio-group v-model="valuationData.valuation_type">
           <v-radio value="minimal">
             <template v-slot:label>
@@ -241,7 +241,7 @@
 
     1234
     <template v-if="!isLoading">
-      <h2 class="text-h5 mb-2"><b>(3) Review valuation of your SaaS business :: {{valuationData.valuation_type}} version</b></h2>
+      <h2 class="text-h5 mb-2"><b>(3) Review valuation :: {{valuationData.valuation_type}} version</b></h2>
 
         <v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }">
 
@@ -329,9 +329,9 @@
     
 
       
-      <v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }" >
+      <!--v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }" >
 
-        <!-- EARLY STAGE -->
+        
         <template v-if="valuationData.state_of_business === 'earlyStage'">
           <h3 class="text-h5 mb-2 mt-4">Valueing Early Stage / Growth SaaS Cases using ARR-Multiple</h3>
           <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).  </p>
@@ -356,14 +356,12 @@
             @update:modelValue="saveData"
           ></v-text-field>
 
-          <!--hint="Base multiple for SaaS valuation"-->
 
 
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
 
           <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
 
-          <!--p class="text-body-2 mb-6">He would thenlook at current market conditions and some other attributes that  have an impact on your valuation multiple. </p-->
 
 
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
@@ -567,14 +565,12 @@
             @update:modelValue="saveData"
           ></v-text-field>
 
-          <!--hint="Base multiple for SaaS valuation"-->
 
 
             <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
 
           <p class="text-body-2 mb-6">An investor would then evaluate your Financial Metrics to find out if they are "SaaS norm" (i.e. have no impact on your multiple), "better than average" (i.e. increase your multiple) or if they are "worse than average" (i.e. decrease your multiple). </p> 
 
-          <!--p class="text-body-2 mb-6">He would thenlook at current market conditions and some other attributes that  have an impact on your valuation multiple. </p-->
 
 
           <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Analysing Growth & Profitability</h4>
@@ -760,7 +756,7 @@
         <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is {{usdFormat(valuationCalculation.companyWorthEBITDA)}}.</p>
        </template>
 
-      </v-card>
+      </v-card-->
       <!--pre>valuationData<br>{{valuationData}}</pre>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
@@ -1751,6 +1747,8 @@
     // ---------------------------
     // Helper functions
     // ---------------------------
+    console.log('latestYear', latestYear)
+    
     const formatKPIValue = (key, value) => {
       if (value == null) return 'N/A';
       // Example: show as percentage with 2 decimals
@@ -1780,9 +1778,10 @@
     const arrVal = latestYear.value && valuationData.valuation_yearly_inputs
       ? valuationData.valuation_yearly_inputs[latestYear.value]?.recurring_revenue
       : null;
-    const ebitdaVal = latestYear.value && valuationData.valuation_yearly_inputs
-      ? valuationData.valuation_yearly_inputs[latestYear.value]?.calc_ebitda_net
+    const ebitdaVal = latestYear.value
+      ? calculatedKPIs[latestYear.value]?.calc_ebitda_net
       : null;
+
 
     // -------------------------------------------------
     // ARR - STANDARD / COMPLETE
@@ -1853,7 +1852,7 @@
     const companyWorthEBITDAComplete = companyWorthEBITDA;
 
     // -----------------------------------------
-    // Return the full object
+    // Return the full object 1234
     // -----------------------------------------
     return {
       arr: {
@@ -2324,20 +2323,24 @@
             `,
         },
       },
-
+      //1234
       ebitda: {
         minimal: {
           description_above_input: `
               <!-- LATER STAGE -->
-              <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
-              <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
+              <!--h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3-->
+              <h3 class="text-h6 mb-2 mt-0">EBITDA-Multiple-Method</h3>
+              <p class="mb-6">As a later stage business that is balancing its focus on "growing" vs. "generating a profit" an investor would typically use the EBIDTA-Multiple valuation method. </p>
 
-              <h3 class="text-h6 mb-2 mt-0">Finding the ARR-Multiple for your business</h3>
+              <p class="mb-6">The EBITDA Valuation Formula is: EBITDA x EBITDA-Multiple </p>
 
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Setting a Base Multiple</h4>
-              <p class="mb-6">To find the ARR-Multiple that an investor might value your business at, we first have to set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case. 
-                As a default we set this multiple at "3". 
-              </p>
+              
+              <p class="mb-6">To find the EBITDA-Multiple that an investor might value your business at, we first set a Base Multiple that an investor would use to value a SaaS business that he deems to be a solid SaaS investment case.  </p>
+              
+              <p class="mb-6">The value of this Base Multiple depends on the current "temperature" of the financial market, the World-Region you and your customers are located in, as well as the investment preferences of the given investor.  </p>
+
+              <p class="mb-6">We recommend that you ask any investor at what EBITDA-Multiple he would value a SaaS business that ticks all the boxes. Doing so will put you "in the lead" and will allow you to base level compare different investors. For the following valuation we will set the multiple at "10". Feel free to change it.   </p>
             `,
           description_below_input: `
               <h4 class="text-body-1 font-weight-bold mb-2 mt-0">Adjusting the Base Multiple to your business' performance</h4>
@@ -4086,8 +4089,8 @@
   onMounted(async () => {
     // Wait for fetchValuation to complete
     await fetchValuation(thisValuationId.value);
-    await nextTick();
-    //recalculateAllMetrics();
+    //await nextTick();
+    recalculateAllMetrics();
   });
 
   
@@ -4124,13 +4127,13 @@
     analyseOtherKPIs();
 
     // 4. Perform Valuation Calculation
-    doValuationCalculation();
+    //doValuationCalculation();
 
     // 5. *** Rebuild textual content for minimal, standard, complete ***
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
 
     // Set loading to false after the first full calculation
-    //isLoading.value = false;
+    isLoading.value = false;
   }
   //////////////////////////////////////////////////////
   // WATCHER AN LIFECYCLE HOOKS START 
