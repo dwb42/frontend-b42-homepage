@@ -6,7 +6,7 @@ const kpiData = {
       "rangeName": "Very Low",
       "multipleVectorName": "Success Factor",
       "impactPercentage": 0.50,
-      "evaluationDescription": "Low proportion of recurring revenue."
+      "evaluationDescription": "is such a low Ratio that it will cause serious doubts in an investor that you are actually running a SaaS business. You beter have a good explanation for it. For valuation purposes we will half your multiple"
     },
     {
       "min": 0.5,
@@ -22,7 +22,7 @@ const kpiData = {
       "rangeName": "2/3 Recurring",
       "multipleVectorName": "Success Factor",
       "impactPercentage": 0.90,
-      "evaluationDescription": "High proportion of recurring revenue."
+      "evaluationDescription": "slightly below what is expected of a typical SaaS business and will reduce your multiple by 10%"
     },
     {
       "min": 0.75,
@@ -30,15 +30,15 @@ const kpiData = {
       "rangeName": "SaaS Norm",
       "multipleVectorName": "Success Factor",
       "impactPercentage": 1.00,
-      "evaluationDescription": "High proportion of recurring revenue."
+      "evaluationDescription": "considered to be the norm for a SaaS business and hence does not affect your multiple"
     },
     {
       "min": 0.9,
       "max": Infinity,
       "rangeName": "Fully Recurring",
       "multipleVectorName": "Success Factor",
-      "impactPercentage": 1.25,
-      "evaluationDescription": "High proportion of recurring revenue."
+      "impactPercentage": 1.15,
+      "evaluationDescription": "is an excellent value and will improve your multiple by 15%"
     }
   ],
   "calc_yoy_revenue_growth": [
@@ -90,7 +90,7 @@ const kpiData = {
       "rangeName": "Less Efficient SaaS",
       "multipleVectorName": "Profitability Factor",
       "impactPercentage": 0.80,
-      "evaluationDescription": "Gross margin between 60% and 70% indicates less efficient SaaS operations."
+      "evaluationDescription": "is a sign of an inefficient SaaS business and will reduce your multiple by 20%"
     },
     {
       "min": 0.7,

@@ -1,3 +1,5 @@
+this is my code: 
+
 <template>
   <v-container>  
     <span class="text-caption"><router-link :to="`/app/valuations/`">Valuations</router-link></span>
@@ -3645,3 +3647,7 @@
   }
 
 </style>
+
+currently when i click "learn more" which call the "openModal" function, the modal does not open. 
+
+tell me why and tell me how to fix it. 
