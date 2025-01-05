@@ -184,8 +184,8 @@
           <v-table>
             <thead>
               <tr>
-                <th class="text-left" width="75%">Factor / Description</th>
-                <th class="text-right" width="25%">Impact %</th>
+                <th class="text-left" width="75%">Metric & Evaluation</th>
+                <th class="text-right" width="25%">Impact</th>
               </tr>
             </thead>
             <tbody>
@@ -215,7 +215,21 @@
               <tr>
                 <!-- Profitability -->
                 <td>
-                  <div class="py-2" v-html="currentEvaluation.table.profitability.description"></div>
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
+                    <p class="text-body-2 mb-2">
+                      <div v-html="currentEvaluation.table.profitability.description"></div>
+                    </p>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ebitda_margin')"
+                    ></v-btn>
+                  </div>
                 </td>
                 <td class="text-right">
                   <span>{{ currentEvaluation.table.profitability.impact }}</span>
@@ -224,7 +238,21 @@
               <tr>
                 <!-- Recurring Revenue Ratio -->
                 <td>
-                  <div class="py-2" v-html="currentEvaluation.table.recurringRevenueRatio.description"></div>
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
+                    <p class="text-body-2 mb-2">
+                      <div v-html="currentEvaluation.table.recurringRevenueRatio.description"></div>
+                    </p>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_recurring_revenue_ratio')"
+                    ></v-btn>
+                  </div>
                 </td>
                 <td class="text-right">
                   <span>{{ currentEvaluation.table.recurringRevenueRatio.impact }}</span>
@@ -233,7 +261,21 @@
               <tr>
                 <!-- LTV-to-CAC Ratio -->
                 <td>
-                  <div class="py-2" v-html="currentEvaluation.table.ltvToCac.description"></div>
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
+                    <p class="text-body-2 mb-2">
+                      <div v-html="currentEvaluation.table.ltvToCac.description"></div>
+                    </p>
+                    <v-btn
+                      color="blue-lighten-2"
+                      variant="tonal"
+                      density="compact"
+
+                      text="Learn More"
+                      class="mt-4"
+                      @click="openModal('calc_ltv_to_cac')"
+                    ></v-btn>
+                  </div>
                 </td>
                 <td class="text-right">
                   <span>{{ currentEvaluation.table.ltvToCac.impact }}</span>
@@ -242,7 +284,12 @@
               <tr>
                 <!-- Final Impact -->
                 <td>
-                  <div class="py-2" v-html="currentEvaluation.table.final.description"></div>
+                  <div class="py-2">
+                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
+                    <p class="text-body-2 mb-2">
+                      <div v-html="currentEvaluation.table.final.description"></div>
+                    </p>
+                  </div>
                 </td>
                 <td class="text-right font-weight-bold">
                   <span>{{ currentEvaluation.table.final.impact }}</span>
@@ -255,6 +302,25 @@
           <div class="mt-6" v-html="currentEvaluation.evaluation_content"></div>
 
         </v-card>
+
+      <!-- The Dialog that will show the selected KPI details -->
+      <v-dialog v-model="isDialogOpen" :style="{ maxWidth: '800px' }">
+        <v-card :title="selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'KPI Details'">
+
+          <v-card-text>
+            <!-- Dynamically render the component -->
+            <component 
+              v-if="selectedKPI && kpiModalConfig[selectedKPI]" 
+              :is="kpiModalConfig[selectedKPI].component"
+            />
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="isDialogOpen = false">Close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
       <!--pre>valuationData<br>{{valuationData}}</pre>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
@@ -410,24 +476,6 @@
   //temp const { trendStatement: recurringRevenueTrend } = useTrendAnalysis(valuationKPIs, 'calc_recurring_revenue_ratio');
   
 
-  const rowDefinitionsFinancialInputsBUK = computed(() => [
-    // Revenue metrics
-    { label: 'Total Revenue', field: 'total_revenue', isCurrency: true },
-    { label: 'Recurring Revenue', field: 'recurring_revenue', isCurrency: true },
-
-    // Cost metrics
-    { label: 'Total Costs', field: 'total_costs', isCurrency: true },
-    { label: 'Costs of Goods Sold', field: 'costs_of_goods_sold', isCurrency: true },
-    { label: 'Costs of Customer Acquisition', field: 'costs_of_customer_acquisition', isCurrency: true },
-    { label: 'Costs of Research and Development', field: 'costs_of_r_and_d', isCurrency: true },
-    { label: 'Costs of General Administration', field: 'costs_of_general_administration', isCurrency: true },
-
-    // Customer metrics
-    { label: 'Number of Customers at End of Period', field: 'number_of_customers_end_of_period', isCurrency: false },
-    { label: 'Customers Won in Period', field: 'customers_won_in_period', isCurrency: false },
-    { label: 'Customers Lost in Period', field: 'customers_lost_in_period', isCurrency: false },
-  ]);
-
   const rowDefinitionsFinancialInputs = computed(() => [
     {
       label: 'Total Revenue',
@@ -449,7 +497,7 @@
         complete: 'all'
       }
     },
-    {
+    /*{
       label: 'Total Costs',
       field: 'total_costs',
       isCurrency: true,
@@ -458,7 +506,7 @@
         standard: 'latestOnly',
         complete: 'all'
       }
-    },
+    },*/
     {
       label: 'Costs of Goods Sold',
       field: 'costs_of_goods_sold',
@@ -1062,27 +1110,27 @@
   // Configuration object: key = KPI field, value = { title, component }
   const kpiModalConfig = {
     calc_yoy_revenue_growth: {
-      title: 'Year-over-Year Growth Details',
+      title: 'Year-over-Year Growth',
       component: YearOnYearGrowthModal
     },
     calc_growth_combined: {
-      title: 'Future Growth Details',
+      title: 'Growth impact on valuation',
       component: FutureGrowthModal
     },
     calc_gross_margin: {
-      title: 'Gross Margin Details',
+      title: 'Gross Margin impact on valuation',
       component: GrossMarginModal
     },
     calc_ebitda_margin: {
-      title: 'EBITDA Margin Details',
+      title: 'EBITDA Margin impact on valuation',
       component: EBITDAMarginModal
     },
     calc_recurring_revenue_ratio: {
-      title: 'Recurring Revenue Ratio Details',
+      title: 'Recurring Revenue Ratio impact on valuation',
       component: RecurringRevenueRatioModal
     },
     calc_ltv_to_cac: {
-      title: 'LTV to CAC Ratio Details',
+      title: 'LTV to CAC Ratio impact on valuation',
       component: LtvToCacModal
     }
   };
@@ -1465,14 +1513,9 @@
             final: {
               description: `
                   <!-- TOTAL IMPACT ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
-                    <p class="text-body-2 mb-2">
                       (${growthImpact} *
                       ${grossMarginImpact} *
                       ${recurringImpact})
-                    </p>
-                  </div>
                 `,
               impact: `${multipleImpactPercent(totalArrImpactMinimal)}`,
             },
@@ -1883,9 +1926,6 @@
             },
             profitability: {
               description: `
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Profitability</p>
-                    <p class="text-body-2 mb-2">
                       When using the EBITDA Valuation (minimal), we determine your profitability based on your Gross Margin and your EBITDA Margin. <br><br>
 
                       Your current Gross Margin is ${
@@ -1916,8 +1956,6 @@
                 The combined impact of your Gross Margin and your EBITDA Margin is ${multipleImpactPercent(
                 (grossMarginImpact + ebitdaMarginImpact) / 2
               )}.
-                    </p>
-                  </div>
                 `,
               impact: `${multipleImpactPercent(
                 (grossMarginImpact + ebitdaMarginImpact) / 2
@@ -1925,9 +1963,6 @@
             },
             recurringRevenueRatio: {
               description: `
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Recurring Revenue Ratio</p>
-                    <p class="text-body-2 mb-2">
                       Your current Recurring Revenue Ratio is ${
                         analysed_kpis.calc_recurring_revenue_ratio
                           ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
@@ -1936,36 +1971,24 @@
                       This is ${
                 analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
               }.
-                      <br>
-                    </p>
-                  </div>
                 `,
               impact: `${multipleImpactPercent(recurringImpact)}`,
             },
             ltvToCac: {
               description: `
                   <!-- LTV TO CAC ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
-                    <p class="text-body-2 mb-2">
-                      When doing the "minimal" evaluation, the LTV-to-CAC ratio can not be calulated an hence has no impact on your multiple. <br>
-                    </p>
-                  </div>
+                      When doing the "minimal" evaluation, the LTV-to-CAC ratio can not be calulated an hence has no impact on your multiple. 
+
                 `,
               impact: '-',
             },
             final: {
               description: `
                   <!-- TOTAL IMPACT ROW -->
-                  <div class="py-2">
-                    <p class="text-body-1 font-weight-bold mb-1">Total Impact on Multiple</p>
-                    <p class="text-body-2 mb-2">
                       Note that we have to multiply and NOT add the invididual impact values to calculate the final multiple impact, i.e. 
                       ${growthImpact} *
                       ${(grossMarginImpact + ebitdaMarginImpact) / 2} *
                       ${recurringImpact} = ${multipleImpactPercent(totalEbitdaImpactMinimal)}.
-                    </p>
-                  </div>
                 `,
               impact: `${multipleImpactPercent(totalEbitdaImpactMinimal)}`,
             },
@@ -1988,7 +2011,6 @@
 
         standard: {
           description_above_input: `
-              <!-- LATER STAGE -->
               <h3 class="text-h5 mb-2 mt-4">Valuing Later Stage / Steady SaaS Cases using EBITDA-Multiple</h3>
               <p class="mb-6">Since early stage business often have low or negative EBITDA, their valuation is often done using a Multiple on their Annual Recurring Revenue (ARR).</p>
 

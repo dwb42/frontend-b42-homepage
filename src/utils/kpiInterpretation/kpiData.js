@@ -291,6 +291,64 @@ const kpiData = {
       "multipleVectorName": "Growth Factor",
       "impactPercentage": 1.40,
       "evaluationDescription": "excellent and will improve your multiple by 40%"
+    }, 
+    "final_multiple": [
+      {
+        "min": 0,
+        "max": 0.5,
+        "rangeName": "Negative Growth",
+        "multipleVectorName": "Growth Factor",
+        "impactPercentage": 0.70,
+        "evaluationDescription": "Negative year-over-year revenue growth."
+      },
+      {
+        "min": 0.5,
+        "max": 0.7,
+        "rangeName": "Slow Growth",
+        "multipleVectorName": "Growth Factor",
+        "impactPercentage": 0.90,
+        "evaluationDescription": "is slow growth and will decrease your mutiple by 10%"
+      },
+      {
+        "min": 0.7,
+        "max": 0.9,
+        "rangeName": "Low Growth",
+        "multipleVectorName": "Growth Factor",
+        "impactPercentage": 0.90,
+        "evaluationDescription": "is low growth and has no effect on your multiple"
+      },
+      {
+        "min": 0.9,
+        "max": 1.1,
+        "rangeName": "SaaS typical",
+        "multipleVectorName": "Growth Factor",
+        "impactPercentage": 1.10,
+        "evaluationDescription": "is good and will improve your mutiple by 10%"
+      },
+      {
+        "min": 1.1,
+        "max": 1.3,
+        "rangeName": "Strong Growth",
+        "multipleVectorName": "Growth Factor",
+        "impactPercentage": 1.25,
+        "evaluationDescription": "strong and will improve your multiple by 25%"
+      },
+      {
+        "min": 1.3,
+        "max": 1.5,
+        "rangeName": "High Growth",
+        "multipleVectorName": "Growth Factor",
+        "impactPercentage": 1.40,
+        "evaluationDescription": "excellent and will improve your multiple by 40%"
+      }
+    ,
+    {
+      "min": 1.5,
+      "max": 1.8,
+      "rangeName": "High Growth",
+      "multipleVectorName": "Growth Factor",
+      "impactPercentage": 1.40,
+      "evaluationDescription": "excellent and will improve your multiple by 40%"
     }
   ]
 };

@@ -39,7 +39,7 @@
           </div>
           
           <div v-else>
-            <h1 class="text-h3 font-weight-bold">Check your email </h1>
+            <h1 class="text-h3 font-weight-bold">Check your mail </h1>
             <div class="py-4"/>
 
             <div class="text-body-1"> 
