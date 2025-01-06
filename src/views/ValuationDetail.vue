@@ -1128,15 +1128,26 @@
 
 
   /*
-  watchEffect(() => {
-    if (valuationData.valuation_yearly_inputs) {
-      for (const year of years.value) {
-        calculateKPIsForYear(year);
-      }
-      /Compute CAGR now that all years are processed
-      computeCAGR();
+  watch(
+  () => valuationData,
+  () => {
+    if (showResults.value === true) {
+      showResults.value = false;
+      valuationData.show_valuation = false;
+      showInputAlert.value = true;
     }
-  });
+  },
+  { deep: true }
+);
+
+watchEffect(() => {
+  if (valuationData.valuation_yearly_inputs) {
+    for (const year of years.value) {
+      calculateKPIsForYear(year);
+    }
+    computeCAGR();
+  }
+});
   */
   //////////////////////////////////////////////////////
   // KPI CALCULATION START 
