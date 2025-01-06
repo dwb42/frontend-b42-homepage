@@ -7,8 +7,8 @@
       <v-list-item 
         v-for="(item, i) in includeItems" 
         :key="i"
-        :value="item"
         color="primary"
+        density="comfortable"
       >
         <template v-slot:prepend>
           <v-icon icon="mdi-account-remove"></v-icon>
@@ -25,8 +25,8 @@
       <v-list-item 
         v-for="(item, i) in excludeItems" 
         :key="i"
-        :value="item"
         color="error"
+        density="comfortable"
       >
         <template v-slot:prepend>
           <v-icon icon="mdi-close"></v-icon>

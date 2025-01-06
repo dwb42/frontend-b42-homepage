@@ -163,7 +163,8 @@
     <!-- /////////////////////////  -->
 
     1234
-    <template v-if="!isLoading">
+    {{valuationData.show_valuation}}
+    <template v-if="showResults">
       <h2 class="text-h5 mb-2"><b>(3) Review valuation :: {{valuationData.valuation_type}} version</b></h2>
 
         <v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }">
@@ -339,45 +340,46 @@
     <!-- ///////////////////////// -->
     <!-- FEEDBACK START    --> 
     <!-- /////////////////////////  -->
-
-    <h2 class="text-h5 mb-2"><b>(4) Gives us Feedback</b></h2>
-    
-    <v-card variant="elevated" class="pa-3 mb-12">
-      <v-form @submit.prevent="">
-
-        <h3 class="text-h6 mb-0 mt-6">Rate this tool on a scale of 1 to 5 </h3>
-        <v-radio-group v-model="valuationData.feedback_rating_1to10_of_tool">
-          <v-radio value="">
-            <template v-slot:label><strong>no answer</strong></template>
-          </v-radio>
-          <v-radio value="1">
-            <template v-slot:label><strong>1 - pretty shitty</strong></template>
-          </v-radio>
-          <v-radio value="2">
-            <template v-slot:label><strong>2 - below average</strong></template>
-          </v-radio>
-          <v-radio value="3">
-            <template v-slot:label><strong>3 - not sure/strong</strong></template>
-          </v-radio>
-          <v-radio value="4">
-            <template v-slot:label><strong>4 - pretty cool</strong></template>
-          </v-radio>
-          <v-radio value="5">
-            <template v-slot:label><strong>5 - awesome</strong></template>
-          </v-radio>          
-        </v-radio-group>
-
-
-        <h3 class="text-h6 mb-2 mt-2">Help us improve, by providing feedback</h3>
-        <v-textarea v-model="valuationData.feedback_text" id="feedback_text" label="What do you like? What should we add / improve?" hide-details class="mb-6"></v-textarea>
-
-
-        <h3 class="text-h6 mb-2 mt-2">Do you want to share this evaluation with investors? </h3>
-        <v-checkbox v-model="valuationData.feedback_share_with_investors" value="share"  label="By checking this box, you agree that we share your business data with a few hand picked investors who are interested in SaaS investment opportunities and might contact you. Your business information will not be made public. "></v-checkbox>
-
-
-      </v-form>
-    </v-card>
+    <template v-if="showResults">
+      <h2 class="text-h5 mb-2 mt-0"><b>(4) Gives us Feedback</b></h2>
+      
+      <v-card variant="elevated" class="pa-3 mb-12">
+        <v-form @submit.prevent="">
+  
+          <h3 class="text-h6 mb-0 mt-0">Rate this tool on a scale of 1 to 5 </h3>
+          <v-radio-group v-model="valuationData.feedback_rating_1to10_of_tool">
+            <v-radio value="">
+              <template v-slot:label><strong>no answer</strong></template>
+            </v-radio>
+            <v-radio value="1">
+              <template v-slot:label><strong>1 - pretty shitty</strong></template>
+            </v-radio>
+            <v-radio value="2">
+              <template v-slot:label><strong>2 - below average</strong></template>
+            </v-radio>
+            <v-radio value="3">
+              <template v-slot:label><strong>3 - not sure/strong</strong></template>
+            </v-radio>
+            <v-radio value="4">
+              <template v-slot:label><strong>4 - pretty cool</strong></template>
+            </v-radio>
+            <v-radio value="5">
+              <template v-slot:label><strong>5 - awesome</strong></template>
+            </v-radio>          
+          </v-radio-group>
+  
+  
+          <h3 class="text-h6 mb-2 mt-2">Help us improve, by providing feedback</h3>
+          <v-textarea v-model="valuationData.feedback_text" id="feedback_text" label="What do you like? What should we add / improve?" hide-details class="mb-6"></v-textarea>
+  
+  
+          <h3 class="text-h6 mb-2 mt-2">Do you want to share this evaluation with investors? </h3>
+          <v-checkbox v-model="valuationData.feedback_share_with_investors" value="share"  label="By checking this box, you agree that we share your business data with a few hand picked investors who are interested in SaaS investment opportunities and might contact you. Your business information will not be made public. "></v-checkbox>
+  
+  
+        </v-form>
+      </v-card>
+    </template>
 
     <!-- ///////////////////////// -->
     <!-- FEEDBACK END           -->
@@ -388,7 +390,7 @@
     <!-- KPI YEARLY TABLE START    --> 
     <!-- /////////////////////////  -->
 
-    <v-card variant="elevated" class="pa-3 mb-6" v-if="!isLoading">
+    <v-card variant="elevated" class="pa-3 mb-6" v-if="showResults">
       <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
       <v-table>
         <thead>
@@ -465,6 +467,7 @@
 
   
   const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
+  const showResults = ref(false); // Variable to track if the results are shown or not
   
   //setup router
   import { useRoute } from 'vue-router'
@@ -473,8 +476,9 @@
 
   //valuation vars
   const thisValuationId = ref(route.params.id);
-  const valuationData = reactive({}); 
-  
+  const valuationData = reactive({
+    show_valuation: false
+  }); 
   // Initialize reactive object to store KPIs and calculated metrics
   //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
@@ -1295,7 +1299,7 @@
   console.log('analysed kpis: ',analysed_kpis)
 
   // After completing the logic, set loading to false
-  isLoading.value = false;
+  //isLoading.value = false;
   //console.log('is loading: ',isLoading.value)
   }
 
@@ -3556,7 +3560,9 @@
     // Wait for fetchValuation to complete
     await fetchValuation(thisValuationId.value);
     //await nextTick();
-    recalculateAllMetrics();
+    if (valuationData.show_valuation) {
+      recalculateAllMetrics();
+    }
   });
 
   
@@ -3592,14 +3598,12 @@
     analyseYearlyKPIs();
     analyseOtherKPIs();
 
-    // 4. Perform Valuation Calculation
-    //doValuationCalculation();
-
-    // 5. *** Rebuild textual content for minimal, standard, complete ***
+    // 4. *** Rebuild textual content for minimal, standard, complete ***
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
 
     // Set loading to false after the first full calculation
-    isLoading.value = false;
+    showResults.value = true;
+    valuationData.show_valuation = true;
   }
   //////////////////////////////////////////////////////
   // WATCHER AN LIFECYCLE HOOKS START 
