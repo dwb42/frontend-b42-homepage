@@ -1,13 +1,36 @@
 
 <template>
   <p class="mb-4">Enter the total amount of revenue your company generated in the given period. This should include:</p>
-  <ul class="mb-4">
-    <li>All recurring revenue (e.g., subscriptions)</li>
-    <li>One-time revenue (e.g., setup fees)</li>
-    <li>Service revenue (e.g., consulting)</li>
-    <li>Other revenue streams</li>
-  </ul>
+  
+  <v-card class="mb-4">
+    <v-list density="compact">
+      <v-list-item
+        v-for="(item, i) in revenueItems"
+        :key="i"
+        :value="item"
+        color="primary"
+      >
+        <template v-slot:prepend>
+          <v-icon icon="mdi-currency-usd"></v-icon>
+        </template>
+        <v-list-item-title v-text="item.text"></v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-card>
 
   <p class="mb-4">Enter the gross amount before any deductions, taxes, or costs.</p>
   <v-alert type="info" text="Use the same currency consistently across all financial inputs." class="mb-4"></v-alert>
 </template>
+
+<script>
+export default {
+  data: () => ({
+    revenueItems: [
+      { text: 'All recurring revenue (e.g., subscriptions)' },
+      { text: 'One-time revenue (e.g., setup fees)' },
+      { text: 'Service revenue (e.g., consulting)' },
+      { text: 'Other revenue streams' }
+    ],
+  }),
+}
+</script>
