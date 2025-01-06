@@ -1,6 +1,6 @@
 
 <template>
-  <p class="mb-4">Enter the number of new paying customers acquired during this period:</p>
+  <p class="mb-2">Enter the number of new paying customers acquired during this period:</p>
   
   <v-card class="mb-4">
     <v-list density="compact">
@@ -18,9 +18,9 @@
     </v-list>
   </v-card>
 
-  <p class="mb-4">Do NOT include:</p>
+  <p class="mb-2">Do not include:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in excludeItems" 
@@ -35,6 +35,8 @@
       </v-list-item>
     </v-list>
   </v-card>
+
+  <p>Make sure that you only include customers who have been won and activated, i.e. if you have won the deal on 15.12.2024 but the contract does not start till 1.1.2025 do not count the customer. </p>
 </template>
 
 <script>

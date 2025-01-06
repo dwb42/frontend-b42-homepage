@@ -1,8 +1,8 @@
 
 <template>
-  <p class="mb-4">Enter all costs related to acquiring new customers:</p>
+  <p class="mb-2">Enter all costs related to acquiring new customers:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in costItems" 
@@ -18,7 +18,7 @@
     </v-list>
   </v-card>
 
-  <v-alert type="info" text="Include both successful and unsuccessful acquisition efforts." class="mb-4"></v-alert>
+  <p>We need your Cost of Customer Acquisition to calculate your LTV-to-CAC Ratio.</p>
 </template>
 
 <script>

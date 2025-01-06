@@ -1,8 +1,8 @@
 
 <template>
-  <p class="mb-4">Enter the total number of paying customers at the end of the period:</p>
+  <p class="mb-2">Enter the total number of paying customers at the end of the period:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in includeItems" 
@@ -18,9 +18,9 @@
     </v-list>
   </v-card>
 
-  <p class="mb-4">Do NOT include:</p>
+  <p class="mb-2">Do not include:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in excludeItems" 
@@ -35,6 +35,8 @@
       </v-list-item>
     </v-list>
   </v-card>
+
+  <p>E.g. if you are inputing the data for 2024, you want to count the number of active customers on 31.12.2024. </p>
 </template>
 
 <script>

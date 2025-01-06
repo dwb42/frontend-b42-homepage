@@ -2,7 +2,7 @@
 <template>
   <p class="mb-4">Enter only the revenue that comes from recurring sources, typically:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in includeItems" 
@@ -11,16 +11,16 @@
         color="primary"
       >
         <template v-slot:prepend>
-          <v-icon icon="mdi-cash-check"></v-icon>
+          <v-icon icon="mdi-currency-usd"></v-icon>
         </template>
         <v-list-item-title v-text="item.text"></v-list-item-title>
       </v-list-item>
     </v-list>
   </v-card>
 
-  <p class="mb-4">Do NOT include:</p>
+  <p class="mb-2 mt-6">Do not include:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in excludeItems" 
@@ -35,8 +35,7 @@
       </v-list-item>
     </v-list>
   </v-card>
-
-  <v-alert type="info" text="This value should be less than or equal to your total revenue." class="mb-4"></v-alert>
+  <p>We need your Recurring Revenue to calculate your Recurring Revenue Ratio.</p>
 </template>
 
 <script>

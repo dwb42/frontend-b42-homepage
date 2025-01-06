@@ -1,8 +1,8 @@
 
 <template>
-  <p class="mb-4">Enter the number of customers who churned during this period:</p>
+  <p class="mb-2">Enter the number of customers who churned during this period:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in includeItems" 
@@ -18,9 +18,9 @@
     </v-list>
   </v-card>
 
-  <p class="mb-4">Do NOT include:</p>
+  <p class="mb-2">Do not include:</p>
   
-  <v-card class="mb-4">
+  <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
         v-for="(item, i) in excludeItems" 
@@ -36,7 +36,8 @@
     </v-list>
   </v-card>
 
-  <v-alert type="info" text="Count the customer as lost in the period when they actually stopped being a customer, not when they gave notice." class="mb-4"></v-alert>
+  <p>Count the customer as lost in the period when they actually stopped being a customer, not when they gave notice. </p>
+
 </template>
 
 <script>
