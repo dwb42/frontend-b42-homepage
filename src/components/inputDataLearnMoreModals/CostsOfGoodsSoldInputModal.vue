@@ -1,17 +1,57 @@
 
 <template>
   <p class="mb-4">Enter the direct costs associated with delivering your service, including:</p>
-  <ul class="mb-4">
-    <li>Cloud hosting costs</li>
-    <li>Third-party API fees</li>
-    <li>Customer support personnel costs</li>
-    <li>Data storage costs</li>
-    <li>Software licenses directly used in service delivery</li>
-  </ul>
+  
+  <v-card class="mb-4">
+    <v-list density="compact">
+      <v-list-item 
+        v-for="(item, i) in includeItems" 
+        :key="i"
+        :value="item"
+        color="primary"
+      >
+        <template v-slot:prepend>
+          <v-icon icon="mdi-currency-usd"></v-icon>
+        </template>
+        <v-list-item-title v-text="item.text"></v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-card>
+
   <p class="mb-4">Do NOT include:</p>
-  <ul class="mb-4">
-    <li>Sales and marketing costs</li>
-    <li>R&D costs</li>
-    <li>Administrative overhead</li>
-  </ul>
+  
+  <v-card class="mb-4">
+    <v-list density="compact">
+      <v-list-item 
+        v-for="(item, i) in excludeItems" 
+        :key="i"
+        :value="item"
+        color="error"
+      >
+        <template v-slot:prepend>
+          <v-icon icon="mdi-close"></v-icon>
+        </template>
+        <v-list-item-title v-text="item.text"></v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-card>
 </template>
+
+<script>
+export default {
+  data: () => ({
+    includeItems: [
+      { text: 'Cloud hosting costs' },
+      { text: 'Third-party API fees' },
+      { text: 'Customer support personnel costs' },
+      { text: 'Data storage costs' },
+      { text: 'Software licenses directly used in service delivery' }
+    ],
+    excludeItems: [
+      { text: 'Sales and marketing costs' },
+      { text: 'R&D costs' },
+      { text: 'Administrative overhead' }
+    ],
+  }),
+}
+</script>
