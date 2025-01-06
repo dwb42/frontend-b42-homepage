@@ -19,7 +19,6 @@
   </v-card>
 
   <p class="mb-4">Enter the gross amount before any deductions, taxes, or costs.</p>
-  <v-alert type="info" text="Use the same currency consistently across all financial inputs." class="mb-4"></v-alert>
 </template>
 
 <script>
