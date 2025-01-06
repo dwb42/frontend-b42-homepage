@@ -9,7 +9,7 @@
     <div class="mt-10"></div>
 
     <h2 class="text-h5 mb-2"><b>(1) Provide general info, select business stage & analysis depth</b></h2>
-    <v-card variant="elevated" class="pa-3 mb-12">
+    <v-card variant="outlined" class="pa-3 mb-12">
       
       
       <v-form @submit.prevent="">
@@ -94,7 +94,7 @@
       v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''"
       >
     <h2 class="text-h5 mb-2"><b>(2) Enter your financial data ({{valuationData.valuation_type}})</b></h2>
-    <v-card variant="elevated" class="pa-3 mb-10">
+    <v-card variant="outlined" class="pa-3 mb-10">
       <v-table>
         <thead>
           <tr>
@@ -140,10 +140,10 @@
         v-if="showInputAlert" 
         ariant="tonal"
         density="compact"
-        text="Hit the button to recalculate. 👇"  
+        text="recalculate 👇"  
         title="Your inputs have changed"
         color="yellow-lighten-4"
-        class="mt-6"
+        class="mt-4"
       ></v-alert>
       
       <v-btn
@@ -162,22 +162,18 @@
     <!-- YEARLY INPUTS END          -->
     <!-- /////////////////////////  -->
 
-    
     <!--pre>valuationData<br>{{valuationData}}</pre>
     <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
     <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
 
  
     <!-- ///////////////////////// -->
-    <!-- EVALUATION START           -->
+    <!-- EVALUATION START     1234      -->
     <!-- /////////////////////////  -->
-
-    1234
-    {{valuationData.show_valuation}}
     <template v-if="showResults">
-      <h2 class="text-h5 mb-2"><b>(3) Review valuation :: {{valuationData.valuation_type}} version</b></h2>
+      <h2 class="text-h5 mb-2"><b>(3) Review valuation ({{valuationData.valuation_type}})</b></h2>
 
-        <v-card variant="elevated" class="pa-3 mb-10" :style="{ maxWidth: '800px' }">
+        <v-card variant="outlined" class="pa-3 mb-10">
 
           <!-- Description above base multiple input -->
           <p v-html="currentEvaluation.description_above_input"></p>
@@ -353,7 +349,7 @@
     <template v-if="showResults">
       <h2 class="text-h5 mb-2 mt-0"><b>(4) Gives us Feedback</b></h2>
       
-      <v-card variant="elevated" class="pa-3 mb-12">
+      <v-card variant="outlined" class="pa-3 mb-12">
         <v-form @submit.prevent="">
   
           <h3 class="text-h6 mb-0 mt-0">Rate this tool on a scale of 1 to 5 </h3>
@@ -400,7 +396,7 @@
     <!-- KPI YEARLY TABLE START    --> 
     <!-- /////////////////////////  -->
 
-    <v-card variant="elevated" class="pa-3 mb-6" v-if="showResults">
+    <v-card variant="outlined" class="pa-3 mb-6" v-if="showResults">
       <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
       <v-table>
         <thead>
@@ -1126,29 +1122,6 @@
   }
 
 
-
-  /*
-  watch(
-  () => valuationData,
-  () => {
-    if (showResults.value === true) {
-      showResults.value = false;
-      valuationData.show_valuation = false;
-      showInputAlert.value = true;
-    }
-  },
-  { deep: true }
-);
-
-watchEffect(() => {
-  if (valuationData.valuation_yearly_inputs) {
-    for (const year of years.value) {
-      calculateKPIsForYear(year);
-    }
-    computeCAGR();
-  }
-});
-  */
   //////////////////////////////////////////////////////
   // KPI CALCULATION START 
   //////////////////////////////////////////////////////
@@ -3530,6 +3503,7 @@ watchEffect(() => {
     // Make an HTTP PUT request to update the lot in the database using Sequelize
     try {
       //db console.log('val data ',valuationData)
+      console.log('update valuation:', valuationData);
       const response = await axios.put(`${apiBaseURL}/valuations/` + thisValuationId.value, valuationData);
       console.log('valuation updated:', response);
 
@@ -3596,8 +3570,16 @@ watchEffect(() => {
     async () => {
       try {
         if (!isInitialLoad.value) {
-          await saveData(newVal);
+          await saveData(valuationData);
+          
+          if (showResults.value === true) {
+            showResults.value = false;
+            //valuationData.show_valuation = false;
+            showInputAlert.value = true;
+            console.log('i am ')
+          }
         }
+        
         //await saveData(valuationData);
         //await nextTick();
       } catch (error) {
@@ -3606,6 +3588,7 @@ watchEffect(() => {
     },
     { deep: true }
   );
+
 
   
   function recalculateAllMetrics() {
@@ -3629,8 +3612,9 @@ watchEffect(() => {
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
 
     // Set loading to false after the first full calculation
+    // valuationData.show_valuation = true;
     showResults.value = true;
-    valuationData.show_valuation = true;
+    showInputAlert.value = false;
   }
   //////////////////////////////////////////////////////
   // WATCHER AN LIFECYCLE HOOKS START 
