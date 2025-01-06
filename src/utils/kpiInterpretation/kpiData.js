@@ -258,56 +258,57 @@ const kpiData = {
       "impactPercentage": 1.40,
       "evaluationDescription": "excellent and will improve your multiple by 40%"
     }, 
+  ],
     "final_multiple": [
       {
         "min": 0,
         "max": 0.5,
-        "rangeName": "Negative Growth",
+        "rangeName": "Really bad performance",
         "impactPercentage": 0.70,
-        "evaluationDescription": "Negative year-over-year revenue growth."
+        "evaluationDescription": "means that based on your performance data you are performing a lot worse than a typical SaaS business and that investors will drastically reduce your valuation because of it."
       },
       {
         "min": 0.5,
         "max": 0.7,
-        "rangeName": "Slow Growth",
+        "rangeName": "A lot worse than typical SaaS",
         "impactPercentage": 0.90,
-        "evaluationDescription": "is slow growth and will decrease your mutiple by 10%"
+        "evaluationDescription": "means that based on your performance data you are performing a lot worse than a typical SaaS business."
       },
       {
         "min": 0.7,
         "max": 0.9,
-        "rangeName": "Low Growth",
+        "rangeName": "Slightly worse than typical SaaS",
         "impactPercentage": 0.90,
-        "evaluationDescription": "is low growth and has no effect on your multiple"
+        "evaluationDescription": "means that based on your performance data you are performing slightly worse than a typical SaaS business."
       },
       {
         "min": 0.9,
         "max": 1.1,
         "rangeName": "SaaS typical",
         "impactPercentage": 1.10,
-        "evaluationDescription": "is good and will improve your mutiple by 10%"
+        "evaluationDescription": "shows that your business performing at a level an investor expects a SaaS business to perform at."
       },
       {
         "min": 1.1,
         "max": 1.3,
-        "rangeName": "Strong Growth",
+        "rangeName": "Better than typcial SaaS ",
         "impactPercentage": 1.25,
-        "evaluationDescription": "strong and will improve your multiple by 25%"
+        "evaluationDescription": "shows that your business performing at a level slightly better than an investor expects a SaaS business to perform at."
       },
       {
         "min": 1.3,
         "max": 1.5,
-        "rangeName": "High Growth",
+        "rangeName": "A lot better than typical SaaS ",
         "impactPercentage": 1.40,
-        "evaluationDescription": "excellent and will improve your multiple by 40%"
+        "evaluationDescription": "shows that your business performing at a level a lot better than an investor expects a SaaS business to perform at."
       }
     ,
     {
       "min": 1.5,
-      "max": 1.8,
-      "rangeName": "High Growth",
+      "max": 3.8,
+      "rangeName": "Outshining SaaS ",
       "impactPercentage": 1.40,
-      "evaluationDescription": "excellent and will improve your multiple by 40%"
+      "evaluationDescription": "is a great result and shows that you are outshining your SaaS competition. You can be proud of your achievement and approach investors with confidence."
     }
   ]
 };
