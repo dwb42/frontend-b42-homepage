@@ -136,6 +136,16 @@
         </tbody>
       </v-table>
 
+      <v-alert
+        v-if="showInputAlert" 
+        ariant="tonal"
+        density="compact"
+        text="Hit the button to recalculate. 👇"  
+        title="Your inputs have changed"
+        color="yellow-lighten-4"
+        class="mt-6"
+      ></v-alert>
+      
       <v-btn
         color="primary"
         class="mt-4"
@@ -468,6 +478,7 @@
   
   const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
   const showResults = ref(false); // Variable to track if the results are shown or not
+  const showInputAlert = ref(false); // Variable to track if the input alert is shown or not
   
   //setup router
   import { useRoute } from 'vue-router'
@@ -476,6 +487,7 @@
 
   //valuation vars
   const thisValuationId = ref(route.params.id);
+  const isInitialLoad = ref(true);
   const valuationData = reactive({
     show_valuation: false
   }); 
@@ -3559,6 +3571,7 @@
   onMounted(async () => {
     // Wait for fetchValuation to complete
     await fetchValuation(thisValuationId.value);
+    isInitialLoad.value = false;
     //await nextTick();
     if (valuationData.show_valuation) {
       recalculateAllMetrics();
@@ -3571,7 +3584,10 @@
     () => valuationData,
     async () => {
       try {
-        await saveData(valuationData);
+        if (!isInitialLoad.value) {
+          await saveData(newVal);
+        }
+        //await saveData(valuationData);
         //await nextTick();
       } catch (error) {
         console.error('Error in watch handler:', error);
