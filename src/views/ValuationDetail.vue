@@ -1154,12 +1154,24 @@
   import RecurringRevenueRatioModal from '@/components/kpiLearnMoreModals/RecurringRevenueRatioModal.vue';
   import LtvToCacModal from '@/components/kpiLearnMoreModals/LtvToCacModal.vue';
 
+//import inputDataLearnMoreModals
+  import AdminCostsInputModal from '@/components/inputDataLearnMoreModals/AdminCostsInputModal.vue';
+  import CostsOfGoodsSoldInputModal from '@/components/inputDataLearnMoreModals/CostsOfGoodsSoldInputModal.vue';
+  import CustomerAcquisitionCostsInputModal from '@/components/inputDataLearnMoreModals/CustomerAcquisitionCostsInputModal.vue';
+  import CustomerCountInputModal from '@/components/inputDataLearnMoreModals/CustomerCountInputModal.vue';
+  import CustomersLostInputModal from '@/components/inputDataLearnMoreModals/CustomersLostInputModal.vue';
+  import CustomersWonInputModal from '@/components/inputDataLearnMoreModals/CustomersWonInputModal.vue';
+  import RAndDCostsInputModal from '@/components/inputDataLearnMoreModals/RAndDCostsInputModal.vue';
+  import RecurringRevenueInputModal from '@/components/inputDataLearnMoreModals/RecurringRevenueInputModal.vue';
+  import TotalRevenueInputModal from '@/components/inputDataLearnMoreModals/TotalRevenueInputModal.vue';
+
   //vars for kpi learn more modals 
   const isDialogOpen = ref(false);
   const selectedKPI = ref(null);
 
   // Configuration object: key = KPI field, value = { title, component }
   const kpiModalConfig = {
+    // KPI Analysis Modals
     calc_yoy_revenue_growth: {
       title: 'Year-over-Year Growth',
       component: YearOnYearGrowthModal
@@ -1183,6 +1195,43 @@
     calc_ltv_to_cac: {
       title: 'LTV to CAC Ratio impact on valuation',
       component: LtvToCacModal
+    },
+    // Input Field Help Modals
+    total_revenue: {
+      title: 'Total Revenue',
+      component: TotalRevenueInputModal
+    },
+    recurring_revenue: {
+      title: 'Recurring Revenue',
+      component: RecurringRevenueInputModal
+    },
+    costs_of_goods_sold: {
+      title: 'Costs of Goods Sold',
+      component: CostsOfGoodsSoldInputModal
+    },
+    costs_of_customer_acquisition: {
+      title: 'Costs of Customer Acquisition',
+      component: CustomerAcquisitionCostsInputModal
+    },
+    costs_of_r_and_d: {
+      title: 'Costs of Research and Development',
+      component: RAndDCostsInputModal
+    },
+    costs_of_general_administration: {
+      title: 'Costs of General Administration',
+      component: AdminCostsInputModal
+    },
+    number_of_customers_end_of_period: {
+      title: 'Number of Customers at End of Period',
+      component: CustomerCountInputModal
+    },
+    customers_won_in_period: {
+      title: 'Customers Won in Period',
+      component: CustomersWonInputModal
+    },
+    customers_lost_in_period: {
+      title: 'Customers Lost in Period',
+      component: CustomersLostInputModal
     }
   };
 
