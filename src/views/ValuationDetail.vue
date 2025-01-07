@@ -364,7 +364,7 @@
               <template v-slot:label><strong>2 - below average</strong></template>
             </v-radio>
             <v-radio value="3">
-              <template v-slot:label><strong>3 - not sure/strong</strong></template>
+              <template v-slot:label><strong>3 - not sure</strong></template>
             </v-radio>
             <v-radio value="4">
               <template v-slot:label><strong>4 - pretty cool</strong></template>
@@ -375,8 +375,8 @@
           </v-radio-group>
   
   
-          <h3 class="text-h6 mb-2 mt-2">Help us improve, by providing feedback</h3>
-          <v-textarea v-model="valuationData.feedback_text" id="feedback_text" label="What do you like? What should we add / improve?" hide-details class="mb-6"></v-textarea>
+          <h3 class="text-h6 mb-2 mt-2">What do you like? What should we add / improve?</h3>
+          <v-textarea v-model="valuationData.feedback_text" id="feedback_text" label="" hide-details class="mb-6"></v-textarea>
   
   
           <h3 class="text-h6 mb-2 mt-2">Do you want to share this evaluation with investors? </h3>
@@ -1394,7 +1394,7 @@
     // ---------------------------
     // Helper functions
     // ---------------------------
-    console.log('latestYear', latestYear)
+    //console.log('latestYear', latestYear)
     
     const formatKPIValue = (key, value) => {
       if (value == null) return 'N/A';
@@ -3430,7 +3430,7 @@
     // if either is missing, return empty
     if (!method || !detail) return {};
 
-    console.log('currentEvaluation', currentEvaluation)
+    //console.log('currentEvaluation', currentEvaluation)
 
     return allEvaluationContent.value[method][detail];
   });
@@ -3567,27 +3567,61 @@
   // Single watcher for data changes
   watch(
     () => valuationData,
-    async () => {
+    async (newVal, oldVal) => {
       try {
         if (!isInitialLoad.value) {
-          await saveData(valuationData);
-          
-          if (showResults.value === true) {
-            showResults.value = false;
-            //valuationData.show_valuation = false;
-            showInputAlert.value = true;
-            console.log('i am ')
-          }
+          await saveData(newVal);
+          console.log('overlord watcher on valuationData')
         }
-        
-        //await saveData(valuationData);
-        //await nextTick();
       } catch (error) {
         console.error('Error in watch handler:', error);
       }
     },
     { deep: true }
   );
+
+
+  // recalc all metric if multiple changes
+  watch(
+     [
+      () => valuationData.base_arr_multiple,
+      () => valuationData.base_ebitda_multiple,
+     ],
+    async (newVal, oldVal) => {
+      try {
+        if (!isInitialLoad.value) {
+          console.log('i am in base multi')
+          if (!isInitialLoad.value) {
+            recalculateAllMetrics();
+          }
+        }
+      } catch (error) {
+        console.error('Error in watch handler:', error);
+      }
+    },
+  );
+
+  // qqqq
+  watch(
+    [
+      () => valuationData.valuation_yearly_inputs, // financials
+      () => valuationData.state_of_business,        // arr or ebitda
+      () => valuationData.valuation_type            // minimal, standard, complete
+    ],
+    async (newVal, oldVal) => {
+      try {
+        if (showResults.value === true) {
+          showResults.value = false;
+          showInputAlert.value = true;
+          console.log('watcher that set showResults to false')
+        }
+      } catch (error) {
+        console.error('Error in watch handler:', error);
+      }
+    },
+    { deep: true }
+  );
+
 
 
   

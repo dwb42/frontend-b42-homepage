@@ -27,9 +27,9 @@
   <v-table>
   <thead>
     <tr>
-      <th class="text-left">Recurring Revenue Ratio</th>
+      <th class="text-left">Future Growth</th>
       <th class="text-right">Range</th>
-      <th class="text-right">Success Factor</th>
+      <th class="text-right">Multiple Impact</th>
     </tr>
   </thead>
   <tbody>

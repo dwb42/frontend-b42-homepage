@@ -67,14 +67,14 @@
       </v-col>
     </v-row>
 
-    <footer class="pa-0 text-body-2 font-weight-light text-center mb-2">
+    <!--footer class="pa-0 text-body-2 font-weight-light text-center mb-2">
       <a href="#" @click.prevent="showDialog('imprint')" class="mr-2 text-grey">Imprint</a>
       <a href="#" @click.prevent="showDialog('privacy')" class="text-grey">Privacy Policy</a>
-    </footer>
+  </footer-->
   </v-container>
 
 
-  <!-- imprint privacy content modal -->
+  <!-- imprint privacy content modal >
   <v-dialog v-model="dialog" persistent max-width="600px" @keydown.esc="closeDialog">
   <v-card>
     <v-card-text>
@@ -174,7 +174,7 @@
       <v-btn color="primary"  @click="dialog = false">close</v-btn>
     </v-card-actions>
   </v-card>
-  </v-dialog>
+  </v-dialog-->
 
   
 
