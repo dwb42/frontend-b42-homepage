@@ -1,6 +1,7 @@
+
 <template>
   <p>
-  In order to assess if you are a “true” SaaS business, investors will want to know how much of your annual revenue is recurring revenue. 
+  In order to assess if you are a "true" SaaS business, investors will want to know how much of your annual revenue is recurring revenue. 
   <br><br>
   
   A recurring revenue ratio of 80 to 90% is deemed the norm for SaaS businesses. 
@@ -25,39 +26,36 @@
   </p>
   
   <v-table>
-  <thead>
-    <tr>
-      <th class="text-left">Future Growth</th>
-      <th class="text-right">Range</th>
-      <th class="text-right">Multiple Impact</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>fully recurring</td>
-      <td class="text-right">> 90%</td>
-      <td class="text-right">125%</td>
-    </tr>
-    <tr>
-      <td>SaaS norm recurring</td>
-      <td class="text-right">75 - 90%</td>
-      <td class="text-right">100%</td>
-    </tr>
-    <tr>
-      <td>⅔ recurring</td>
-      <td class="text-right">60 - 75%</td>
-      <td class="text-right">90%</td>
-    </tr>
-    <tr>
-      <td>50% recurring</td>
-      <td class="text-right">50 - 60%</td>
-      <td class="text-right">65%</td>
-    </tr>
-    <tr>
-      <td>is this SaaS?</td>
-      <td class="text-right">40 - 50%</td>
-      <td class="text-right">50%</td>
-    </tr>
-  </tbody>
+    <thead>
+      <tr>
+        <th class="text-left">Future Growth</th>
+        <th class="text-right">Range</th>
+        <th class="text-right">Multiple Impact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(range, index) in growthRanges" :key="index">
+        <td>{{ range.rangeName }}</td>
+        <td class="text-right">{{ formatRange(range.min, range.max) }}</td>
+        <td class="text-right">{{ formatImpact(range.impactPercentage) }}</td>
+      </tr>
+    </tbody>
   </v-table>
 </template>
+
+<script setup>
+import kpiData from '@/utils/kpiInterpretation/kpiData';
+
+const growthRanges = kpiData.calc_growth_general;
+
+function formatRange(min, max) {
+  if (max === Infinity || max === 100) {
+    return `> ${min * 100}%`;
+  }
+  return `${min * 100}% - ${max * 100}%`;
+}
+
+function formatImpact(impact) {
+  return `${(impact * 100).toFixed(0)}%`;
+}
+</script>
