@@ -29,35 +29,35 @@
         <tr>
           <th class="text-left">Recurring Revenue Ratio</th>
           <th class="text-right">Range</th>
-          <th class="text-right">Success Factor</th>
+          <th class="text-right">Multiple Impact</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>fully recurring</td>
-          <td class="text-right">> 90%</td>
-          <td class="text-right">125%</td>
-        </tr>
-        <tr>
-          <td>SaaS norm recurring</td>
-          <td class="text-right">75 - 90%</td>
-          <td class="text-right">100%</td>
-        </tr>
-        <tr>
-          <td>⅔ recurring</td>
-          <td class="text-right">60 - 75%</td>
-          <td class="text-right">90%</td>
-        </tr>
-        <tr>
-          <td>50% recurring</td>
-          <td class="text-right">50 - 60%</td>
-          <td class="text-right">65%</td>
-        </tr>
-        <tr>
-          <td>is this SaaS?</td>
-          <td class="text-right">40 - 50%</td>
-          <td class="text-right">50%</td>
+        <tr v-for="(range, index) in recurringRevenueRanges" :key="index">
+          <td>{{ range.rangeName }}</td>
+          <td class="text-right">{{ formatRange(range.min, range.max) }}</td>
+          <td class="text-right">{{ formatImpact(range.impactPercentage) }}</td>
         </tr>
       </tbody>
       </v-table>
 </template>
+
+<script setup>
+import kpiData from '@/utils/kpiInterpretation/kpiData';
+
+const recurringRevenueRanges = kpiData.calc_recurring_revenue_ratio;
+
+function formatRange(min, max) {
+  if (max === Infinity || max === 100) {
+    return `> ${min * 100}%`;
+  }
+  if (min === Infinity || min === -100) {
+    return `< ${max * 100}%`;
+  }
+  return `${min * 100}% - ${max * 100}%`;
+}
+
+function formatImpact(impact) {
+  return `${(impact * 100).toFixed(0)}%`;
+}
+</script>

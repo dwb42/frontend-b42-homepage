@@ -8,7 +8,7 @@
 
     <div class="mt-10"></div>
 
-    <h2 class="text-h5 mb-2"><b>(1) Provide general info, select business stage & analysis depth</b></h2>
+    <h2 class="text-h5 mb-2"><b>(1) Provide general info & select business stage</b></h2>
     <v-card variant="outlined" class="pa-3 mb-12">
       
       
@@ -49,29 +49,26 @@
 
         <v-alert
           v-if="valuationData.state_of_business === 'preRevenue'"
-          text="but our valuation method does not work for pre-revenue businesses. 🤷‍♂️"
-          title="Sorry ... "
+          text=""
+          title="Sorry, our valuation method does not work for pre-revenue businesses. We wish you success in sales!"
           type="error"
         ></v-alert>
 
-        <h3 class="text-h6 mb-2 mt-2">What type of valuation do you want to do?</h3>
-        <v-radio-group v-model="valuationData.valuation_type">
-          <v-radio value="minimal">
-            <template v-slot:label>
-              <div class="mb-2"><strong>minimal</strong><br>Enter financial data for latest financial period to provide investors with a first sense of growth and profitability.  </div>
-            </template>
-          </v-radio>
-          <v-radio value="standard">
-            <template v-slot:label>
-              <div class="mt-2 mb-2"><strong>standard</strong><br>Add more revenue data to get CAGR and current period customer data to calculate logo churn. </div>
-            </template>
-          </v-radio>
-          <v-radio value="complete">
-            <template v-slot:label>
-              <div class="mt-2"><strong>complete</strong><br>Provide investors with a complete overview of your current and past performance so that they can include trends in the valuation of your company. </div>
-            </template>
-          </v-radio>
-        </v-radio-group>
+        <v-alert
+          v-if="valuationData.state_of_business === 'earlyStage'"
+          text=""
+          title="We will use the ARR-Multiple Method for valuation."
+          type="success"
+        ></v-alert>
+
+        <v-alert
+          v-if="valuationData.state_of_business === 'laterStage'"
+          text=""
+          title="We will use the EBITDA-Multiple Method for valuation."
+          type="success"
+        ></v-alert>
+
+
 
         <!--v-btn 
           color="primary" 
@@ -93,8 +90,29 @@
     <template 
       v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''"
       >
-    <h2 class="text-h5 mb-2"><b>(2) Enter your financial data ({{valuationData.valuation_type}})</b></h2>
+    <h2 class="text-h5 mb-2"><b>(2) Enter your financial data <!--({{valuationData.valuation_type}})--></b></h2>
     <v-card variant="outlined" class="pa-3 mb-10">
+      
+      <h3 class="text-h6 mb-2 mt-2">Select Detail-Level</h3>
+      <v-radio-group v-model="valuationData.valuation_type">
+        <v-radio value="minimal">
+          <template v-slot:label>
+            <div class="mb-2"><strong>minimal</strong><br>Enter financial data for latest financial period to provide investors with a first sense of growth and profitability.  </div>
+          </template>
+        </v-radio>
+        <v-radio value="standard">
+          <template v-slot:label>
+            <div class="mt-2 mb-2"><strong>standard</strong><br>Add more revenue data to get CAGR and current period customer data to calculate logo churn. </div>
+          </template>
+        </v-radio>
+        <v-radio value="complete">
+          <template v-slot:label>
+            <div class="mt-2"><strong>complete</strong><br>Provide investors with a complete overview of your current and past performance so that they can include trends in the valuation of your company. </div>
+          </template>
+        </v-radio>
+      </v-radio-group>
+
+      
       <v-table>
         <thead>
           <tr>
@@ -171,7 +189,7 @@
     <!-- EVALUATION START     1234      -->
     <!-- /////////////////////////  -->
     <template v-if="showResults">
-      <h2 class="text-h5 mb-2"><b>(3) Review valuation ({{valuationData.valuation_type}})</b></h2>
+      <h2 class="text-h5 mb-2"><b>(3) Review valuation <!--({{valuationData.valuation_type}})--></b></h2>
 
         <v-card variant="outlined" class="pa-3 mb-10">
 
@@ -238,7 +256,7 @@
 
                       text="Learn More"
                       class="mt-4"
-                      @click="openModal('calc_ebitda_margin')"
+                      @click="openModal('calc_profitability')"
                     ></v-btn>
                   </div>
                 </td>
@@ -314,30 +332,33 @@
 
         </v-card>
 
-      <!-- The Dialog that will show the selected KPI details -->
-      <v-dialog v-model="isDialogOpen" :style="{ maxWidth: '800px' }">
-        <v-card :title="selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'KPI Details'">
 
-          <v-card-text>
-            <!-- Dynamically render the component -->
-            <component 
-              v-if="selectedKPI && kpiModalConfig[selectedKPI]" 
-              :is="kpiModalConfig[selectedKPI].component"
-            />
-          </v-card-text>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="isDialogOpen = false">Close</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
 
       <!--pre>valuationData<br>{{valuationData}}</pre>
       <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
       <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
 
     </template>
+
+    <!-- The Dialog that will show the selected KPI details -->
+    <!-- putting it outside the showResults if so that it works for inputs -->
+    <v-dialog v-model="isDialogOpen" :style="{ maxWidth: '800px' }">
+      <v-card :title="selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'KPI Details'">
+
+        <v-card-text>
+          <!-- Dynamically render the component -->
+          <component 
+            v-if="selectedKPI && kpiModalConfig[selectedKPI]" 
+            :is="kpiModalConfig[selectedKPI].component"
+          />
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="isDialogOpen = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- ///////////////////////// -->
     <!-- EVALUATION END           -->
@@ -1151,6 +1172,7 @@
   import FutureGrowthModal from '@/components/kpiLearnMoreModals/FutureGrowthModal.vue';
   import GrossMarginModal from '@/components/kpiLearnMoreModals/GrossMarginModal.vue';
   import EBITDAMarginModal from '@/components/kpiLearnMoreModals/EBITDAMarginModal.vue';
+  import FutureProfitabiliyModal from '@/components/kpiLearnMoreModals/FutureProfitabiliyModal.vue';
   import RecurringRevenueRatioModal from '@/components/kpiLearnMoreModals/RecurringRevenueRatioModal.vue';
   import LtvToCacModal from '@/components/kpiLearnMoreModals/LtvToCacModal.vue';
 
@@ -1187,6 +1209,10 @@
     calc_ebitda_margin: {
       title: 'EBITDA Margin impact on valuation',
       component: EBITDAMarginModal
+    },
+    calc_profitability: {
+      title: 'Profitability impact on valuation',
+      component: FutureProfitabiliyModal
     },
     calc_recurring_revenue_ratio: {
       title: 'Recurring Revenue Ratio impact on valuation',

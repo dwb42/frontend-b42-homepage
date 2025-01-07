@@ -69,7 +69,7 @@ const kpiData = {
   ],
   "calc_gross_margin": [
     {
-      "min": 0,
+      "min": -100,
       "max": 0.6,
       "rangeName": "Is This Even SaaS?",
       "impactPercentage": 0.50,
