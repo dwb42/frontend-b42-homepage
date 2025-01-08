@@ -9,7 +9,7 @@
   </p>
 
   <p class="mb-4">
-    We get your customer acquisition costs from the data you provide to us. 
+    We get your Customer Acquisition Costs from the data you provide to us. 
   </p>
 
   <p class="mb-4">
@@ -19,7 +19,7 @@
   <v-card class="mb-6">
     <v-list density="compact">
       <v-list-item 
-        v-for="(item, i) in includeItems" 
+        v-for="(item, i) in ltvItems" 
         :key="i"
         :value="item"
         color="primary"
@@ -27,7 +27,7 @@
         <template v-slot:prepend>
           <v-icon icon="mdi-check"></v-icon>
         </template>
-        <v-list-item-title v-text="item.text"></v-list-item-title>
+        <v-list-item-title v-html="item.text"></v-list-item-title>
       </v-list-item>
     </v-list>
   </v-card>
@@ -64,17 +64,13 @@ import kpiData from '@/utils/kpiInterpretation/kpiData';
 
 const ltvToCacRanges = kpiData.calc_ltv_to_cac;
 
-const includeItems = ref([
-  { text: 'Count each unique customer organization once' },
+const ltvItems = ref([
+  { text: 'calculate Customer Churn Rate by using the following formula: "Customer at beginning of period" / "Customers lost in period"' },
   { text: 'Include all subscription tiers' },
   { text: 'Only count active, paying customers' }
 ]);
 
-const excludeItems = ref([
-  { text: 'Free trial users' },
-  { text: 'Cancelled/churned customers' },
-  { text: 'Internal test accounts' }
-]);
+
 
 function formatRange(min, max) {
   if (max === Infinity || max === 100) {
