@@ -27,7 +27,7 @@
         <template v-slot:prepend>
           <v-icon icon="mdi-check"></v-icon>
         </template>
-        <v-list-item-title v-html="item.text"></v-list-item-title>
+        <v-list-item-title v-html="item.text" class="text-wrap"></v-list-item-title>
       </v-list-item>
     </v-list>
   </v-card>
