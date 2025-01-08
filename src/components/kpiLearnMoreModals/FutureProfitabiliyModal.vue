@@ -27,7 +27,7 @@
     When we value a business based on EBITDA Multiple, we will regard both the Gross Margin as well as the EBITDA Margin for the calculation of our Profitability Factor.
   </p>
 
-  <h3 class="text-subtitle-1 mb-2"><b>How Gross Margin impacts the Profitability Factor</b></h3>
+  <h2 class="text-body-1 mb-2"><b>How Gross Margin impacts the Profitability Factor</b></h2>
 
   <p class="mb-4">
     The Gross Margin represents the percentage of revenue remaining after deducting the direct costs associated with delivering the product or service, such as hosting and customer support expenses in a SaaS-business model.
@@ -73,7 +73,7 @@
     </tbody>
   </v-table>
 
-  <h3 class="text-subtitle-1 mb-2"><b>How EBITDA Margin impacts the Profitability Factor</b></h3>
+  <h2 class="text-body-1 mb-2"><b>How EBITDA Margin impacts the Profitability Factor</b></h2>
 
   <p class="mb-4">
     The EBITDA Margin measures a company’s return before non-operating expenditures. It is a good measure to evaluate the overall operating efficiency of a company.
