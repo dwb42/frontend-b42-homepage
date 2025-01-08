@@ -73,7 +73,7 @@
     </tbody>
   </v-table>
 
-  <h2 class="text-body-1 mb-2"><b>How EBITDA Margin impacts the Profitability Factor</b></h2>
+  <h2 class="text-body-1 mb-2 mt-6"><b>How EBITDA Margin impacts the Profitability Factor</b></h2>
 
   <p class="mb-4">
     The EBITDA Margin measures a company’s return before non-operating expenditures. It is a good measure to evaluate the overall operating efficiency of a company.

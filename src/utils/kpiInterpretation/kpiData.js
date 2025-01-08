@@ -4,9 +4,9 @@ const kpiData = {
     {
       "min": 0,
       "max": 0.5,
-      "rangeName": "Very Low",
-      "impactPercentage": 0.50,
-      "evaluationDescription": "is such a low Ratio that it will cause serious doubts in an investor that you are actually running a SaaS business. You beter have a good explanation for it. For valuation purposes we will half your multiple"
+      "rangeName": "not a SaaS business",
+      "impactPercentage": 0.10,
+      "evaluationDescription": "is such a low Ratio that it will cause serious doubts in an investor that you are actually running a SaaS business. You beter have a good explanation for it. For valuation purposes we will slash your multiple by the factor of 10."
     },
     {
       "min": 0.5,
