@@ -343,7 +343,7 @@
     <!-- The Dialog that will show the selected KPI details -->
     <!-- putting it outside the showResults if so that it works for inputs -->
     <v-dialog v-model="isDialogOpen" :style="{ maxWidth: '800px' }">
-      <v-card :title="selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'KPI Details'">
+      <v-card :title="selectedKPI && kpiModalConfig[selectedKPI] ? kpiModalConfig[selectedKPI].title : 'someone forgot to give this modal a title ..'">
 
         <v-card-text>
           <!-- Dynamically render the component -->
@@ -1363,6 +1363,7 @@
           typeof latestYearKPIs.calc_cagr_revenue === 'number') {
 
         const combinedGrowthRate = (latestYearKPIs.calc_yoy_revenue_growth + latestYearKPIs.calc_cagr_revenue) / 2;
+        console.log('Combined Growth Rate:', combinedGrowthRate);
 
         try {
           const growthAnalysis = getKPIInfo('calc_growth_general', combinedGrowthRate);
@@ -1443,6 +1444,7 @@
     const yoy = analysed_kpis.calc_yoy_revenue_growth?.value || 0;
     const cagr = analysed_kpis.calc_cagr_revenue?.value || 0;
     const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const growthImpactMinimal = analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.impactPercentage ?? 1; // not use combined but only yoy
     const grossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
     const ebitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
     const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
@@ -1489,7 +1491,7 @@
     // ARR - MINIMAL (ignore CAGR, ignore LTV-to-CAC)
     // -------------------------------------------------
     const futureGrowthRateMinimalArr = yoy; 
-    const totalArrImpactMinimal = growthImpact * grossMarginImpact * recurringImpact;
+    const totalArrImpactMinimal = growthImpactMinimal * grossMarginImpact * recurringImpact;
     const totalArrImpactInterpretationMinimal = getKPIInfo('final_multiple', totalArrImpactMinimal).evaluationDescription
     const finalArrMultipleMinimal = parseFloat((baseArrMultiple * totalArrImpactMinimal).toFixed(2));
     let companyWorthARRMinimal = null;
@@ -1501,7 +1503,7 @@
     // EBITDA - MINIMAL (ignore CAGR, ignore LTV-to-CAC)
     // -------------------------------------------------
     const totalEbitdaImpactMinimal =
-      growthImpact *
+      growthImpactMinimal *
       ((grossMarginImpact + ebitdaMarginImpact) / 2) *
       recurringImpact;
     const totalEbitdaImpactInterpretationMinimal = getKPIInfo('final_multiple', totalEbitdaImpactMinimal).evaluationDescription
@@ -1590,7 +1592,7 @@
               analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
                   }.
                     `,
-              impact: `${multipleImpactPercent(growthImpact)}`,
+              impact: `${multipleImpactPercent(growthImpactMinimal)}`,
             },
             profitability: {
               description: `
@@ -1989,11 +1991,11 @@
             growth: {
               description: `
                 Your current Year-on-Year growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
-                A growth rate of ${(yoy * 100)}% is ${
-          analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+                A growth rate of ${formatKPIValue('calc_yoy_revenue_growth', yoy)} is ${
+          analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.evaluationDescription || 'N/A'
               }.
                 `,
-              impact: `${multipleImpactPercent(growthImpact)}`,
+              impact: `${multipleImpactPercent(growthImpactMinimal)}`,
             },
             profitability: {
               description: `
