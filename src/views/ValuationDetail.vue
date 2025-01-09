@@ -527,7 +527,19 @@
 
   async function createInitialYearlyInputs() {
   try {
-    const response = await axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/createInitialYearlyInputs`);
+    let years = [];
+    const operationalYear = parseInt(valuationData.operational_since);
+    const currentYear = 2024;
+    
+    for (let year = Math.min(2021, operationalYear); year <= currentYear; year++) {
+      if (year >= operationalYear) {
+        years.push(year);
+      }
+    }
+
+    const response = await axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/createInitialYearlyInputs`, {
+      years: years
+    });
     console.log('Yearly inputs created:', response.data);
   } catch (error) {
     console.error('Error creating yearly inputs:', error);
