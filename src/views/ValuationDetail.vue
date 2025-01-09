@@ -83,7 +83,17 @@
           Enter Financial Information
         </v-btn>
 
+        <v-btn 
+          color="primary" 
+          type="button"
+          class="mt-6"
+          @click="createInitialYearlyInputs"
+        >
+          create yrls
+        </v-btn>
 
+
+        
       </v-form>
     </v-card>
     
@@ -515,9 +525,9 @@
     show_yearly_inputs: false
   }); 
 
-  async function createValuationYearlyInputs() {
+  async function createInitialYearlyInputs() {
   try {
-    const response = await axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/createValuationYearlyInputs`);
+    const response = await axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/createInitialYearlyInputs`);
     console.log('Yearly inputs created:', response.data);
   } catch (error) {
     console.error('Error creating yearly inputs:', error);
@@ -525,7 +535,7 @@
 }
 
 async function navigateToFinancialInfo() {
-  await createValuationYearlyInputs();
+  await createInitialYearlyInputs();
   valuationData.show_yearly_inputs = true;
 } 
   // Initialize reactive object to store KPIs and calculated metrics
