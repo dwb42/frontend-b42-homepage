@@ -22,7 +22,7 @@
                 <td>{{ valuation.id }}</td>
                 <td><router-link :to="`/app/valuation/${valuation.id}`">{{ valuation.company_name }}</router-link></td> 
                 <td><a :href="valuation.company_url" target="_blank">{{ valuation.company_url }}</a></td> 
-                <td></td>
+                <td>{{ valuation.state_of_business === 'laterStage' ? 'EBITDA-Multiple' : 'ARR-Multiple' }}</td>
                 <!--td>{{ usdFormat(valuation.appraised_value) }}</td>
                 <td>{{ usdFormat(valuation.bid_price) }}</td>
                 <td>{{ formatDateUsingDateFns(valuation.createdAt) }}</td-->
