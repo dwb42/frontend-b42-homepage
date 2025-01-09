@@ -1,8 +1,19 @@
 <template>
   <v-container>  
     <span class="text-caption"><router-link :to="`/app/valuations/`">Valuations</router-link></span>
-    <h1 class="text-h4 mb-0"><b>
-      {{ valuationData.company_name }}</b> &nbsp;
+    <h1 class="text-h4 mb-0">
+      <div v-if="!isEditingName" @click="startEditingName" style="cursor: pointer;">
+        <b>{{ valuationData.company_name }}</b> &nbsp;
+      </div>
+      <input
+        v-else
+        v-model="valuationData.company_name"
+        @blur="stopEditingName"
+        @keyup.enter="stopEditingName"
+        ref="nameInput"
+        class="text-h4"
+        style="border: none; outline: none; background: transparent; font-weight: bold; width: 100%;"
+      >
     </h1>
     <a :href="valuationData.company_url" target="_blank" class="text-body-1 mr-6">{{ valuationData.company_url }}</a>
 
@@ -520,6 +531,19 @@
   const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
   const showResults = ref(false); // Variable to track if the results are shown or not
   const showInputAlert = ref(false); // Variable to track if the input alert is shown or not
+const isEditingName = ref(false);
+const nameInput = ref(null);
+
+function startEditingName() {
+  isEditingName.value = true;
+  nextTick(() => {
+    nameInput.value.focus();
+  });
+}
+
+function stopEditingName() {
+  isEditingName.value = false;
+}
   
   //setup router
   import { useRoute } from 'vue-router'
