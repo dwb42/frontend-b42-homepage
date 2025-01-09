@@ -56,24 +56,27 @@
 
         <v-alert
           v-if="valuationData.state_of_business === 'earlyStage'"
-          text=""
-          title="We will use the ARR-Multiple Method for valuation."
-          type="success"
-        ></v-alert>
+          text="We will use the ARR-Multiple Method for valuation."
+          title=""
+          color="secondary"
+          >
+          </v-alert>
 
         <v-alert
           v-if="valuationData.state_of_business === 'laterStage'"
-          text=""
-          title="We will use the EBITDA-Multiple Method for valuation."
-          type="success"
-        ></v-alert>
+          text="We will use the EBITDA-Multiple Method for valuation."
+          title=""
+          color="secondary"
+          >
+        </v-alert>
 
 
 
         <v-btn 
-          v-if="!valuationData.show_financial_inputs"
-          color="success" 
+          v-if="!valuationData.show_yearly_inputs"
+          color="primary" 
           type="button"
+          class="mt-6"
           @click="navigateToFinancialInfo"
           :disabled="!isGeneralInfoComplete"
         >
@@ -91,7 +94,7 @@
     <!-- /////////////////////////  -->
 
     <template 
-      v-if="valuationData.show_financial_inputs"
+      v-if="valuationData.show_yearly_inputs"
       >
     <h2 class="text-h5 mb-2"><b>(2) Enter your financial data <!--({{valuationData.valuation_type}})--></b></h2>
     <v-card variant="outlined" class="pa-3 mb-10">
@@ -509,12 +512,11 @@
   const thisValuationId = ref(route.params.id);
   const isInitialLoad = ref(true);
   const valuationData = reactive({
-    show_valuation: false,
-    show_financial_inputs: false
+    show_yearly_inputs: false
   }); 
 
   function navigateToFinancialInfo() {
-    valuationData.show_financial_inputs = true;
+    valuationData.show_yearly_inputs = true;
   } 
   // Initialize reactive object to store KPIs and calculated metrics
   //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
@@ -532,20 +534,20 @@
 
   
   const isGeneralInfoComplete = computed(() => {
-    // Safely access and trim values, handling potential undefined/null cases
-    const hasCompanyName = valuationData.company_name?.toString().trim() !== '';
-    const hasOperationalSince = valuationData.operational_since?.toString().trim() !== '';
-    const hasNumberOfEmployees = valuationData.number_of_employees?.toString().trim() !== '';
-    const hasStateOfBusiness = valuationData.state_of_business?.toString().trim() !== '';
+    // Safely access, trim values, and ensure they are not null or undefined
+    const hasCompanyName = valuationData.company_name != null && valuationData.company_name.toString().trim() !== '';
+    const hasOperationalSince = valuationData.operational_since != null && valuationData.operational_since.toString().trim() !== '';
+    const hasNumberOfEmployees = valuationData.number_of_employees != null && valuationData.number_of_employees.toString().trim() !== '';
+    const hasStateOfBusiness = valuationData.state_of_business != null && valuationData.state_of_business.toString().trim() !== '';
 
-    // Return true only if *all* are non-empty
+    // Return true only if *all* are non-empty and not null
     return (
       hasCompanyName &&
       hasOperationalSince &&
       hasNumberOfEmployees &&
       hasStateOfBusiness 
     );
-  });
+  }); 
   
   //compute properties for dynamic table
   const years = computed(() => {
@@ -3592,9 +3594,6 @@
     await fetchValuation(thisValuationId.value);
     isInitialLoad.value = false;
     //await nextTick();
-    if (valuationData.show_valuation) {
-      recalculateAllMetrics();
-    }
   });
 
   
@@ -3680,7 +3679,6 @@
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
 
     // Set loading to false after the first full calculation
-    // valuationData.show_valuation = true;
     showResults.value = true;
     showInputAlert.value = false;
   }
