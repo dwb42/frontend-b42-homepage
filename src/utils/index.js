@@ -23,6 +23,14 @@ export const truncateString = (str, maxLength) => {
     }  
   }  
 
+export const checkValidPastYear = (value) => {
+  const year = parseInt(value);
+  if (isNaN(year) || year > 2025) {
+    return 'Year must be 2025 or earlier';
+  }
+  return true;
+};  
+
 export const usdFormat = (number) => {
   if (number === null || number === undefined) {
     return ''; // or any other default value you'd prefer to display

@@ -25,7 +25,15 @@
           hide-details="auto"
           class="mb-6"
         ></v-text-field>
-        <v-text-field v-model="valuationData.operational_since" id="operational_since" label="Operational since" required hide-details class="mb-6"></v-text-field>
+        <v-text-field 
+          v-model="valuationData.operational_since" 
+          id="operational_since" 
+          label="Operational since" 
+          required 
+          :rules="[checkValidPastYear]"
+          hide-details="auto"
+          class="mb-6"
+        ></v-text-field>
         <v-text-field v-model="valuationData.number_of_employees" id="number_of_employees" label="Number of employees (incl. active founders)" required hide-details class="mb-6"></v-text-field>
 
         <h3 class="text-h6 mb-2 mt-6">What best describes your current stage of business?</h3>
@@ -502,7 +510,7 @@
 <script setup>
   import { reactive, ref, computed, watchEffect, watch, onMounted, nextTick } from 'vue';
   import axios from 'axios'; 
-  import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, multipleImpactPercent, apiBaseURL } from '@/utils/index.js';
+  import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, multipleImpactPercent, apiBaseURL, checkValidPastYear } from '@/utils/index.js';
   import { urlRules, formatURL as formatURLUtil } from '@/utils/url_formatting.js';
   import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';

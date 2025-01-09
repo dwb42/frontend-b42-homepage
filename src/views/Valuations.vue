@@ -1,7 +1,7 @@
 <template>
   <v-container>  
     <h1 class="text-h4 mb-6">Valuations</h1>
-    
+
     <v-row>
       <v-col cols="12" md="12" xl="12">
         <v-card variant="tonal" color=#91b2f6 class="pa-3 mb-6">
@@ -31,7 +31,7 @@
           </v-table>
         </v-card>
       </v-col>
-    
+
       <v-col cols="12" md="8" xl="4">
         <v-card variant="elevated" class="pa-3 mb-6">
           <h2 class="text-h5 mb-6">create new valuation</h2>
@@ -59,7 +59,7 @@
 <script setup>
 import { ref, computed, watchEffect, onMounted } from 'vue';
 import axios from 'axios'; 
-import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
+import { formatDateUsingDateFns, usdFormat, apiBaseURL, checkValidPastYear } from '@/utils/index.js';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/useUserStore.js';
 import { urlRules, formatURL } from '@/utils/url_formatting.js';
@@ -103,7 +103,7 @@ async function createValuation() {
   //await fetchValuations(); 
 
   router.push(`/app/valuation/${response.data.id}`);
-    
+
   } catch (error) {
   console.error('Error creating new valuation:', error);
   }
