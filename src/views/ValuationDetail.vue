@@ -81,7 +81,7 @@
 
 
         <v-btn 
-          v-if="!valuationData.show_yearly_inputs"
+          v-if="!valuationData.show_yearly_inputs && valuationData.state_of_business !== 'preRevenue'"
           color="primary" 
           type="button"
           class="mt-6"
