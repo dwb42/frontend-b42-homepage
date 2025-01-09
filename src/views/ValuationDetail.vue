@@ -12,7 +12,7 @@
         @keyup.enter="stopEditingName"
         ref="nameInput"
         class="text-h4"
-        style="border: none; outline: none; background: transparent; font-weight: bold; width: 100%;"
+        style="border: 1px solid #767676; outline: none; background: #ddd; font-weight: bold; width: 100%;"
       >
     </h1>
     <a :href="valuationData.company_url" target="_blank" class="text-body-1 mr-6">{{ valuationData.company_url }}</a>
@@ -24,7 +24,7 @@
       
       
       <v-form @submit.prevent="">
-        <v-text-field v-model="valuationData.company_name" id="company_name" label="Company Name" required hide-details class="mb-6"></v-text-field>
+        <!--v-text-field v-model="valuationData.company_name" id="company_name" label="Company Name" required hide-details class="mb-6"></v-text-field-->
         <v-text-field 
           v-model="valuationData.company_url" 
           id="company_url" 
