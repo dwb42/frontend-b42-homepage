@@ -5,20 +5,20 @@
       <div v-if="!isEditingName" @click="startEditingName" style="cursor: pointer;">
         <b>{{ valuationData.company_name }}</b> &nbsp;
       </div>
-      <input
+      <v-text-field
         v-else
         v-model="valuationData.company_name"
         @blur="stopEditingName"
         @keyup.enter="stopEditingName"
         ref="nameInput"
         class="text-h4"
-        style="border: 1px solid #767676; outline: none; background: #ddd; font-weight: bold; width: 100%;"
-      >
+
+      ></v-text-field>
     </h1>
     <div class="d-flex align-center">
       <template v-if="!isEditingURL">
         <a :href="valuationData.company_url" target="_blank" class="text-body-1 mr-2">{{ valuationData.company_url }}</a>
-        <v-icon @click="startEditingURL" style="cursor: pointer;">mdi-pencil</v-icon>
+        <v-icon @click="startEditingURL" style="cursor: pointer; font-size: 18px; color: gray;">mdi-pencil</v-icon>
       </template>
       <v-text-field
         v-else
