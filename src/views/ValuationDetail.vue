@@ -15,7 +15,24 @@
         style="border: 1px solid #767676; outline: none; background: #ddd; font-weight: bold; width: 100%;"
       >
     </h1>
-    <a :href="valuationData.company_url" target="_blank" class="text-body-1 mr-6">{{ valuationData.company_url }}</a>
+    <div class="d-flex align-center">
+      <template v-if="!isEditingURL">
+        <a :href="valuationData.company_url" target="_blank" class="text-body-1 mr-2">{{ valuationData.company_url }}</a>
+        <v-icon @click="startEditingURL" style="cursor: pointer;">mdi-pencil</v-icon>
+      </template>
+      <v-text-field
+        v-else
+        v-model="valuationData.company_url"
+        @blur="stopEditingURL"
+        @keyup.enter="stopEditingURL"
+        :rules="[urlRules]"
+        placeholder="www.example.com"
+        @blur="formatURL"
+        hide-details="auto"
+        ref="urlInput"
+        style="max-width: 400px;"
+      ></v-text-field>
+    </div>
 
     <div class="mt-10"></div>
 
@@ -532,7 +549,9 @@
   const showResults = ref(false); // Variable to track if the results are shown or not
   const showInputAlert = ref(false); // Variable to track if the input alert is shown or not
 const isEditingName = ref(false);
+const isEditingURL = ref(false);
 const nameInput = ref(null);
+const urlInput = ref(null);
 
 function startEditingName() {
   isEditingName.value = true;
@@ -543,6 +562,18 @@ function startEditingName() {
 
 function stopEditingName() {
   isEditingName.value = false;
+}
+
+function startEditingURL() {
+  isEditingURL.value = true;
+  nextTick(() => {
+    urlInput.value.focus();
+  });
+}
+
+function stopEditingURL() {
+  isEditingURL.value = false;
+  formatURL();
 }
   
   //setup router
