@@ -29,8 +29,7 @@ export const checkValidPastYear = (value) => {
   
   const year = parseInt(value);
   if (isNaN(year)) return 'Year must be a valid number';
-  if (year < 1900) return 'Year must be 1900 or later';
-  if (year > 2025) return 'Year must be 2025 or earlier';
+  if (year > 2024) return 'You must have been operational since at least 2024';
   
   return true;
 };  
