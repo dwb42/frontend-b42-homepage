@@ -7,7 +7,8 @@ import router from './router'
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-// Add axios interceptor for JWT token
+// Add axios interceptors
+// Request interceptor for JWT token
 axios.interceptors.request.use(config => {
   const token = localStorage.getItem('jwt_token')
   if (token) {
@@ -17,6 +18,19 @@ axios.interceptors.request.use(config => {
 }, error => {
   return Promise.reject(error)
 })
+
+// Response interceptor for 401 handling
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('jwt_token')
+      localStorage.removeItem('isLoggedIn')
+      router.push('/login')
+    }
+    return Promise.reject(error)
+  }
+)
 
 
 //import './assets/main.css'
