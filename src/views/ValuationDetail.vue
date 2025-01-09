@@ -531,10 +531,9 @@
     const operationalYear = parseInt(valuationData.operational_since);
     const currentYear = 2024;
     
-    for (let year = Math.min(2021, operationalYear); year <= currentYear; year++) {
-      if (year >= operationalYear) {
-        years.push(year);
-      }
+    const startYear = Math.max(2021, operationalYear);
+    for (let year = startYear; year <= currentYear; year++) {
+      years.push(year);
     }
 
     const response = await axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/createInitialYearlyInputs`, {
