@@ -24,10 +24,14 @@ export const truncateString = (str, maxLength) => {
   }  
 
 export const checkValidPastYear = (value) => {
+  if (!value) return 'Year is required';
+  if (!/^\d+$/.test(value)) return 'Year must be a valid number';
+  
   const year = parseInt(value);
-  if (isNaN(year) || year > 2025) {
-    return 'Year must be 2025 or earlier';
-  }
+  if (isNaN(year)) return 'Year must be a valid number';
+  if (year < 1900) return 'Year must be 1900 or later';
+  if (year > 2025) return 'Year must be 2025 or earlier';
+  
   return true;
 };  
 
