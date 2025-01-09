@@ -59,7 +59,7 @@
           v-if="valuationData.state_of_business === 'preRevenue'"
           text=""
           title="Sorry, our valuation method does not work for pre-revenue businesses. We wish you success in sales!"
-          type="error"
+          color="#b00020"
         ></v-alert>
 
         <v-alert
@@ -91,14 +91,14 @@
           Enter Financial Information
         </v-btn>
 
-        <v-btn 
+        <!-- <v-btn 
           color="primary" 
           type="button"
           class="mt-6"
           @click="createInitialYearlyInputs"
         >
           create yrls
-        </v-btn>
+        </v-btn> -->
 
 
         
