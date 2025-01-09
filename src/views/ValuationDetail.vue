@@ -70,13 +70,15 @@
 
 
 
-        <!--v-btn 
-          color="primary" 
-          type="submit"
+        <v-btn 
+          color="success" 
+          type="button"
+          @click="navigateToFinancialInfo"
           :disabled="!isGeneralInfoComplete"
         >
           Enter Financial Information
-        </v-btn-->
+        </v-btn>
+
 
       </v-form>
     </v-card>
@@ -529,15 +531,13 @@
     const hasOperationalSince = valuationData.operational_since?.toString().trim() !== '';
     const hasNumberOfEmployees = valuationData.number_of_employees?.toString().trim() !== '';
     const hasStateOfBusiness = valuationData.state_of_business?.toString().trim() !== '';
-    const hasValuationType = valuationData.valuation_type?.toString().trim() !== '';
 
     // Return true only if *all* are non-empty
     return (
       hasCompanyName &&
       hasOperationalSince &&
       hasNumberOfEmployees &&
-      hasStateOfBusiness &&
-      hasValuationType
+      hasStateOfBusiness 
     );
   });
   

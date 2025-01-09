@@ -26,6 +26,7 @@ axios.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('jwt_token')
       localStorage.removeItem('isLoggedIn')
+      localStorage.removeItem('user')
       router.push('/login')
     }
     return Promise.reject(error)
