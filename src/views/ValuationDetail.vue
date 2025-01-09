@@ -23,11 +23,10 @@
       <v-text-field
         v-else
         v-model="valuationData.company_url"
-        @blur="stopEditingURL"
+        @blur="() => { stopEditingURL(); formatURL(); }"
         @keyup.enter="stopEditingURL"
         :rules="[urlRules]"
         placeholder="www.example.com"
-        @blur="formatURL"
         hide-details="auto"
         ref="urlInput"
         style="max-width: 400px;"
