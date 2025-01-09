@@ -515,9 +515,19 @@
     show_yearly_inputs: false
   }); 
 
-  function navigateToFinancialInfo() {
-    valuationData.show_yearly_inputs = true;
-  } 
+  async function createValuationYearlyInputs() {
+  try {
+    const response = await axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/createValuationYearlyInputs`);
+    console.log('Yearly inputs created:', response.data);
+  } catch (error) {
+    console.error('Error creating yearly inputs:', error);
+  }
+}
+
+async function navigateToFinancialInfo() {
+  await createValuationYearlyInputs();
+  valuationData.show_yearly_inputs = true;
+} 
   // Initialize reactive object to store KPIs and calculated metrics
   //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
