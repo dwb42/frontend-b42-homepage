@@ -71,6 +71,7 @@
 
 
         <v-btn 
+          v-if="!valuationData.show_financial_inputs"
           color="success" 
           type="button"
           @click="navigateToFinancialInfo"
@@ -90,7 +91,7 @@
     <!-- /////////////////////////  -->
 
     <template 
-      v-if="valuationData.valuation_type !== null && valuationData.valuation_type !== ''"
+      v-if="valuationData.show_financial_inputs"
       >
     <h2 class="text-h5 mb-2"><b>(2) Enter your financial data <!--({{valuationData.valuation_type}})--></b></h2>
     <v-card variant="outlined" class="pa-3 mb-10">
@@ -508,8 +509,13 @@
   const thisValuationId = ref(route.params.id);
   const isInitialLoad = ref(true);
   const valuationData = reactive({
-    show_valuation: false
+    show_valuation: false,
+    show_financial_inputs: false
   }); 
+
+  function navigateToFinancialInfo() {
+    valuationData.show_financial_inputs = true;
+  } 
   // Initialize reactive object to store KPIs and calculated metrics
   //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
