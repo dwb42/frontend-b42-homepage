@@ -42,7 +42,7 @@
       
       <v-form @submit.prevent="">
         <!--v-text-field v-model="valuationData.company_name" id="company_name" label="Company Name" required hide-details class="mb-6"></v-text-field-->
-        <v-text-field 
+        <!--v-text-field 
           v-model="valuationData.company_url" 
           id="company_url" 
           label="Company Website" 
@@ -52,7 +52,7 @@
           @blur="formatURL"
           hide-details="auto"
           class="mb-6"
-        ></v-text-field>
+        ></v-text-field-->
         <v-text-field 
           v-model="valuationData.operational_since" 
           id="operational_since" 
