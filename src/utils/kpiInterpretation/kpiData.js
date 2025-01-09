@@ -145,23 +145,30 @@ const kpiData = {
     {
       "min": 0,
       "max": 1,
-      "rangeName": "Unsustainable",
-      "impactPercentage": 0.75,
-      "evaluationDescription": "LTV to CAC ratio less than 1 indicates unsustainable acquisition costs."
+      "rangeName": "unsustainable - loosing money",
+      "impactPercentage": 0.4,
+      "evaluationDescription": "terrible, because you are paying more to win a customer than the customer is worth to you "
     },
     {
       "min": 1,
-      "max": 2,
-      "rangeName": "Needs Improvement",
-      "impactPercentage": 0.85,
-      "evaluationDescription": "LTV to CAC ratio between 1 and 3 needs improvement."
+      "max": 1.75,
+      "rangeName": "pretty bad",
+      "impactPercentage": 0.7,
+      "evaluationDescription": "pretty bad, because are paying at least 60% for customer acquisition"
     },
     {
-      "min": 2,
+      "min": 1.75,
+      "max": 2.5,
+      "rangeName": "needs improvement",
+      "impactPercentage": 0.85,
+      "evaluationDescription": "close to SaaS norm, but needs improvement"
+    },
+    {
+      "min": 2.5,
       "max": 4,
       "rangeName": "SaaS Norm",
       "impactPercentage": 1.00,
-      "evaluationDescription": "in the range of one expects a SaaS business' LTV-to-CAC ratio to be in and hence has no impact on the multiple"
+      "evaluationDescription": "in the range of what one expects a SaaS business' LTV-to-CAC ratio to be in and hence has no impact on the multiple"
     },
     {
       "min": 4,

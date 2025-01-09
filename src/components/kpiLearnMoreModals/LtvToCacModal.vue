@@ -1,43 +1,35 @@
 
 <template>
   <p class="mb-4">
-    The Customer Lifetime Value (LTV) to Customer Acquisition Cost (CAC) Ratio measures the relationship between the lifetime value of a customer and the cost of acquiring that customer. 
+    The Customer Lifetime Value (LTV) to Customer Acquisition Cost (CAC) Ratio measures the relationship between the lifetime value of a customer and the cost of acquiring that customer. The LTV-to-CAC ratio is calculated by dividing your LTV by CAC.
+  </p>
+
+  <p class="mb-4"><b>
+    We get your Customer Acquisition Costs from the data you provide to us. </b>
   </p>
 
   <p class="mb-4">
-    The LTV-to-CAC ratio is calculated by dividing your LTV by CAC.
+    <b>Calculating the Customer Lifetime Value is a little more difficult: </b><br>
+    a) calculate Customer Churn Rate by using the following formula: "Customer at beginning of period" / "Customers lost in period" <br>
+    b) calculate the Customer Lifetime via: 1 / Customer Churn Rate <br>
+    c) multiply Customer Lifetime * Average Revenue per Customer 
+  </p>
+
+
+  <p class="mb-4">
+    For a SaaS business, a LTV-to-CAC ratio of around 3 is considered good.  
   </p>
 
   <p class="mb-4">
-    We get your Customer Acquisition Costs from the data you provide to us. 
+    If your Ratio is significantly lower than 3, investors will assume that you have not found product-market fit yet or that you are not proficient in sales & marketing. They will penalize this with a lower multiple and will want to find out if this is something that can be fixed or not. 
   </p>
 
   <p class="mb-4">
-    Calculating the Customer Lifetime Value is a little more difficult: 
+    Having a LTV-to-CAC ratio that is significantly higher than 3, is definitively better than having a ratio below 3. Investors will assume that you could be spending more aggressively on marketing and sales and will want to find out why you are not doing so. 
   </p>
 
-  <v-card class="mb-6">
-    <v-list density="compact">
-      <v-list-item 
-        v-for="(item, i) in ltvItems" 
-        :key="i"
-        :value="item"
-        color="primary"
-      >
-        <template v-slot:prepend>
-          <v-icon icon="mdi-check"></v-icon>
-        </template>
-        <v-list-item-title v-html="item.text" class="text-wrap"></v-list-item-title>
-      </v-list-item>
-    </v-list>
-  </v-card>
-  
-  <p class="mb-4">
-    If the services have to be delivered by you as the founder or by other key personnel (such as consulting services, one-off software development or similar) the investor will see these activities as a distraction from the main business that are probably hard to scale and likely reduce the multiple they are willing to pay.  
-  </p>
-
-  <p class="mb-4">
-    If on the other hand the services rendered to incur the non-recurring revenue are of repeatable nature that can be taught to members of the customer success team (such as one-time onboarding fees, one-time services rendered) investors might have less of a problem with it. Be sure to explain / mark the repeatable and scalable nature of such one-off revenue. 
+  <p class="mb-4 font-weight-bold">
+    We use the following LTV-to-CAC ratio ranges with their respective impact on the Multiple in our SaaS valuation formula:
   </p>
 
   <v-table>
@@ -64,11 +56,6 @@ import kpiData from '@/utils/kpiInterpretation/kpiData';
 
 const ltvToCacRanges = kpiData.calc_ltv_to_cac;
 
-const ltvItems = ref([
-  { text: 'calculate Customer Churn Rate by using the following formula: "Customer at beginning of period" / "Customers lost in period"' },
-  { text: 'Include all subscription tiers' },
-  { text: 'Only count active, paying customers' }
-]);
 
 
 
