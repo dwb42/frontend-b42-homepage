@@ -1223,49 +1223,22 @@ async function navigateToFinancialInfo() {
 
   async function saveOutputs() {
     try {
-      let outputData = {
-        arr_multiple_impact: null,
-        arr_final_multiple: null,
-        arr_final_valuation: null,
-        ebitda_multiple_impact: null,
-        ebitda_final_multiple: null,
-        ebitda_final_valuation: null
-      };
+      let outputData;
+      const type = valuationData.valuation_type;
 
-      switch (valuationData.valuation_type) {
-        case 'minimal':
-          outputData = {
-            arr_multiple_impact: allEvaluationContent.arr.minimal.multiple_impact,
-            arr_final_multiple: finalArrMultipleMinimal,
-            arr_final_valuation: companyWorthArrMinimal,
-            ebitda_multiple_impact: totalEbitdaImpactMinimal,
-            ebitda_final_multiple: finalEbitdaMultipleMinimal,
-            ebitda_final_valuation: companyWorthEbitdaMinimal
-          };
-          break;
-
-        case 'standard':
-          outputData = {
-            arr_multiple_impact: totalArrImpact,
-            arr_final_multiple: finalArrMultiple,
-            arr_final_valuation: companyWorthArr,
-            ebitda_multiple_impact: totalEbitdaImpact,
-            ebitda_final_multiple: finalEbitdaMultiple,
-            ebitda_final_valuation: companyWorthEbitda
-          };
-          break;
-
-        case 'complete':
-          outputData = {
-            arr_multiple_impact: totalArrImpactComplete,
-            arr_final_multiple: finalArrMultipleComplete,
-            arr_final_valuation: companyWorthArrComplete,
-            ebitda_multiple_impact: totalEbitdaImpactComplete,
-            ebitda_final_multiple: finalEbitdaMultipleComplete,
-            ebitda_final_valuation: companyWorthEbitdaComplete
-          };
-          break;
+      if (!allEvaluationContent?.arr?.[type] || !allEvaluationContent?.ebitda?.[type]) {
+        console.error('Required evaluation content not found');
+        return;
       }
+
+      outputData = {
+        arr_multiple_impact: allEvaluationContent.arr[type].multiple_impact,
+        arr_final_multiple: allEvaluationContent.arr[type].final_multiple,
+        arr_final_valuation: allEvaluationContent.arr[type].final_valuation,
+        ebitda_multiple_impact: allEvaluationContent.ebitda[type].multiple_impact,
+        ebitda_final_multiple: allEvaluationContent.ebitda[type].final_multiple,
+        ebitda_final_valuation: allEvaluationContent.ebitda[type].final_valuation
+      };
 
       const response = await axios.post(
         `${apiBaseURL}/valuations/${thisValuationId.value}/outputs`,
