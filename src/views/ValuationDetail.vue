@@ -1093,6 +1093,9 @@ async function navigateToFinancialInfo() {
      * 7) EBITDA Margin = EBITDA / total_revenue
      */
 
+    // Call saveOutputs to store the metrics in database
+    await saveOutputs();
+
 async function saveOutputs() {
   try {
     let outputData = {
