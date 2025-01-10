@@ -1567,9 +1567,9 @@ async function navigateToFinancialInfo() {
     const totalArrImpactInterpretation = getKPIInfo('final_multiple', totalArrImpact).evaluationDescription
     const baseArrMultiple = valuationData.base_arr_multiple || 3; // fallback
     const finalArrMultiple = parseFloat((baseArrMultiple * totalArrImpact).toFixed(2));
-    let companyWorthARR = null;
+    let companyWorthArr = null;
     if (arrVal != null && !isNaN(finalArrMultiple)) {
-      companyWorthARR = arrVal * finalArrMultiple;
+      companyWorthArr = arrVal * finalArrMultiple;
     }
 
     // -------------------------------------------------
@@ -1583,9 +1583,9 @@ async function navigateToFinancialInfo() {
     const totalEbitdaImpactInterpretation = getKPIInfo('final_multiple', totalEbitdaImpact).evaluationDescription
     const baseEbitdaMultiple = valuationData.base_ebitda_multiple || 3; // fallback
     const finalEbitdaMultiple = parseFloat((baseEbitdaMultiple * totalEbitdaImpact).toFixed(2));
-    let companyWorthEBITDA = null;
+    let companyWorthEbitda = null;
     if (ebitdaVal != null && !isNaN(finalEbitdaMultiple)) {
-      companyWorthEBITDA = ebitdaVal * finalEbitdaMultiple;
+        companyWorthEbitda = ebitdaVal * finalEbitdaMultiple;
     }
 
     // -------------------------------------------------
@@ -1595,9 +1595,9 @@ async function navigateToFinancialInfo() {
     const totalArrImpactMinimal = growthImpactMinimal * grossMarginImpact * recurringImpact;
     const totalArrImpactInterpretationMinimal = getKPIInfo('final_multiple', totalArrImpactMinimal).evaluationDescription
     const finalArrMultipleMinimal = parseFloat((baseArrMultiple * totalArrImpactMinimal).toFixed(2));
-    let companyWorthARRMinimal = null;
+    let companyWorthArrMinimal = null;
     if (arrVal != null && !isNaN(finalArrMultipleMinimal)) {
-      companyWorthARRMinimal = arrVal * finalArrMultipleMinimal;
+      companyWorthArrMinimal = arrVal * finalArrMultipleMinimal;
     }
 
     // -------------------------------------------------
@@ -1611,9 +1611,9 @@ async function navigateToFinancialInfo() {
     const finalEbitdaMultipleMinimal = parseFloat(
       (baseEbitdaMultiple * totalEbitdaImpactMinimal).toFixed(2)
     );
-    let companyWorthEBITDAMinimal = null;
+    let companyWorthEbitdaMinimal = null;
     if (ebitdaVal != null && !isNaN(finalEbitdaMultipleMinimal)) {
-      companyWorthEBITDAMinimal = ebitdaVal * finalEbitdaMultipleMinimal;
+      companyWorthEbitdaMinimal = ebitdaVal * finalEbitdaMultipleMinimal;
     }
 
     // -------------------------------------------------
@@ -1623,7 +1623,7 @@ async function navigateToFinancialInfo() {
     const totalArrImpactComplete = totalArrImpact;
     const totalArrImpactInterpretationComplete = getKPIInfo('final_multiple', totalArrImpactComplete).evaluationDescription
     const finalArrMultipleComplete = finalArrMultiple;
-    const companyWorthARRComplete = companyWorthARR;
+    const companyWorthArrComplete = companyWorthArr;
 
     // -------------------------------------------------
     // EBITDA - COMPLETE (same as standard in this example)
@@ -1631,7 +1631,7 @@ async function navigateToFinancialInfo() {
     const totalEbitdaImpactComplete = totalEbitdaImpact;
     const totalEbitdaImpactInterpretationComplete = getKPIInfo('final_multiple', totalEbitdaImpactComplete).evaluationDescription
     const finalEbitdaMultipleComplete = finalEbitdaMultiple;
-    const companyWorthEBITDAComplete = companyWorthEBITDA;
+    const companyWorthEbitdaComplete = companyWorthEbitda;
 
     // -----------------------------------------
     // Return the full object 1234
@@ -1755,7 +1755,7 @@ async function navigateToFinancialInfo() {
             <p class="mb-6">Adjusting your base ARR-Multiple of ${baseArrMultiple} by ${multipleImpactPercent(
             totalArrImpactMinimal)} gives us your final ARR-Multiple of ${finalArrMultipleMinimal}.</p>
 
-            <p class="mb-2 font-weight-bold">Multiplying this with your ARR of ${usdFormat(arrVal)} we estimate the worth of your business to be ${usdFormat(companyWorthARRMinimal)}. </p>
+            <p class="mb-2 font-weight-bold">Multiplying this with your ARR of ${usdFormat(arrVal)} we estimate the worth of your business to be ${usdFormat(companyWorthArrMinimal)}. </p>
             `,
         },
 
@@ -1895,7 +1895,7 @@ async function navigateToFinancialInfo() {
               <p class="mb-6">Adjusting your base ARR-Multiple of ${baseArrMultiple} by ${multipleImpactPercent(
               totalArrImpact)} gives us your final ARR-Multiple of ${finalArrMultiple}.</p>
 
-              <p class="mb-2 font-weight-bold">Multiplying this with your ARR of ${usdFormat(arrVal)} we estimate the worth of your business to be ${usdFormat(companyWorthARR)}. </p>
+              <p class="mb-2 font-weight-bold">Multiplying this with your ARR of ${usdFormat(arrVal)} we estimate the worth of your business to be ${usdFormat(companyWorthArr)}. </p>
             `,
         },
 
@@ -2035,7 +2035,7 @@ async function navigateToFinancialInfo() {
               <p class="mb-6">Adjusting your base ARR-Multiple of ${baseArrMultiple} by ${multipleImpactPercent(
               totalArrImpact)} gives us your final ARR-Multiple of ${finalArrMultiple}.</p>
 
-              <p class="mb-2 font-weight-bold">Multiplying this with your ARR of ${usdFormat(arrVal)} we estimate the worth of your business to be ${usdFormat(companyWorthARR)}. </p>
+              <p class="mb-2 font-weight-bold">Multiplying this with your ARR of ${usdFormat(arrVal)} we estimate the worth of your business to be ${usdFormat(companyWorthArr)}. </p>
             `,
         },
       },
@@ -2177,7 +2177,7 @@ async function navigateToFinancialInfo() {
           totalEbitdaImpactMinimal)} gives us your final EBITDA Multiple of ${finalEbitdaMultipleMinimal}.
             </p>
             
-            <p class="mb-2 font-weight-bold">Multiplying this with your EBITDA of ${usdFormat(ebitdaVal)} we estimate the worth of your business to be ${usdFormat(companyWorthEBITDAMinimal)}. </p>
+            <p class="mb-2 font-weight-bold">Multiplying this with your EBITDA of ${usdFormat(ebitdaVal)} we estimate the worth of your business to be ${usdFormat(companyWorthEbitdaMinimal)}. </p>
             
           `,
         },
@@ -2338,7 +2338,7 @@ async function navigateToFinancialInfo() {
               totalEbitdaImpact)} gives us your final EBITDA Multiple of ${finalEbitdaMultiple}.
               </p>
             
-              <p class="mb-2 font-weight-bold">Multiplying this with your EBITDA of ${usdFormat(ebitdaVal)} we estimate the worth of your business to be ${usdFormat(companyWorthEBITDA)}. </p>
+              <p class="mb-2 font-weight-bold">Multiplying this with your EBITDA of ${usdFormat(ebitdaVal)} we estimate the worth of your business to be ${usdFormat(companyWorthEbitda)}. </p>
             `,
         },
 
@@ -2497,7 +2497,7 @@ async function navigateToFinancialInfo() {
             totalEbitdaImpact)} gives us your final EBITDA Multiple of ${finalEbitdaMultiple}.
             </p>
 
-            <p class="mb-2 font-weight-bold">Multiplying this with your EBITDA of ${usdFormat(ebitdaVal)} we estimate the worth of your business to be ${usdFormat(companyWorthEBITDA)}. </p>
+            <p class="mb-2 font-weight-bold">Multiplying this with your EBITDA of ${usdFormat(ebitdaVal)} we estimate the worth of your business to be ${usdFormat(companyWorthEbitda)}. </p>
           `,
         },
       },
@@ -2671,9 +2671,9 @@ async function navigateToFinancialInfo() {
             <p class="mb-2">
               To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
               i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple}
-              = ${usdFormat(valuationCalculation.companyWorthARR)} 
+              = ${usdFormat(valuationCalculation.companyWorthArr)} 
             </p>
-            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthArr)}.</p>
           `
         },
 
@@ -2839,9 +2839,9 @@ async function navigateToFinancialInfo() {
             <p class="mb-2">
               To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
               i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple}
-              = ${usdFormat(valuationCalculation.companyWorthARR)}
+              = ${usdFormat(valuationCalculation.companyWorthArr)}
             </p>
-            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthArr)}.</p>
           `
         },
         complete: {
@@ -3003,9 +3003,9 @@ async function navigateToFinancialInfo() {
             <p class="mb-2">
               To evaluate the worth of your business using the ARR Multiple Method, all that is left to do is to multiply your current ARR with the final multiple. <br>
               i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].recurring_revenue)} * ${valuationCalculation.final_arr_multiple}
-              = ${usdFormat(valuationCalculation.companyWorthARR)}
+              = ${usdFormat(valuationCalculation.companyWorthArr)}
             </p>
-            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthARR)}.</p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the ARR-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthArr)}.</p>
           `
         }
       },
@@ -3178,9 +3178,9 @@ async function navigateToFinancialInfo() {
             <p class="mb-2">
               To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
               i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)} * ${valuationCalculation.final_ebitda_multiple}
-              = ${usdFormat(valuationCalculation.companyWorthEBITDA)}
+              = ${usdFormat(valuationCalculation.companyWorthEbitda)}
             </p>
-            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEBITDA)}.</p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEbitda)}.</p>
           `
         },
         standard: {
@@ -3347,9 +3347,9 @@ async function navigateToFinancialInfo() {
             <p class="mb-2">
               To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
               i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)} * ${valuationCalculation.final_ebitda_multiple}
-              = ${usdFormat(valuationCalculation.companyWorthEBITDA)}
+              = ${usdFormat(valuationCalculation.companyWorthEbitda)}
             </p>
-            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEBITDA)}.</p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEbitda)}.</p>
           `
         },
         complete: {
@@ -3516,9 +3516,9 @@ async function navigateToFinancialInfo() {
             <p class="mb-2">
               To evaluate the worth of your business using the EBITDA-Multiple-Method, all that is left to do is to multiply your current EBITDA with the final multiple. <br>
               i.e. ${usdFormat(valuationData.valuation_yearly_inputs[latestYear].calc_ebitda_net)} * ${valuationCalculation.final_ebitda_multiple}
-              = ${usdFormat(valuationCalculation.companyWorthEBITDA)}
+              = ${usdFormat(valuationCalculation.companyWorthEbitda)}
             </p>
-            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEBITDA)}.</p>
+            <p class="mb62 font-weight-bold">Your business' valuation using the EBITDA-Multiple-Method is ${usdFormat(valuationCalculation.companyWorthEbitda)}.</p>
           `
         }
       }

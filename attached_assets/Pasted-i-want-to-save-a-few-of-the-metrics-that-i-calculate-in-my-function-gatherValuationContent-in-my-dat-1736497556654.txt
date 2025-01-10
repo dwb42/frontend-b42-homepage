@@ -1,0 +1,60 @@
+i want to save a few of the metrics that i calculate in my function gatherValuationContent in my database. 
+
+the database fields are defined as follows 
+
+    arr_multiple_impact: {
+      type: DataTypes.FLOAT,
+    },
+    arr_final_multiple: {
+      type: DataTypes.FLOAT,
+    },
+    arr_final_valuation: {
+      type: DataTypes.FLOAT,
+    },
+    ebitda_multiple_impact: {
+      type: DataTypes.FLOAT,
+    },
+    ebitda_final_multiple: {
+      type: DataTypes.FLOAT,
+    },
+    ebitda_final_valuation: {
+      type: DataTypes.FLOAT,
+    },
+
+    the route on the backend server is as follows 
+
+axios.post(`${apiBaseURL}/valuations/${thisValuationId.value}/outputs`
+    
+in the function gatherValuationContent the values for the variables to be saved in the database are defined by following variables: 
+
+if valuationData.valuation_type = minimal 
+
+arr_multiple_impact = totalArrImpactMinimal
+arr_final_multiple = finalArrMultipleMinimal
+arr_final_valuation  = companyWorthArrMinimal
+ebitda_multiple_impact = totalEbitdaImpactMinimal
+ebitda_final_multiple = finalEbitdaMultipleMinimal
+ebitda_final_valuation  = companyWorthEbitdaMinimal
+    
+    
+if valuationData.valuation_type = standard
+
+arr_multiple_impact = totalArrImpact
+arr_final_multiple = finalArrMultiple
+arr_final_valuation  = companyWorthArr
+ebitda_multiple_impact = totalEbitdaImpact
+ebitda_final_multiple = finalEbitdaMultiple
+ebitda_final_valuation  = companyWorthEBITDA
+
+if valuationData.valuation_type = complete 
+
+arr_multiple_impact = totalArrImpactComplete
+arr_final_multiple = finalArrMultipleComplete
+arr_final_valuation  = companyWorthArrComplete
+ebitda_multiple_impact = totalEbitdaImpactComplete
+ebitda_final_multiple = finalEbitdaMultipleComplete
+ebitda_final_valuation  = companyWorthEbitdaComplete
+
+in @valuplease create a new function "saveOutputs" assigns values to the keys to be saved in the database based on the value of valuationData.valuation_type according to the mapping above. 
+
+include an axios post in the function to save the values. 
