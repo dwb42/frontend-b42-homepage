@@ -411,6 +411,8 @@
       </v-card>
     </v-dialog>
 
+    allEvaluationContent <pre>{{allEvaluationContent}}</pre>
+    
     <!-- ///////////////////////// -->
     <!-- EVALUATION END           -->
     <!-- /////////////////////////  -->
@@ -419,7 +421,7 @@
     <!-- FEEDBACK START    --> 
     <!-- /////////////////////////  -->
     <template v-if="showResults">
-      <h2 class="text-h5 mb-2 mt-0"><b>(4) Gives us Feedback</b></h2>
+      <h2 class="text-h5 mb-2 mt-0"><b>(4) Give us Feedback</b></h2>
       
       <v-card variant="outlined" class="pa-3 mb-12">
         <v-form @submit.prevent="">
@@ -1093,66 +1095,6 @@ async function navigateToFinancialInfo() {
      * 7) EBITDA Margin = EBITDA / total_revenue
      */
 
-    // Call saveOutputs to store the metrics in database
-    await saveOutputs();
-
-async function saveOutputs() {
-  try {
-    let outputData = {
-      arr_multiple_impact: null,
-      arr_final_multiple: null,
-      arr_final_valuation: null,
-      ebitda_multiple_impact: null,
-      ebitda_final_multiple: null,
-      ebitda_final_valuation: null
-    };
-
-    switch (valuationData.valuation_type) {
-      case 'minimal':
-        outputData = {
-          arr_multiple_impact: totalArrImpactMinimal,
-          arr_final_multiple: finalArrMultipleMinimal,
-          arr_final_valuation: companyWorthArrMinimal,
-          ebitda_multiple_impact: totalEbitdaImpactMinimal,
-          ebitda_final_multiple: finalEbitdaMultipleMinimal,
-          ebitda_final_valuation: companyWorthEbitdaMinimal
-        };
-        break;
-
-      case 'standard':
-        outputData = {
-          arr_multiple_impact: totalArrImpact,
-          arr_final_multiple: finalArrMultiple,
-          arr_final_valuation: companyWorthArr,
-          ebitda_multiple_impact: totalEbitdaImpact,
-          ebitda_final_multiple: finalEbitdaMultiple,
-          ebitda_final_valuation: companyWorthEbitda
-        };
-        break;
-
-      case 'complete':
-        outputData = {
-          arr_multiple_impact: totalArrImpactComplete,
-          arr_final_multiple: finalArrMultipleComplete,
-          arr_final_valuation: companyWorthArrComplete,
-          ebitda_multiple_impact: totalEbitdaImpactComplete,
-          ebitda_final_multiple: finalEbitdaMultipleComplete,
-          ebitda_final_valuation: companyWorthEbitdaComplete
-        };
-        break;
-    }
-
-    const response = await axios.post(
-      `${apiBaseURL}/valuations/${thisValuationId.value}/outputs`,
-      outputData
-    );
-    
-    console.log('Outputs saved successfully:', response.data);
-  } catch (error) {
-    console.error('Error saving outputs:', error);
-  }
-}
-
     if (
       financials.total_revenue != null &&
       financials.costs_of_goods_sold != null &&
@@ -1279,6 +1221,62 @@ async function saveOutputs() {
   }
 
 
+  async function saveOutputs() {
+    try {
+      let outputData = {
+        arr_multiple_impact: null,
+        arr_final_multiple: null,
+        arr_final_valuation: null,
+        ebitda_multiple_impact: null,
+        ebitda_final_multiple: null,
+        ebitda_final_valuation: null
+      };
+
+      switch (valuationData.valuation_type) {
+        case 'minimal':
+          outputData = {
+            arr_multiple_impact: allEvaluationContent.arr.minimal.multiple_impact,
+            arr_final_multiple: finalArrMultipleMinimal,
+            arr_final_valuation: companyWorthArrMinimal,
+            ebitda_multiple_impact: totalEbitdaImpactMinimal,
+            ebitda_final_multiple: finalEbitdaMultipleMinimal,
+            ebitda_final_valuation: companyWorthEbitdaMinimal
+          };
+          break;
+
+        case 'standard':
+          outputData = {
+            arr_multiple_impact: totalArrImpact,
+            arr_final_multiple: finalArrMultiple,
+            arr_final_valuation: companyWorthArr,
+            ebitda_multiple_impact: totalEbitdaImpact,
+            ebitda_final_multiple: finalEbitdaMultiple,
+            ebitda_final_valuation: companyWorthEbitda
+          };
+          break;
+
+        case 'complete':
+          outputData = {
+            arr_multiple_impact: totalArrImpactComplete,
+            arr_final_multiple: finalArrMultipleComplete,
+            arr_final_valuation: companyWorthArrComplete,
+            ebitda_multiple_impact: totalEbitdaImpactComplete,
+            ebitda_final_multiple: finalEbitdaMultipleComplete,
+            ebitda_final_valuation: companyWorthEbitdaComplete
+          };
+          break;
+      }
+
+      const response = await axios.post(
+        `${apiBaseURL}/valuations/${thisValuationId.value}/outputs`,
+        outputData
+      );
+
+      console.log('Outputs saved successfully:', response.data);
+    } catch (error) {
+      console.error('Error saving outputs:', error);
+    }
+  }
 
 
 
@@ -1700,6 +1698,9 @@ async function saveOutputs() {
     return {
       arr: {
         minimal: {
+          multiple_impact: totalArrImpactMinimal,
+          final_multiple: finalArrMultipleMinimal,
+          final_valuation: companyWorthArrMinimal,
           description_above_input: `
             <h3 class="text-h6 mb-2 mt-0">ARR-Multiple-Method</h3>
             <p class="mb-6">To value an earlier stage business that is still investing heavily in growth and/or product (rather than striving for profit) an investor would typically use the ARR-Multiple valuation method. </p>
@@ -1821,6 +1822,9 @@ async function saveOutputs() {
         },
 
         standard: {
+          multiple_impact: totalArrImpact,
+          final_multiple: finalArrMultiple,
+          final_valuation: companyWorthArr,
           description_above_input: `
             <h3 class="text-h6 mb-2 mt-0">ARR-Multiple-Method</h3>
             <p class="mb-6">To value an earlier stage business that is still investing heavily in growth and/or product (rather than striving for profit) an investor would typically use the ARR-Multiple valuation method. </p>
@@ -1961,6 +1965,9 @@ async function saveOutputs() {
         },
 
         complete: {
+          multiple_impact: totalArrImpactComplete,
+          final_multiple: finalArrMultipleComplete,
+          final_valuation: companyWorthArrComplete,
           description_above_input: `
             <h3 class="text-h6 mb-2 mt-0">ARR-Multiple-Method</h3>
             <p class="mb-6">To value an earlier stage business that is still investing heavily in growth and/or product (rather than striving for profit) an investor would typically use the ARR-Multiple valuation method. </p>
@@ -2103,6 +2110,9 @@ async function saveOutputs() {
       //1234
       ebitda: {
         minimal: {
+          multiple_impact: totalEbitdaImpactMinimal,
+          final_multiple: finalEbitdaMultipleMinimal,
+          final_valuation: companyWorthEbitdaMinimal,
           description_above_input: `
               <h3 class="text-h6 mb-2 mt-0">EBITDA-Multiple-Method</h3>
               <p class="mb-6">As a later stage business that is balancing its focus on "growing" vs. "generating a profit" an investor would typically use the EBIDTA-Multiple valuation method. </p>
@@ -2244,6 +2254,9 @@ async function saveOutputs() {
         },
 
         standard: {
+          multiple_impact: totalEbitdaImpact,
+          final_multiple: finalEbitdaMultiple,
+          final_valuation: companyWorthEbitda,
           description_above_input: `
               <h3 class="text-h6 mb-2 mt-0">EBITDA-Multiple-Method</h3>
               <p class="mb-6">As a later stage business that is balancing its focus on "growing" vs. "generating a profit" an investor would typically use the EBIDTA-Multiple valuation method. </p>
@@ -2404,6 +2417,9 @@ async function saveOutputs() {
         },
 
         complete: {
+          multiple_impact: totalEbitdaImpactComplete,
+          final_multiple: finalEbitdaMultipleComplete,
+          final_valuation: companyWorthEbitdaComplete,
           description_above_input: `
             <h3 class="text-h6 mb-2 mt-0">EBITDA-Multiple-Method</h3>
             <p class="mb-6">As a later stage business that is balancing its focus on "growing" vs. "generating a profit" an investor would typically use the EBIDTA-Multiple valuation method. </p>
@@ -3831,6 +3847,9 @@ async function saveOutputs() {
 
     // 4. *** Rebuild textual content for minimal, standard, complete ***
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
+
+    // 5. save core EvaluationOutput in DB 
+    saveOutputs();
 
     // Set loading to false after the first full calculation
     showResults.value = true;
