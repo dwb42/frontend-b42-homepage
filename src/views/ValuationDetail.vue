@@ -1092,6 +1092,64 @@ async function navigateToFinancialInfo() {
     /**
      * 7) EBITDA Margin = EBITDA / total_revenue
      */
+
+async function saveOutputs() {
+  try {
+    let outputData = {
+      arr_multiple_impact: null,
+      arr_final_multiple: null,
+      arr_final_valuation: null,
+      ebitda_multiple_impact: null,
+      ebitda_final_multiple: null,
+      ebitda_final_valuation: null
+    };
+
+    switch (valuationData.valuation_type) {
+      case 'minimal':
+        outputData = {
+          arr_multiple_impact: totalArrImpactMinimal,
+          arr_final_multiple: finalArrMultipleMinimal,
+          arr_final_valuation: companyWorthArrMinimal,
+          ebitda_multiple_impact: totalEbitdaImpactMinimal,
+          ebitda_final_multiple: finalEbitdaMultipleMinimal,
+          ebitda_final_valuation: companyWorthEbitdaMinimal
+        };
+        break;
+
+      case 'standard':
+        outputData = {
+          arr_multiple_impact: totalArrImpact,
+          arr_final_multiple: finalArrMultiple,
+          arr_final_valuation: companyWorthArr,
+          ebitda_multiple_impact: totalEbitdaImpact,
+          ebitda_final_multiple: finalEbitdaMultiple,
+          ebitda_final_valuation: companyWorthEbitda
+        };
+        break;
+
+      case 'complete':
+        outputData = {
+          arr_multiple_impact: totalArrImpactComplete,
+          arr_final_multiple: finalArrMultipleComplete,
+          arr_final_valuation: companyWorthArrComplete,
+          ebitda_multiple_impact: totalEbitdaImpactComplete,
+          ebitda_final_multiple: finalEbitdaMultipleComplete,
+          ebitda_final_valuation: companyWorthEbitdaComplete
+        };
+        break;
+    }
+
+    const response = await axios.post(
+      `${apiBaseURL}/valuations/${thisValuationId.value}/outputs`,
+      outputData
+    );
+    
+    console.log('Outputs saved successfully:', response.data);
+  } catch (error) {
+    console.error('Error saving outputs:', error);
+  }
+}
+
     if (
       financials.total_revenue != null &&
       financials.costs_of_goods_sold != null &&
