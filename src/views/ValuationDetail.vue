@@ -1223,60 +1223,52 @@ async function navigateToFinancialInfo() {
 
   async function saveOutputs() {
     try {
-      let outputData = {
-        arr_multiple_impact: null,
-        arr_final_multiple: null,
-        arr_final_valuation: null,
-        ebitda_multiple_impact: null,
-        ebitda_final_multiple: null,
-        ebitda_final_valuation: null
-      };
-
-      switch (valuationData.valuation_type) {
-        case 'minimal':
-          outputData = {
-            arr_multiple_impact: allEvaluationContent.arr.minimal.multiple_impact,
-            arr_final_multiple: finalArrMultipleMinimal,
-            arr_final_valuation: companyWorthArrMinimal,
-            ebitda_multiple_impact: totalEbitdaImpactMinimal,
-            ebitda_final_multiple: finalEbitdaMultipleMinimal,
-            ebitda_final_valuation: companyWorthEbitdaMinimal
-          };
-          break;
-
-        case 'standard':
-          outputData = {
-            arr_multiple_impact: totalArrImpact,
-            arr_final_multiple: finalArrMultiple,
-            arr_final_valuation: companyWorthArr,
-            ebitda_multiple_impact: totalEbitdaImpact,
-            ebitda_final_multiple: finalEbitdaMultiple,
-            ebitda_final_valuation: companyWorthEbitda
-          };
-          break;
-
-        case 'complete':
-          outputData = {
-            arr_multiple_impact: totalArrImpactComplete,
-            arr_final_multiple: finalArrMultipleComplete,
-            arr_final_valuation: companyWorthArrComplete,
-            ebitda_multiple_impact: totalEbitdaImpactComplete,
-            ebitda_final_multiple: finalEbitdaMultipleComplete,
-            ebitda_final_valuation: companyWorthEbitdaComplete
-          };
-          break;
+      // If we haven't built allEvaluationContent yet, bail out.
+      if (!allEvaluationContent.value) {
+        console.log("No allEvaluationContent - cannot save outputs");
+        return;
       }
 
+      // Determine which detail level ("minimal", "standard", or "complete")
+      const detail = valuationData.valuation_type;
+      if (!detail) {
+        console.log("No valuation_type selected - cannot save outputs");
+        return;
+      }
+
+      // Grab the ARR scenario object
+      const scenarioArr = allEvaluationContent.value.arr[detail];
+      // Grab the EBITDA scenario object
+      const scenarioEbitda = allEvaluationContent.value.ebitda[detail];
+
+      if (!scenarioArr || !scenarioEbitda) {
+        console.log("Scenarios not found in allEvaluationContent - cannot save outputs");
+        return;
+      }
+
+      // Fill both ARR and EBITDA fields no matter what
+      const outputData = {
+        arr_multiple_impact:     scenarioArr.multiple_impact,
+        arr_final_multiple:      scenarioArr.final_multiple,
+        arr_final_valuation:     scenarioArr.final_valuation,
+        ebitda_multiple_impact:  scenarioEbitda.multiple_impact,
+        ebitda_final_multiple:   scenarioEbitda.final_multiple,
+        ebitda_final_valuation:  scenarioEbitda.final_valuation,
+      };
+
+      // Send outputData to your endpoint
       const response = await axios.post(
         `${apiBaseURL}/valuations/${thisValuationId.value}/outputs`,
         outputData
       );
 
       console.log('Outputs saved successfully:', response.data);
+
     } catch (error) {
       console.error('Error saving outputs:', error);
     }
   }
+
 
 
 
