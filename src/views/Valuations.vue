@@ -15,6 +15,7 @@
                 <th class="text-left">Multiple</th>
                 <th class="text-left">Valued at</th>
                 <th class="text-left">Created</th>
+                <th class="text-left"></th>
               </tr>
             </thead>
             <tbody>
@@ -32,6 +33,7 @@
                       valuation.valuation_general_outputs[0].ebitda_final_valuation : 
                       valuation.valuation_general_outputs[0].arr_final_valuation) : '-' }}</td>
                 <td>{{ formatDateUsingDateFns(valuation.createdAt) }}</td>
+                <td><v-icon>mdi-trash-can-outline</v-icon></td>
               </tr>
             </tbody>
           </v-table>
