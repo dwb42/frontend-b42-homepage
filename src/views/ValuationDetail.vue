@@ -243,9 +243,21 @@
       <h2 class="text-h5 mb-2"><b>(3) Review valuation <!--({{valuationData.valuation_type}})--></b></h2>
 
         <v-card variant="outlined" class="pa-3 mb-10">
+          
+          <div class="text-left">
+            <v-btn
+              color="primary"
+              variant="tonal"
+              density="compact"
+              @click="valuationData.showValuationExplanation = !valuationData.showValuationExplanation"
+              class="mb-6"
+            >
+              {{ valuationData.showValuationExplanation ? 'Hide Valuation Explanation' : 'Show Valuation Explanation' }}
+            </v-btn>
+          </div>
 
           <!-- Description above base multiple input -->
-          <p v-html="currentEvaluation.description_above_input"></p>
+          <p v-if="valuationData.showValuationExplanation" v-html="currentEvaluation.description_above_input"></p>
 
           <!-- Base multiple input -->
           <v-text-field
@@ -258,7 +270,7 @@
           ></v-text-field>
 
           <!-- Description below base multiple input -->
-          <p class="mb-6 text-body-1" v-html="currentEvaluation.description_below_input"></p>
+          <p v-if="valuationData.showValuationExplanation" class="mb-6 text-body-1" v-html="currentEvaluation.description_below_input"></p>
 
           <!-- Table structure with 5 rows  -->
           <v-table>
@@ -532,6 +544,17 @@
     <!-- ///////////////////////// -->
     <!-- KPI YEARLY TABLE END           -->
     <!-- /////////////////////////  -->
+
+
+
+    <div style='margin-top:400px'>
+    <h2 class="text-h5 mb-2"><b>Danger Zone</b></h2>
+    <v-card variant="outlined" class="pa-3 mb-10">
+    <v-btn color="error" tonal @click="deleteValuation">Delete Valuation</v-btn>
+    </v-card>
+    </div>
+    
+      
     
   </v-container>  
 </template>
@@ -736,7 +759,7 @@ async function navigateToFinancialInfo() {
       }
     },
     {
-      label: 'Number of Customers at End of Period',
+      label: 'Number of Customers at Start of Period',
       field: 'number_of_customers_end_of_period',
       isCurrency: false,
       applyToRules: {
@@ -745,7 +768,7 @@ async function navigateToFinancialInfo() {
         complete: 'all'
       }
     },
-    {
+    /*{
       label: 'Customers Won in Period',
       field: 'customers_won_in_period',
       isCurrency: false,
@@ -754,7 +777,7 @@ async function navigateToFinancialInfo() {
         standard: 'latestOnly',
         complete: 'all'
       }
-    },
+    },*/
     {
       label: 'Customers Lost in Period',
       field: 'customers_lost_in_period',
@@ -1400,7 +1423,7 @@ async function navigateToFinancialInfo() {
       component: AdminCostsInputModal
     },
     number_of_customers_end_of_period: {
-      title: 'Number of Customers at End of Period',
+      title: 'Number of Customers at Start of Period',
       component: CustomerCountInputModal
     },
     customers_won_in_period: {
@@ -1562,6 +1585,8 @@ async function navigateToFinancialInfo() {
   // VALUATION START 
   //////////////////////////////////////////////////////
 
+  const showValuationExplanation = ref(true);
+  
   /** 1234
    * This function gathers:
    *  - All textual content for minimal, standard, complete for ARR and EBITDA
@@ -3851,6 +3876,7 @@ async function navigateToFinancialInfo() {
   // WATCHER AN LIFECYCLE HOOKS START 
   //////////////////////////////////////////////////////
 
+    
   
   //////////////////////////////////////////////////////
   // FORMATING AND HELPER FUNCTIONS START 

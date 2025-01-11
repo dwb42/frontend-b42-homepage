@@ -9,7 +9,7 @@
             <thead>
               <tr>
                 <th class="text-left">id</th>
-                <th class="text-left">Company Name</th>
+                <th class="text-left" style="min-width: 200px;">Company Name</th>
                 <th class="text-left">Company URL</th>
                 <th class="text-left">Valuation Method</th>
                 <th class="text-left">Multiple</th>
@@ -20,13 +20,13 @@
             <tbody>
               <tr v-for="valuation in valuationsData" :key="valuation.id">
                 <td>{{ valuation.id }}</td>
-                <td><router-link :to="`/app/valuation/${valuation.id}`">{{ valuation.company_name }}</router-link></td> 
+                <td><router-link :to="`/app/valuation/${valuation.id}`"><b>{{ valuation.company_name }}</b></router-link></td> 
                 <td><a :href="valuation.company_url" target="_blank">{{ valuation.company_url }}</a></td> 
                 <td>{{ valuation.state_of_business === 'laterStage' ? 'EBITDA' : 'ARR' }}</td>
                 <td>{{ valuation.valuation_general_outputs?.[0] ? 
                     (valuation.state_of_business === 'laterStage' ? 
-                      valuation.valuation_general_outputs[0].ebitda_final_multiple : 
-                      valuation.valuation_general_outputs[0].arr_final_multiple) : '-' }}</td>
+                     multipleImpactPercent(valuation.valuation_general_outputs[0].ebitda_final_multiple) : 
+                     multipleImpactPercent(valuation.valuation_general_outputs[0].arr_final_multiple)) : '-' }}</td>
                 <td>{{ valuation.valuation_general_outputs?.[0] ? 
                     usdFormat(valuation.state_of_business === 'laterStage' ? 
                       valuation.valuation_general_outputs[0].ebitda_final_valuation : 
@@ -77,6 +77,12 @@ const valuationsData = ref({});
 
 const company_name = ref('');
 const company_url = ref('');
+
+const multipleImpactPercent = (val) => {
+  if (val == null) return 'N/A';
+  // e.g., "1.20x"
+  return `${val.toFixed(2)}x`;
+};
 
 function formatCompanyURL() {
   company_url.value = formatURL(company_url.value);

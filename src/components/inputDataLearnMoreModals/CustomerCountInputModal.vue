@@ -1,6 +1,6 @@
 
 <template>
-  <p class="mb-2">Enter the total number of paying customers at the end of the period:</p>
+  <p class="mb-2">Enter the total number of paying customers at the start of the period:</p>
   
   <v-card class="mb-6">
     <v-list density="compact">
@@ -36,7 +36,7 @@
     </v-list>
   </v-card>
 
-  <p>E.g. if you are inputing the data for 2024, you want to count the number of active customers on 31.12.2024. </p>
+  <p>E.g. if you are inputing the data for 2024, you want to count the number of active customers on 1.1.2024. </p>
 </template>
 
 <script>
