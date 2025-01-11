@@ -33,7 +33,11 @@
                       valuation.valuation_general_outputs[0].ebitda_final_valuation : 
                       valuation.valuation_general_outputs[0].arr_final_valuation) : '-' }}</td>
                 <td>{{ formatDateUsingDateFns(valuation.createdAt) }}</td>
-                <td><v-icon>mdi-trash-can-outline</v-icon></td>
+                <td>
+                  <v-icon @click="deleteValuation(valuation.id)" style="cursor: pointer;">
+                    mdi-trash-can-outline
+                  </v-icon>
+                </td>
               </tr>
             </tbody>
           </v-table>
@@ -107,19 +111,29 @@ async function fetchValuations() {
 
 async function createValuation() {
   try {
-  const formData = {
-    company_name: company_name.value, 
-    company_url: company_url.value
-  };
-  const response = await axios.post(`${apiBaseURL}/valuations/`, formData);
-  console.log('Valuation created:', response.data);
+    const formData = {
+      company_name: company_name.value, 
+      company_url: company_url.value
+    };
+    const response = await axios.post(`${apiBaseURL}/valuations/`, formData);
+    console.log('Valuation created:', response.data);
 
-  //await fetchValuations(); 
-
-  router.push(`/app/valuation/${response.data.id}`);
+    router.push(`/app/valuation/${response.data.id}`);
 
   } catch (error) {
-  console.error('Error creating new valuation:', error);
+    console.error('Error creating new valuation:', error);
+  }
+}
+
+async function deleteValuation(id) {
+  try {
+    if (confirm('Are you sure you want to delete this valuation?')) {
+      await axios.delete(`${apiBaseURL}/valuations/${id}`);
+      console.log('Valuation deleted');
+      await fetchValuations();
+    }
+  } catch (error) {
+    console.error('Error deleting valuation:', error);
   }
 }
 
