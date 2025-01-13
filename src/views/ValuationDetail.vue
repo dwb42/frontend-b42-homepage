@@ -507,17 +507,10 @@
               <template v-for="year in years" :key="year">
                 <td class="text-right">
                   <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
-                    <!-- Display dash for first year -->
-                    <template v-if="calculatedKPIs[year][row.field] === '-'">
-                      -
-                    </template>
-                    <!-- Check if KPI value is a number -->
-                    <template v-else-if="typeof calculatedKPIs[year][row.field] === 'number'">
-                      {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
-                    </template>
-                    <!-- If KPI value is an object with missing data -->
-  
-                    <template v-else-if="calculatedKPIs[year][row.field].missingData">
+                    <!-- we now expect each KPI to be an object with { value, missingData } -->
+
+                    <!-- 1) If it has missingData, show the icon+tooltip -->
+                    <template v-if="calculatedKPIs[year][row.field].missingData">
                       <v-tooltip location="top">
                         <template #activator="{ props }">
                           <v-icon
@@ -529,13 +522,31 @@
                         <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
                       </v-tooltip>
                     </template>
+
+                    <!-- 2) Else if the KPI value is a number, display it -->
+                    <template v-else-if="typeof calculatedKPIs[year][row.field].value === 'number'">
+                      {{ formatKPIValue(row.field, calculatedKPIs[year][row.field].value) }}
+                    </template>
+
+                    <!-- 3) If the KPI value is '-' (like yoy in earliest year) -->
+                    <template v-else-if="calculatedKPIs[year][row.field].value === '-'">
+                      -
+                    </template>
+
+                    <!-- 4) Otherwise fallback -->
+                    <template v-else>
+                      <span style="color: red;">No data</span>
+                    </template>
                   </template>
+
+                  <!-- If for some reason we have no KPI object at all -->
                   <template v-else>
                     <span style="color: red;">No data</span>
                   </template>
                 </td>
               </template>
             </tr>
+
           </tbody>
         </v-table>
   
@@ -992,48 +1003,61 @@ async function navigateToFinancialInfo() {
   function calculateKPIsForYear(year) {
     const financials = valuationData.valuation_yearly_inputs?.[year];
 
-    /*/ If there are no financials for the year, set an error and return early
+    // If there are no financials for this year, store an error and return
     if (!financials) {
       calculatedKPIs[year] = {
         error: `No financial data available for the year: ${year}`,
       };
       return;
-    }*/
-
-    // Prepare an object to store the final KPI values (numbers, null, or simple strings)
-    const kpis = {
-      missingFields: [],
-    };
-
-    /**
-     * 1) Total Revenue
-     */
-    if (financials.total_revenue != null) {
-      kpis.calc_total_revenue = financials.total_revenue;
-    } else {
-      //kpis.calc_total_revenue = null;
-      kpis.missingFields.push('total_revenue');
     }
 
-    /**
-     * 2) Gross Margin Net = total_revenue - costs_of_goods_sold
-     */
+    // We'll store the year’s KPI results in this object
+    const kpis = {};
+
+    // Helper function to build an object: { value, missingData: string | null }
+    function makeKPI(value, missingFieldsArray) {
+      if (missingFieldsArray && missingFieldsArray.length > 0) {
+        // Join missing fields into a single string: 'fieldA, fieldB'
+        return {
+          value: value,
+          missingData: missingFieldsArray.join(', '),
+        };
+      } else {
+        return {
+          value: value,
+          missingData: null,
+        };
+      }
+    }
+
+    /***********************************************************
+     * 1) TOTAL REVENUE
+     ***********************************************************/
+    if (financials.total_revenue != null) {
+      kpis.calc_total_revenue = makeKPI(financials.total_revenue, []);
+    } else {
+      kpis.calc_total_revenue = makeKPI(null, ['total_revenue']);
+    }
+
+    /***********************************************************
+     * 2) GROSS MARGIN NET = total_revenue - costs_of_goods_sold
+     ***********************************************************/
     if (
       financials.total_revenue != null &&
       financials.costs_of_goods_sold != null
     ) {
-      kpis.calc_gross_margin_net =
-        financials.total_revenue - financials.costs_of_goods_sold;
+      const gmNet = financials.total_revenue - financials.costs_of_goods_sold;
+      kpis.calc_gross_margin_net = makeKPI(gmNet, []);
     } else {
-      kpis.calc_gross_margin_net = null;
-      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null)
-        kpis.missingFields.push('costs_of_goods_sold');
+      const missingFields = [];
+      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
+      kpis.calc_gross_margin_net = makeKPI(null, missingFields);
     }
 
-    /**
-     * 3) EBITDA Net = total_revenue - (sum of major costs)
-     */
+    /***********************************************************
+     * 3) EBITDA NET = total_revenue - sum of major costs
+     ***********************************************************/
     if (
       financials.total_revenue != null &&
       financials.costs_of_goods_sold != null &&
@@ -1046,97 +1070,81 @@ async function navigateToFinancialInfo() {
         financials.costs_of_customer_acquisition +
         financials.costs_of_r_and_d +
         financials.costs_of_general_administration;
-      kpis.calc_ebitda_net = financials.total_revenue - totalCosts;
+      kpis.calc_ebitda_net = makeKPI(financials.total_revenue - totalCosts, []);
     } else {
-      kpis.calc_ebitda_net = null;
-      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null)
-        kpis.missingFields.push('costs_of_goods_sold');
-      if (financials.costs_of_customer_acquisition == null)
-        kpis.missingFields.push('costs_of_customer_acquisition');
-      if (financials.costs_of_r_and_d == null)
-        kpis.missingFields.push('costs_of_r_and_d');
-      if (financials.costs_of_general_administration == null)
-        kpis.missingFields.push('costs_of_general_administration');
+      const missingFields = [];
+      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
+      if (financials.costs_of_customer_acquisition == null) missingFields.push('costs_of_customer_acquisition');
+      if (financials.costs_of_r_and_d == null) missingFields.push('costs_of_r_and_d');
+      if (financials.costs_of_general_administration == null) missingFields.push('costs_of_general_administration');
+      kpis.calc_ebitda_net = makeKPI(null, missingFields);
     }
 
-    /**
-     * 4) Recurring Revenue Ratio = recurring_revenue / total_revenue
-     */
-    if (
-      financials.recurring_revenue != null &&
-      financials.total_revenue != null
-    ) {
-      kpis.calc_recurring_revenue_ratio =
-        financials.total_revenue !== 0
-          ? financials.recurring_revenue / financials.total_revenue
-          : 0;
+    /***********************************************************
+     * 4) RECURRING REVENUE RATIO = recurring_revenue / total_revenue
+     ***********************************************************/
+    if (financials.recurring_revenue != null && financials.total_revenue != null) {
+      const ratio = (financials.total_revenue === 0)
+        ? 0
+        : financials.recurring_revenue / financials.total_revenue;
+      kpis.calc_recurring_revenue_ratio = makeKPI(ratio, []);
     } else {
-      kpis.calc_recurring_revenue_ratio = null;
-      if (financials.recurring_revenue == null)
-        kpis.missingFields.push('recurring_revenue');
-      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
+      const missingFields = [];
+      if (financials.recurring_revenue == null) missingFields.push('recurring_revenue');
+      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      kpis.calc_recurring_revenue_ratio = makeKPI(null, missingFields);
     }
 
-    /**
-     * 5) Year-over-Year Revenue Growth
-     *    Compare current year's total_revenue to previous year's total_revenue
-     */
-    {
-      const yearsArray = Object.keys(valuationData.valuation_yearly_inputs).sort();
-      const firstYear = yearsArray[0];
+    /***********************************************************
+     * 5) YEAR-OVER-YEAR REVENUE GROWTH vs previous year
+     ***********************************************************/
+    const yearsArray = Object.keys(valuationData.valuation_yearly_inputs).sort();
+    const firstYear = yearsArray[0];
 
-      if (year === firstYear) {
-        // For the earliest year, we can't do a YoY comparison
-        kpis.calc_yoy_revenue_growth = '-'; // or null, or any placeholder
+    if (year.toString() === firstYear) {
+      // For earliest year => no YoY comparison
+      kpis.calc_yoy_revenue_growth = makeKPI('-', null);
+    } else {
+      const prevYear = (parseInt(year) - 1).toString();
+      const prevFinancials = valuationData.valuation_yearly_inputs[prevYear];
+      const missingFields = [];
+      if (financials.total_revenue == null) missingFields.push(`total_revenue (${year})`);
+      if (!prevFinancials || prevFinancials.total_revenue == null) {
+        missingFields.push(`total_revenue (${prevYear})`);
+      }
+
+      if (missingFields.length === 0) {
+        const yoyGrowth = (prevFinancials.total_revenue !== 0)
+          ? (financials.total_revenue - prevFinancials.total_revenue) / prevFinancials.total_revenue
+          : null;
+        kpis.calc_yoy_revenue_growth = makeKPI(yoyGrowth, []);
       } else {
-        const previousYear = parseInt(year) - 1;
-        const prevFinancials = valuationData.valuation_yearly_inputs[previousYear];
-
-        if (
-          financials.total_revenue != null &&
-          prevFinancials &&
-          prevFinancials.total_revenue != null
-        ) {
-          if (prevFinancials.total_revenue !== 0) {
-            kpis.calc_yoy_revenue_growth =
-              (financials.total_revenue - prevFinancials.total_revenue) /
-              prevFinancials.total_revenue;
-          } else {
-            kpis.calc_yoy_revenue_growth = null;
-          }
-        } else {
-          kpis.calc_yoy_revenue_growth = null;
-          if (financials.total_revenue == null)
-            kpis.missingFields.push(`total_revenue (${year})`);
-          if (!prevFinancials || prevFinancials.total_revenue == null)
-            kpis.missingFields.push(`total_revenue (${previousYear})`);
-        }
+        kpis.calc_yoy_revenue_growth = makeKPI(null, missingFields);
       }
     }
 
-    /**
-     * 6) Gross Margin = (total_revenue - costs_of_goods_sold) / total_revenue
-     */
+    /***********************************************************
+     * 6) GROSS MARGIN = (total_revenue - costs_of_goods_sold) / total_revenue
+     ***********************************************************/
     if (
       financials.total_revenue != null &&
       financials.costs_of_goods_sold != null
     ) {
       const revenue = financials.total_revenue;
       const cogs = financials.costs_of_goods_sold;
-      kpis.calc_gross_margin =
-        revenue !== 0 ? (revenue - cogs) / revenue : 0;
+      const gm = (revenue === 0) ? 0 : (revenue - cogs) / revenue;
+      kpis.calc_gross_margin = makeKPI(gm, []);
     } else {
-      kpis.calc_gross_margin = null;
-      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null)
-        kpis.missingFields.push('costs_of_goods_sold');
+      const missingFields = [];
+      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
+      kpis.calc_gross_margin = makeKPI(null, missingFields);
     }
 
-    /**
-     * 7) EBITDA Margin = EBITDA / total_revenue
-     */
-
+    /***********************************************************
+     * 7) EBITDA MARGIN = EBITDA / total_revenue
+     ***********************************************************/
     if (
       financials.total_revenue != null &&
       financials.costs_of_goods_sold != null &&
@@ -1150,117 +1158,108 @@ async function navigateToFinancialInfo() {
         financials.costs_of_r_and_d +
         financials.costs_of_general_administration;
       const ebitda = financials.total_revenue - totalCosts;
-      kpis.calc_ebitda_margin =
-        financials.total_revenue !== 0 ? ebitda / financials.total_revenue : 0;
+      const margin = (financials.total_revenue === 0) ? 0 : ebitda / financials.total_revenue;
+      kpis.calc_ebitda_margin = makeKPI(margin, []);
     } else {
-      kpis.calc_ebitda_margin = null;
-      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null)
-        kpis.missingFields.push('costs_of_goods_sold');
-      if (financials.costs_of_customer_acquisition == null)
-        kpis.missingFields.push('costs_of_customer_acquisition');
-      if (financials.costs_of_r_and_d == null)
-        kpis.missingFields.push('costs_of_r_and_d');
-      if (financials.costs_of_general_administration == null)
-        kpis.missingFields.push('costs_of_general_administration');
+      const missingFields = [];
+      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
+      if (financials.costs_of_customer_acquisition == null) missingFields.push('costs_of_customer_acquisition');
+      if (financials.costs_of_r_and_d == null) missingFields.push('costs_of_r_and_d');
+      if (financials.costs_of_general_administration == null) missingFields.push('costs_of_general_administration');
+      kpis.calc_ebitda_margin = makeKPI(null, missingFields);
     }
 
-    /**
-     * 8) Average Revenue per Customer = total_revenue / number_of_customers_end_of_period
-     */
+    /***********************************************************
+     * 8) AVERAGE REVENUE PER CUSTOMER
+     ***********************************************************/
     if (
       financials.total_revenue != null &&
       financials.number_of_customers_end_of_period != null
     ) {
       const customers = financials.number_of_customers_end_of_period;
-      kpis.calc_average_revenue_per_customer =
-        customers !== 0 ? financials.total_revenue / customers : 0;
+      const arpc = (customers === 0) ? 0 : financials.total_revenue / customers;
+      kpis.calc_average_revenue_per_customer = makeKPI(arpc, []);
     } else {
-      kpis.calc_average_revenue_per_customer = null;
-      if (financials.total_revenue == null) kpis.missingFields.push('total_revenue');
-      if (financials.number_of_customers_end_of_period == null)
-        kpis.missingFields.push('number_of_customers_end_of_period');
+      const missingFields = [];
+      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.number_of_customers_end_of_period == null) {
+        missingFields.push('number_of_customers_end_of_period');
+      }
+      kpis.calc_average_revenue_per_customer = makeKPI(null, missingFields);
     }
 
-    /**
-     * 9) Customer Logo Churn = customers_lost_in_period / (starting number of customers)
-     *    starting number of customers = end_of_period - won_in_period + lost_in_period
-     */
+    /***********************************************************
+     * 9) CUSTOMER LOGO CHURN
+     ***********************************************************/
     if (
       financials.number_of_customers_end_of_period != null &&
-      //financials.customers_won_in_period != null &&
       financials.customers_lost_in_period != null
     ) {
-      const endCount = financials.number_of_customers_end_of_period;
-      //const won = financials.customers_won_in_period;
-      const lost = financials.customers_lost_in_period;
-
       const startCount = financials.number_of_customers_end_of_period;
-
-      if (startCount !== 0) {
-        kpis.calc_customer_logo_churn = lost / startCount;
-      } else {
-        kpis.calc_customer_logo_churn = null;
-      }
+      const lost = financials.customers_lost_in_period;
+      const churn = (startCount !== 0) ? lost / startCount : null;
+      kpis.calc_customer_logo_churn = makeKPI(churn, []);
     } else {
-      kpis.calc_customer_logo_churn = null;
-      if (financials.number_of_customers_end_of_period == null)
-        kpis.missingFields.push('number_of_customers_end_of_period');
-      //if (financials.customers_won_in_period == null)
-        //kpis.missingFields.push('customers_won_in_period');
-      if (financials.customers_lost_in_period == null)
-        kpis.missingFields.push('customers_lost_in_period');
+      const missingFields = [];
+      if (financials.number_of_customers_end_of_period == null) {
+        missingFields.push('number_of_customers_end_of_period');
+      }
+      if (financials.customers_lost_in_period == null) {
+        missingFields.push('customers_lost_in_period');
+      }
+      kpis.calc_customer_logo_churn = makeKPI(null, missingFields);
     }
 
-    /**
+    /***********************************************************
      * 10) LTV to CAC Ratio
-     *     LTV = (avg_revenue_per_customer * gross_margin) / churn_rate
-     *     CAC = costs_of_customer_acquisition / customers_won_in_period
-     */
+     ***********************************************************/
     if (
-      kpis.calc_average_revenue_per_customer != null &&
-      kpis.calc_gross_margin != null &&
-      kpis.calc_customer_logo_churn != null &&
+      kpis.calc_average_revenue_per_customer.value != null &&
+      kpis.calc_gross_margin.value != null &&
+      kpis.calc_customer_logo_churn.value != null &&
       financials.costs_of_customer_acquisition != null &&
       financials.customers_won_in_period != null
     ) {
-      const avgRevenuePerCustomer = kpis.calc_average_revenue_per_customer;
-      const grossMargin = kpis.calc_gross_margin;
-      const churnRate = kpis.calc_customer_logo_churn;
+      const avgRevenuePerCustomer = kpis.calc_average_revenue_per_customer.value;
+      const grossMargin = kpis.calc_gross_margin.value;
+      const churnRate = kpis.calc_customer_logo_churn.value;
 
-      const ltv =
-        churnRate !== 0
-          ? (avgRevenuePerCustomer * grossMargin) / churnRate
-          : null;
-
-      const cac =
-        financials.customers_won_in_period !== 0
-          ? financials.costs_of_customer_acquisition /
-            financials.customers_won_in_period
-          : null;
+      const ltv = (churnRate !== 0)
+        ? (avgRevenuePerCustomer * grossMargin) / churnRate
+        : null;
+      const cac = (financials.customers_won_in_period !== 0)
+        ? financials.costs_of_customer_acquisition / financials.customers_won_in_period
+        : null;
 
       if (ltv != null && cac != null && cac !== 0) {
-        kpis.calc_ltv_to_cac = ltv / cac;
+        const ratio = ltv / cac;
+        kpis.calc_ltv_to_cac = makeKPI(ratio, []);
       } else {
-        kpis.calc_ltv_to_cac = null;
+        // The formula breaks down => treat as missing / not computable
+        kpis.calc_ltv_to_cac = makeKPI(null, ['ltv or cac is invalid']);
       }
     } else {
-      kpis.calc_ltv_to_cac = null;
-      if (kpis.calc_average_revenue_per_customer == null)
-        kpis.missingFields.push('calc_average_revenue_per_customer');
-      if (kpis.calc_gross_margin == null)
-        kpis.missingFields.push('calc_gross_margin');
-      if (kpis.calc_customer_logo_churn == null)
-        kpis.missingFields.push('calc_customer_logo_churn');
+      const missingFields = [];
+      if (kpis.calc_average_revenue_per_customer.value == null)
+        missingFields.push('calc_average_revenue_per_customer');
+      if (kpis.calc_gross_margin.value == null)
+        missingFields.push('calc_gross_margin');
+      if (kpis.calc_customer_logo_churn.value == null)
+        missingFields.push('calc_customer_logo_churn');
       if (financials.costs_of_customer_acquisition == null)
-        kpis.missingFields.push('costs_of_customer_acquisition');
+        missingFields.push('costs_of_customer_acquisition');
       if (financials.customers_won_in_period == null)
-        kpis.missingFields.push('customers_won_in_period');
+        missingFields.push('customers_won_in_period');
+
+      kpis.calc_ltv_to_cac = makeKPI(null, missingFields);
     }
 
-    // Finally, store the newly calculated KPIs in calculatedKPIs
+    // Finally, store the KPI results for this year
     calculatedKPIs[year] = kpis;
   }
+
+
 
 
   async function saveOutputs() {
@@ -1479,7 +1478,7 @@ async function navigateToFinancialInfo() {
 
       kpiDefinitions.forEach(kpiDef => {
         const field = kpiDef.field;
-        const kpiValue = calculatedKPIs[latestYearValue]?.[field];
+        const kpiValue = calculatedKPIs[latestYearValue]?.[field].value;
 
         // Log KPI details before analysis
         /*console.log('-------------------');
@@ -1525,21 +1524,21 @@ async function navigateToFinancialInfo() {
     return value == null || value === '';
   }
 
-  //function to provide the content of the missing fields tooltip 
-  function missingDataTooltipContent(missingFields) {
-    //console.log('missingFields = ', missingFields);
-    if (!Array.isArray(missingFields)) {
+  // function to provide the content of the missing fields tooltip
+  function missingDataTooltipContent(missingData) {
+    // If missingData is null or not a string, return a generic message
+    if (!missingData || typeof missingData !== 'string') {
       return '<b>Missing data</b><br>- unknown fields';
     }
-
-    const labels = missingFields.map(field => {
-      //console.log('Field in missingFields:', field); // <--- Debug log
-      const rowDef = rowDefinitionsFinancialInputs.value.find(r => r.field === field);
-      return rowDef ? rowDef.label : field;
+    // Otherwise, split the string by comma to produce lines
+    const fields = missingData.split(',');
+    let content = '<b>Missing data</b><br>';
+    fields.forEach(field => {
+      content += `- ${field.trim()}<br>`;
     });
-
-    return `<b>Missing data</b><br>- ` + labels.join('<br>- ');
+    return content;
   }
+
 
   //function to calculate and analyse combined / derived kpis for evaluation 
   function analyseOtherKPIs() {
@@ -1779,7 +1778,7 @@ async function navigateToFinancialInfo() {
       ? valuationData.valuation_yearly_inputs[latestYear.value]?.recurring_revenue
       : null;
     const ebitdaVal = latestYear.value
-      ? calculatedKPIs[latestYear.value]?.calc_ebitda_net
+      ? calculatedKPIs[latestYear.value]?.calc_ebitda_net.value
       : null;
 
 
