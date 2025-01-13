@@ -185,15 +185,17 @@
             <template v-for="year in years" :key="year">
               <td class="text-right">
                 <template v-if="isRowFieldActive(valuationData.valuation_type, year, years, row)">
+                  
                   <input
                     :value="displayedFinancialValue(year, row.field)"
                     @focus="onFocus(year, row.field)"
-                    @blur="onBlur(year, row.field)"
+                    @blur="handleBlur(year, row.field)"     
                     @input="updateFinancialValue(year, row.field, $event.target.value)"
                     :class="['input_data', { 'missing-data': isMissingValue(year, row.field) }]"
                     autocomplete="off"
                     type="text"
                   />
+
                 </template>
                 <template v-else>
                   -
@@ -485,66 +487,69 @@
     <!-- ///////////////////////// -->
     <!-- KPI YEARLY TABLE START    --> 
     <!-- /////////////////////////  -->
-
-    <v-card variant="outlined" class="pa-3 mb-6" v-if="showResults">
-      <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
-      <v-table>
-        <thead>
-          <tr>
-            <th class="text-left"><h2 class="text-h5 mb-2"><b>Calculated Yearly KPIs</b></h2></th>
-            <template v-for="year in years" :key="year">
-              <th class="text-right">{{ year }}</th>
-            </template>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in rowDefinitionsKPIOutputs" :key="row.field">
-            <td>{{ row.label }}</td>
-            <template v-for="year in years" :key="year">
-              <td class="text-right">
-                <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
-                  <!-- Display dash for first year -->
-                  <template v-if="calculatedKPIs[year][row.field] === '-'">
-                    -
+    <template v-if="showResults" class="mt-12">
+      <h2 class="text-h5 mb-2 mt-0"><b>Overview Financial Inputs and KPIs</b></h2>
+      <v-card variant="outlined" class="pa-3 mb-6" v-if="showResults">
+        <p class="mb-6">This valuation above is based on these financials and calculated KPIs.</p>
+        <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
+        <v-table>
+          <thead>
+            <tr>
+              <th class="text-left"><!--h2 class="text-h5 mb-2"><b>Calculated Yearly KPIs</b></h2--></th>
+              <template v-for="year in years" :key="year">
+                <th class="text-right">{{ year }}</th>
+              </template>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in rowDefinitionsKPIOutputs" :key="row.field">
+              <td>{{ row.label }}</td>
+              <template v-for="year in years" :key="year">
+                <td class="text-right">
+                  <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
+                    <!-- Display dash for first year -->
+                    <template v-if="calculatedKPIs[year][row.field] === '-'">
+                      -
+                    </template>
+                    <!-- Check if KPI value is a number -->
+                    <template v-else-if="typeof calculatedKPIs[year][row.field] === 'number'">
+                      {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
+                    </template>
+                    <!-- If KPI value is an object with missing data -->
+  
+                    <template v-else-if="calculatedKPIs[year][row.field].missingData">
+                      <v-tooltip location="top">
+                        <template #activator="{ props }">
+                          <v-icon
+                            v-bind="props"
+                            color="red"
+                            icon="mdi-progress-question"
+                          ></v-icon>
+                        </template>
+                        <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
+                      </v-tooltip>
+                    </template>
                   </template>
-                  <!-- Check if KPI value is a number -->
-                  <template v-else-if="typeof calculatedKPIs[year][row.field] === 'number'">
-                    {{ formatKPIValue(row.field, calculatedKPIs[year][row.field]) }}
+                  <template v-else>
+                    <span style="color: red;">No data</span>
                   </template>
-                  <!-- If KPI value is an object with missing data -->
+                </td>
+              </template>
+            </tr>
+          </tbody>
+        </v-table>
+  
+        <div 
+          v-if="calculatedKPIs[latestYear] && calculatedKPIs[latestYear].calc_cagr_revenue != null"
+          class="mt-2 ml-4 text-body-2"
+          >
+          Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
+          {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
+        </div>
+      </v-card>
+    </template>
 
-                  <template v-else-if="calculatedKPIs[year][row.field].missingData">
-                    <v-tooltip location="top">
-                      <template #activator="{ props }">
-                        <v-icon
-                          v-bind="props"
-                          color="red"
-                          icon="mdi-progress-question"
-                        ></v-icon>
-                      </template>
-                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
-                    </v-tooltip>
-                  </template>
-                </template>
-                <template v-else>
-                  <span style="color: red;">No data</span>
-                </template>
-              </td>
-            </template>
-          </tr>
-        </tbody>
-      </v-table>
-
-      <div 
-        v-if="calculatedKPIs[latestYear] && calculatedKPIs[latestYear].calc_cagr_revenue != null"
-        class="mt-2 ml-4 text-body-2"
-        >
-        Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
-        {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
-      </div>
-    </v-card>
-
-    <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
+    <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
 
     <!-- ///////////////////////// -->
     <!-- KPI YEARLY TABLE END           -->
@@ -895,7 +900,7 @@ async function navigateToFinancialInfo() {
     valuationData.valuation_yearly_inputs[year][field] = unformattedValue;
 
     // Debounce API calls to prevent excessive requests
-    debouncedUpdateValuationFinancial(field, unformattedValue, year);
+    //debouncedUpdateValuationFinancial(field, unformattedValue, year);
   }
 
 
@@ -910,11 +915,20 @@ async function navigateToFinancialInfo() {
     focusedCells[year][field] = true;
   }
 
-  function onBlur(year, field) {
+  //still needed?
+  function onBlur(year, field) { 
     if (focusedCells[year]) {
       focusedCells[year][field] = false;
     }
   }
+
+  function handleBlur(year, field) {
+    // The final unformatted value user typed
+    const unformattedValue = valuationData.valuation_yearly_inputs[year][field];
+    // Actually call your existing update function (non-debounced or lightly debounced)
+    updateValuationFinancial(field, unformattedValue, year);
+  }
+
 
   function isCellFocused(year, field) {
     return focusedCells[year] && focusedCells[year][field];
@@ -978,13 +992,13 @@ async function navigateToFinancialInfo() {
   function calculateKPIsForYear(year) {
     const financials = valuationData.valuation_yearly_inputs?.[year];
 
-    // If there are no financials for the year, set an error and return early
+    /*/ If there are no financials for the year, set an error and return early
     if (!financials) {
       calculatedKPIs[year] = {
         error: `No financial data available for the year: ${year}`,
       };
       return;
-    }
+    }*/
 
     // Prepare an object to store the final KPI values (numbers, null, or simple strings)
     const kpis = {
@@ -997,7 +1011,7 @@ async function navigateToFinancialInfo() {
     if (financials.total_revenue != null) {
       kpis.calc_total_revenue = financials.total_revenue;
     } else {
-      kpis.calc_total_revenue = null;
+      //kpis.calc_total_revenue = null;
       kpis.missingFields.push('total_revenue');
     }
 
@@ -1902,8 +1916,8 @@ async function navigateToFinancialInfo() {
           table: {
             growth: {
               description: `
-                    Your current Year-on-Year growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
-                    A growth rate of ${(yoy * 100)}% is ${
+                    Your current Year-on-Year growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br><br>
+                    A growth rate of ${formatKPIValue('calc_yoy_revenue_growth', yoy)} is ${
               analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
                   }.
                     `,
@@ -1917,7 +1931,7 @@ async function navigateToFinancialInfo() {
                         analysed_kpis.calc_gross_margin
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
 
                       A Gross Margin of ${
                         analysed_kpis.calc_gross_margin
@@ -1935,7 +1949,7 @@ async function navigateToFinancialInfo() {
                         analysed_kpis.calc_recurring_revenue_ratio
                           ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       This is ${
                 analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
               }.
@@ -2050,7 +2064,7 @@ async function navigateToFinancialInfo() {
                         analysed_kpis.calc_gross_margin
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
 
                       A Gross Margin of ${
                         analysed_kpis.calc_gross_margin
@@ -2068,7 +2082,7 @@ async function navigateToFinancialInfo() {
                         analysed_kpis.calc_recurring_revenue_ratio
                           ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       This is ${
                 analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
               }.
@@ -2078,7 +2092,7 @@ async function navigateToFinancialInfo() {
             ltvToCac: {
               description: `
                       Your current LTV-to-CAC Ratio is ${
-                      analysed_kpis.calc_ltv_to_cac.value.toFixed(2)
+                      analysed_kpis.calc_ltv_to_cac?.value?.toFixed(2) || 'N/A'
                       }. <br><br>
 
                       This is ${
@@ -2194,7 +2208,7 @@ analysed_kpis.calc_yoy_revenue_growth?.trend?.description || 'N/A'
                         analysed_kpis.calc_gross_margin
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
 
                       A Gross Margin of ${
                         analysed_kpis.calc_gross_margin
@@ -2215,7 +2229,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_recurring_revenue_ratio
                           ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       This is ${
                 analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
               }.
@@ -2225,7 +2239,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
             ltvToCac: {
               description: `
                     Your current LTV-to-CAC Ratio is ${
-                    analysed_kpis.calc_ltv_to_cac.value.toFixed(2)
+                    analysed_kpis.calc_ltv_to_cac?.value?.toFixed(2) || 'N/A'
                     }. <br><br>
 
                       This is ${
@@ -2316,7 +2330,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
           table: {
             growth: {
               description: `
-                Your current Year-on-Year growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br>
+                Your current Year-on-Year growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br><br>
                 A growth rate of ${formatKPIValue('calc_yoy_revenue_growth', yoy)} is ${
           analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.evaluationDescription || 'N/A'
               }.
@@ -2331,7 +2345,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_gross_margin 
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       A Gross Margin of ${
                                 analysed_kpis.calc_gross_margin
                                   ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
@@ -2366,7 +2380,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_recurring_revenue_ratio
                           ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       This is ${
                 analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
               }.
@@ -2486,7 +2500,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                     analysed_kpis.calc_gross_margin 
                       ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                       : 'N/A'
-                  }. <br>
+                  }. <br><br>
                   A Gross Margin of ${
                             analysed_kpis.calc_gross_margin
                               ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
@@ -2521,7 +2535,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                   analysed_kpis.calc_recurring_revenue_ratio
                     ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
                     : 'N/A'
-                }. <br>
+                }. <br><br>
                 This is ${
           analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
         }.
@@ -2532,7 +2546,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
             ltvToCac: {
               description: `
                     Your current LTV-to-CAC Ratio is ${
-                    analysed_kpis.calc_ltv_to_cac.value.toFixed(2)
+                    analysed_kpis.calc_ltv_to_cac?.value?.toFixed(2) || 'N/A'
                     }. <br><br>  
 
                       This is ${
@@ -2646,7 +2660,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_gross_margin 
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       A Gross Margin of ${
                                 analysed_kpis.calc_gross_margin
                                   ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
@@ -2681,7 +2695,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_recurring_revenue_ratio
                           ? formatKPIValue('calc_recurring_revenue_ratio', analysed_kpis.calc_recurring_revenue_ratio.value)
                           : 'N/A'
-                      }. <br>
+                      }. <br><br>
                       This is ${
                 analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.evaluationDescription || 'N/A'
                 }.
@@ -2691,7 +2705,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
             ltvToCac: {
               description: `
                   Your current LTV-to-CAC Ratio is ${
-                    analysed_kpis.calc_ltv_to_cac.value.toFixed(2)
+                    analysed_kpis.calc_ltv_to_cac?.value?.toFixed(2) || 'N/A'
                   }. <br><br>
 
                   This is ${
@@ -2818,10 +2832,10 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
     }
   }
 
-  // Debounced function to update valuation financials
+  /*/ Debounced function to update valuation financials
   const debouncedUpdateValuationFinancial = debounce((field, value, timePeriod) => {
     updateValuationFinancial(field, value, timePeriod);
-  }, 1000);
+  }, 1000); */
 
 
   //save valuation data to db
@@ -2889,7 +2903,11 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
   
   // Single watcher for data changes
   watch(
-    () => valuationData,
+    () => {
+      // clone or restructure so that `.valuation_yearly_inputs` is excluded:
+      const { valuation_yearly_inputs, ...fieldsWeCareAbout } = valuationData;
+      return fieldsWeCareAbout;
+    },
     async (newVal, oldVal) => {
       try {
         if (!isInitialLoad.value) {

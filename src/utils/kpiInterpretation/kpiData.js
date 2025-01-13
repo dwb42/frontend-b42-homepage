@@ -260,7 +260,7 @@ const kpiData = {
       "max": 0.2,
       "rangeName": "Steady Growth",
       "impactPercentage": 1,
-      "evaluationDescription": "steady growth and has no effect on your multiple"
+      "evaluationDescription": "a growth rate that one would expect from a good SaaS company and hence has no effect on your multiple"
     },
     {
       "min": 0.2,
