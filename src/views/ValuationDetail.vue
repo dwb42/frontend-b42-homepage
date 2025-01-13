@@ -61,7 +61,7 @@
           hide-details="auto"
           class="mb-6"
         ></v-text-field>
-        <v-text-field v-model="valuationData.number_of_employees" id="number_of_employees" label="Number of employees (incl. active founders)" required hide-details class="mb-6"></v-text-field>
+        <v-text-field v-model="valuationData.number_of_employees" id="number_of_employees" label="Number of employees (incl. active founders and freelance)" required hide-details class="mb-6"></v-text-field>
 
         <h3 class="text-h6 mb-2 mt-6">What best describes your current stage of business?</h3>
         <v-radio-group v-model="valuationData.state_of_business">
@@ -118,14 +118,14 @@
           Enter Financial Information
         </v-btn>
 
-        <!-- <v-btn 
+        <!---v-btn 
           color="primary" 
           type="button"
           class="mt-6"
           @click="createInitialYearlyInputs"
         >
           create yrls
-        </v-btn> -->
+        </v-btn-->
 
 
         
@@ -231,7 +231,11 @@
     <!-- YEARLY INPUTS END          -->
     <!-- /////////////////////////  -->
 
+    
+    
+
     <!--pre>valuationData<br>{{valuationData}}</pre>
+    <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
     <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
     <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
 
@@ -423,7 +427,7 @@
       </v-card>
     </v-dialog>
 
-    allEvaluationContent <pre>{{allEvaluationContent}}</pre>
+    <!-- allEvaluationContent <pre>{{allEvaluationContent}}</pre> -->
     
     <!-- ///////////////////////// -->
     <!-- EVALUATION END           -->
@@ -540,21 +544,11 @@
       </div>
     </v-card>
 
+    <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
 
     <!-- ///////////////////////// -->
     <!-- KPI YEARLY TABLE END           -->
     <!-- /////////////////////////  -->
-
-
-
-    <div style='margin-top:400px'>
-    <h2 class="text-h5 mb-2"><b>Danger Zone</b></h2>
-    <v-card variant="outlined" class="pa-3 mb-10">
-    <v-btn color="error" tonal @click="deleteValuation">Delete Valuation</v-btn>
-    </v-card>
-    </div>
-    
-      
     
   </v-container>  
 </template>
@@ -564,7 +558,6 @@
   import axios from 'axios'; 
   import { formatDateUsingDateFns, truncateString, usdFormat, convertToPercent, multipleImpact, multipleImpactPercent, apiBaseURL, checkValidPastYear } from '@/utils/index.js';
   import { urlRules, formatURL as formatURLUtil } from '@/utils/url_formatting.js';
-  import { useTrendAnalysis } from '@/utils/trendAnalysis.js';
   import debounce from 'debounce';
 
 
@@ -572,33 +565,7 @@
   const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
   const showResults = ref(false); // Variable to track if the results are shown or not
   const showInputAlert = ref(false); // Variable to track if the input alert is shown or not
-const isEditingName = ref(false);
-const isEditingURL = ref(false);
-const nameInput = ref(null);
-const urlInput = ref(null);
-
-function startEditingName() {
-  isEditingName.value = true;
-  nextTick(() => {
-    nameInput.value.focus();
-  });
-}
-
-function stopEditingName() {
-  isEditingName.value = false;
-}
-
-function startEditingURL() {
-  isEditingURL.value = true;
-  nextTick(() => {
-    urlInput.value.focus();
-  });
-}
-
-function stopEditingURL() {
-  isEditingURL.value = false;
-  formatURL();
-}
+  
   
   //setup router
   import { useRoute } from 'vue-router'
@@ -609,9 +576,51 @@ function stopEditingURL() {
   const thisValuationId = ref(route.params.id);
   const isInitialLoad = ref(true);
   const valuationData = reactive({
-    show_yearly_inputs: false
+    show_yearly_inputs: false, 
   }); 
 
+  // Initialize reactive object to store KPIs and calculated metrics
+  //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
+
+  const calculatedKPIs = reactive({}); // var to save the output of calculateKPIsForYear 
+
+  const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
+
+  const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
+
+  //////////////////////////////////////////////////////
+  // GENERAL INPUT START 
+  //////////////////////////////////////////////////////
+  
+  const isEditingName = ref(false);
+  const isEditingURL = ref(false);
+  const nameInput = ref(null);
+  const urlInput = ref(null);
+
+  function startEditingName() {
+    isEditingName.value = true;
+    nextTick(() => {
+      nameInput.value.focus();
+    });
+  }
+
+  function stopEditingName() {
+    isEditingName.value = false;
+  }
+
+  function startEditingURL() {
+    isEditingURL.value = true;
+    nextTick(() => {
+      urlInput.value.focus();
+    });
+  }
+
+  function stopEditingURL() {
+    isEditingURL.value = false;
+    formatURL();
+  }
+
+  
   async function createInitialYearlyInputs() {
   try {
     let years = [];
@@ -631,19 +640,16 @@ function stopEditingURL() {
     console.error('Error creating yearly inputs:', error);
   }
 }
-
+  
 async function navigateToFinancialInfo() {
   await createInitialYearlyInputs();
+  await fetchValuation(thisValuationId.value);
   valuationData.show_yearly_inputs = true;
 } 
-  // Initialize reactive object to store KPIs and calculated metrics
-  //const valuationKPIs = reactive({}); // KPIs (mostly yearly) based on valuationData.financial...
 
-  const calculatedKPIs = reactive({}); // var to save the output of calculateKPIsForYear 
-  
-  const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
-
-  const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
+  //////////////////////////////////////////////////////
+  // GENERAL INPUT START 
+  //////////////////////////////////////////////////////
 
 
   //////////////////////////////////////////////////////
@@ -683,8 +689,7 @@ async function navigateToFinancialInfo() {
     return years.value.length ? years.value[0] : null;
   });
 
-  //compute trends 
-  //temp const { trendStatement: recurringRevenueTrend } = useTrendAnalysis(valuationKPIs, 'calc_recurring_revenue_ratio');
+
   
 
   const rowDefinitionsFinancialInputs = computed(() => [
@@ -768,7 +773,7 @@ async function navigateToFinancialInfo() {
         complete: 'all'
       }
     },
-    /*{
+    {
       label: 'Customers Won in Period',
       field: 'customers_won_in_period',
       isCurrency: false,
@@ -777,7 +782,7 @@ async function navigateToFinancialInfo() {
         standard: 'latestOnly',
         complete: 'all'
       }
-    },*/
+    },
     {
       label: 'Customers Lost in Period',
       field: 'customers_lost_in_period',
@@ -1169,14 +1174,14 @@ async function navigateToFinancialInfo() {
      */
     if (
       financials.number_of_customers_end_of_period != null &&
-      financials.customers_won_in_period != null &&
+      //financials.customers_won_in_period != null &&
       financials.customers_lost_in_period != null
     ) {
       const endCount = financials.number_of_customers_end_of_period;
-      const won = financials.customers_won_in_period;
+      //const won = financials.customers_won_in_period;
       const lost = financials.customers_lost_in_period;
 
-      const startCount = endCount - won + lost;
+      const startCount = financials.number_of_customers_end_of_period;
 
       if (startCount !== 0) {
         kpis.calc_customer_logo_churn = lost / startCount;
@@ -1187,8 +1192,8 @@ async function navigateToFinancialInfo() {
       kpis.calc_customer_logo_churn = null;
       if (financials.number_of_customers_end_of_period == null)
         kpis.missingFields.push('number_of_customers_end_of_period');
-      if (financials.customers_won_in_period == null)
-        kpis.missingFields.push('customers_won_in_period');
+      //if (financials.customers_won_in_period == null)
+        //kpis.missingFields.push('customers_won_in_period');
       if (financials.customers_lost_in_period == null)
         kpis.missingFields.push('customers_lost_in_period');
     }
@@ -1575,6 +1580,129 @@ async function navigateToFinancialInfo() {
       console.error('Error in analyseOtherKPIs:', error.message);
     }
   }
+
+  
+  ////////////////////////////////////////////////////////////////////////////////
+  // // TREND ANALYSIS
+  ////////////////////////////////////////////////////////////////////////////////
+  function analyseTrend(calculatedKPIs) {
+    // We only want to look at the last 3 years (descending, e.g. 2024, 2023, 2022)
+    const allYears = Object.keys(calculatedKPIs)
+      .map(y => parseInt(y))
+      .sort((a, b) => b - a);
+
+    if (allYears.length < 3) {
+      console.log('Not enough years to do trend analysis');
+      return;
+    }
+
+    // last 3 years in descending order
+    const [yearA, yearB, yearC] = allYears; // yearA is newest, yearB is middle, yearC is oldest
+
+    // We want to do the trend analysis for these KPI fields:
+    const kpiFieldsToAnalyze = [
+      'calc_yoy_revenue_growth',
+      'calc_gross_margin',
+      'calc_average_revenue_per_customer',
+      'calc_recurring_revenue_ratio'
+    ];
+
+    // Mapping from label to multipleImpact
+    const labelToMultipleImpact = {
+      'accelerating quickly': 1.15,
+      'accelerating': 1.1,
+      'accelerating slightly': 1.05,
+      'no significant change': 1,
+      'decelerating quickly': 0.8,
+      'decelerating': 0.9,
+      'decelerating slightly': 0.95,
+      'fluctuating': 1
+    };
+
+    // Mapping from label to multipleImpact
+    const labelToDescription = {
+      'accelerating quickly': 'has been accelerating quickly over the last 3 years. Investors will see this as a very positive sign and might boost this multiple by 15%.',
+      'accelerating': 'has been accelerating over the last 3 years. Investors will see this as a positive sign and might boost this multiple by 10%.',
+      'accelerating slightly': 'has been accelerating slightly over the last 3 years. Investors will see this as a positive sign and might boost this multiple by 5%.',
+      'no significant change': 'has not changed significantly over the last 3 years so that it will not affect your multiple.',
+      'decelerating quickly': 'has been decelerating quickly over the last 3 years. Investors will see this as a very negative sign and might reduce this multiple by 20%.',
+      'decelerating': 'has been decelerating over the last 3 years. Investors will see this as a negative sign and might reduce this multiple by 10%.',
+      'decelerating slightly': 'has been decelerating slightly over the last 3 years. Investors will see this as a negative sign and might reduce this multiple by 5%.',
+      'fluctuating': 'has been fluctuating over the last 3 years. Be prepared to explain why. ',
+    };
+
+    // Helper function to produce a "trend label" for (newestVal, midVal, oldestVal)
+    function getTrendLabel(newestVal, midVal, oldestVal) {
+      // If any of them is null, or '-' (string), or not a valid number -> skip
+      if (
+        newestVal == null || midVal == null || oldestVal == null ||
+        newestVal === '-' || midVal === '-' || oldestVal === '-' ||
+        isNaN(newestVal) || isNaN(midVal) || isNaN(oldestVal)
+      ) {
+        return 'no significant change'; // fallback
+      }
+
+      const a = parseFloat(newestVal); // e.g. 2024
+      const b = parseFloat(midVal);    // e.g. 2023
+      const c = parseFloat(oldestVal); // e.g. 2022
+
+      // 1) strictly increasing
+      if (c < b && b < a) {
+        const totalChangePercent = ((a - c) / c) * 100;
+        if (totalChangePercent >= 40) return "accelerating quickly";
+        else if (totalChangePercent >= 30) return "accelerating";
+        else if (totalChangePercent >= 20) return "accelerating slightly";
+        else return "no significant change";
+      }
+      // 2) strictly decreasing
+      if (c > b && b > a) {
+        const decChangePercent = ((c - a) / c) * 100;
+        if (decChangePercent >= 40) return "decelerating quickly";
+        else if (decChangePercent >= 30) return "decelerating";
+        else if (decChangePercent >= 20) return "decelerating slightly";
+        else return "no significant change";
+      }
+      // 3) upThenDown or downThenUp
+      const isUpThenDown = (c < b && a < b);
+      const isDownThenUp = (c > b && a > b);
+      if (isUpThenDown || isDownThenUp) {
+        const netChange = a - c;
+        const totalChangePercent = (netChange / c) * 100;
+        if (Math.abs(totalChangePercent) >= 20) return "fluctuating";
+        else return "no significant change";
+      }
+      // fallback
+      return "no significant change";
+    }
+
+    // For each KPI, read the values from calculatedKPIs for yearA, yearB, yearC
+    kpiFieldsToAnalyze.forEach(kpiField => {
+      const valA = calculatedKPIs[yearA]?.[kpiField];
+      const valB = calculatedKPIs[yearB]?.[kpiField];
+      const valC = calculatedKPIs[yearC]?.[kpiField];
+
+      // produce a trend label
+      const trendLabel = getTrendLabel(valA, valB, valC);
+      // determine the corresponding multipleImpact
+      const multipleImpact = labelToMultipleImpact[trendLabel] || 1;
+      // determine the corresponding description
+      const description = labelToDescription[trendLabel] || 1;
+
+      // Make sure the base object for that KPI is not null:
+      if (!analysed_kpis[kpiField]) {
+        analysed_kpis[kpiField] = {};
+      }
+      // Store both label and multipleImpact under analysed_kpis[kpiField].trend
+      analysed_kpis[kpiField].trend = {
+        label: trendLabel,
+        multipleImpact: multipleImpact,
+          description: description
+      };
+    });
+  }
+
+  // END TREND ANALYSIS
+
   
   //////////////////////////////////////////////////////
   // KPI ANALYSIS END
@@ -1620,9 +1748,15 @@ async function navigateToFinancialInfo() {
     // ---------------------------
     const yoy = analysed_kpis.calc_yoy_revenue_growth?.value || 0;
     const cagr = analysed_kpis.calc_cagr_revenue?.value || 0;
-    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
-    const growthImpactMinimal = analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.impactPercentage ?? 1; // not use combined but only yoy
+    
+  const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const growthImpactMinimal = analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.impactPercentage ?? 1; // not use combined but only yoy asdf
+  const growthImpactComplete = ((analysed_kpis.calc_growth_combined.analysisResult.impactPercentage -1) * analysed_kpis.calc_yoy_revenue_growth.trend.multipleImpact)+1;
+
     const grossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
+  const grossMarginImpactComplete = ((analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage - 1) * analysed_kpis.calc_gross_margin.trend.multipleImpact)+1;
+  
+  
     const ebitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
     const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
     const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
@@ -1696,6 +1830,7 @@ async function navigateToFinancialInfo() {
     // ARR - COMPLETE (same as standard in this example)
     // -------------------------------------------------
     const futureGrowthRateCompleteArr = futureGrowthRate; 
+    
     const totalArrImpactComplete = totalArrImpact;
     const totalArrImpactInterpretationComplete = getKPIInfo('final_multiple', totalArrImpactComplete).evaluationDescription
     const finalArrMultipleComplete = finalArrMultiple;
@@ -2046,9 +2181,12 @@ async function navigateToFinancialInfo() {
                 <br><br>
                 A future growth rate of ${(futureGrowthRate * 100).toFixed(2)}% is ${
                 analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
-              }.
-                `,
-              impact: `${multipleImpactPercent(growthImpact)}`,
+              }.<br><br>
+               Trend Analysis: Your rate of growth ${
+analysed_kpis.calc_yoy_revenue_growth?.trend?.description || 'N/A'
+              } 
+              `,
+              impact: `${multipleImpactPercent(growthImpactComplete)}`,
             },
             profitability: {
               description: `
@@ -2065,10 +2203,13 @@ async function navigateToFinancialInfo() {
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
                       } is ${
-                analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
-              }.
+analysed_kpis.calc_gross_margin?.analysisResult?.evaluationDescription || 'N/A'
+              }.<br><br>
+               Trend Analysis: Your Gross Margin ${
+analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
+              }
                 `,
-              impact: `${multipleImpactPercent(grossMarginImpact)}`,
+              impact: `${multipleImpactPercent(grossMarginImpactComplete)}`,
             },
             recurringRevenueRatio: {
               description: `
@@ -3562,7 +3703,7 @@ async function navigateToFinancialInfo() {
                 <div class="py-2">
                   <p class="text-body-1 font-weight-bold mb-1">LTV-to-CAC Ratio</p>
                   <p class="text-body-2 mb-2">
-                    Your current LTV-to-CAC Ratio is ${formatKPIValue('calc_ltv_to_cac', analysed_kpis.calc_ltv_to_cac.value)}. <br><br>
+                    Your current LTV-to-CAC Ratio is asdf ${analysed_kpis.calc_ltv_to_cac.value}. <br><br>
 
                     This is ${analysed_kpis.calc_ltv_to_cac.analysisResult.evaluationDescription}.
                     <br>
@@ -3860,15 +4001,20 @@ async function navigateToFinancialInfo() {
 
     // 3. Analyse Yearly and Other KPIs
     analyseYearlyKPIs();
-    analyseOtherKPIs();
+    analyseOtherKPIs(); 
 
-    // 4. *** Rebuild textual content for minimal, standard, complete ***
+    // 4. do Trend Analysis
+    if (valuationData.valuation_type === 'complete') {
+      analyseTrend(calculatedKPIs);
+    }
+
+    // 5. *** Rebuild textual content for minimal, standard, complete ***
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
 
-    // 5. save core EvaluationOutput in DB 
+    // 6. save core EvaluationOutput in DB 
     saveOutputs();
 
-    // Set loading to false after the first full calculation
+    // 7. Set loading to false after the first full calculation
     showResults.value = true;
     showInputAlert.value = false;
   }

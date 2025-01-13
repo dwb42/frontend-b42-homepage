@@ -34,8 +34,8 @@
                       valuation.valuation_general_outputs[0].arr_final_valuation) : '-' }}</td>
                 <td>{{ formatDateUsingDateFns(valuation.createdAt) }}</td>
                 <td>
-                  <v-icon @click="deleteValuation(valuation.id)" style="cursor: pointer;">
-                    mdi-trash-can-outline
+                  <v-icon @click="deleteValuation(valuation.id)" style="cursor: pointer;color:gray">
+                   mdi-trash-can-outline
                   </v-icon>
                 </td>
               </tr>
@@ -128,6 +128,7 @@ async function createValuation() {
 async function deleteValuation(id) {
   try {
     if (confirm('Are you sure you want to delete this valuation?')) {
+      console.log('Deleting valuation with ID:', id);
       await axios.delete(`${apiBaseURL}/valuations/${id}`);
       console.log('Valuation deleted');
       await fetchValuations();
