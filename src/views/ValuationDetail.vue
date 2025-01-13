@@ -2966,9 +2966,9 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
     analyseOtherKPIs(); 
 
     // 4. do Trend Analysis
-    if (valuationData.valuation_type === 'complete') {
+    //if (valuationData.valuation_type === 'complete') {
       analyseTrend(calculatedKPIs);
-    }
+    //}
 
     // 5. *** Rebuild textual content for minimal, standard, complete ***
     allEvaluationContent.value = gatherValuationContent(valuationData, analysed_kpis, latestYear);
