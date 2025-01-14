@@ -511,16 +511,8 @@
 
                     <!-- 1) If it has missingData, show the icon+tooltip -->
                     <template v-if="calculatedKPIs[year][row.field].missingData">
-                      <v-tooltip location="top">
-                        <template #activator="{ props }">
-                          <v-icon
-                            v-bind="props"
-                            color="red"
-                            icon="mdi-progress-question"
-                          ></v-icon>
-                        </template>
-                        <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
-                      </v-tooltip>
+                      ?
+                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
                     </template>
 
                     <!-- 2) Else if the KPI value is a number, display it -->
@@ -557,6 +549,8 @@
           Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
           {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
         </div>
+        
+
       </v-card>
     </template>
 
