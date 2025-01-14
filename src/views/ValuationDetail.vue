@@ -118,20 +118,6 @@
           Enter Financial Information
         </v-btn>
 
-    <!-- Missing Data Dialog -->
-    <v-dialog v-model="showMissingDataDialog" max-width="400">
-      <v-card>
-        <v-card-text>
-          <div v-html="currentMissingDataContent"></div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text @click="showMissingDataDialog = false">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-
         <!---v-btn 
           color="primary" 
           type="button"
@@ -246,16 +232,6 @@
     <!-- ///////////////////////// -->
     <!-- YEARLY INPUTS END          -->
     <!-- /////////////////////////  -->
-
-
-  // Dialog control for missing data tooltip
-  const showMissingDataDialog = ref(false);
-  const currentMissingDataContent = ref('');
-
-  function openMissingDataDialog(missingData) {
-    currentMissingDataContent.value = missingDataTooltipContent(missingData);
-    showMissingDataDialog.value = true;
-  }
 
     
     
@@ -535,7 +511,8 @@
 
                     <!-- 1) If it has missingData, show the icon+tooltip -->
                     <template v-if="calculatedKPIs[year][row.field].missingData">
-                      <span @click="openMissingDataDialog(calculatedKPIs[year][row.field].missingData)" style="cursor: pointer; color: blue;">?</span>
+                      ?
+                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
                     </template>
 
                     <!-- 2) Else if the KPI value is a number, display it -->
