@@ -35,7 +35,7 @@
 
     <div class="mt-10"></div>
 
-    <h2 class="text-h5 mb-2"><b>(1) Provide general info & select business stage</b></h2>
+    <h2 class="text-h5 mb-2" id="section-general"><b>(1) Provide general info & select business stage</b></h2>
     <v-card variant="outlined" class="pa-3 mb-12">
       
       
@@ -141,7 +141,7 @@
     <template 
       v-if="valuationData.show_yearly_inputs"
       >
-    <h2 class="text-h5 mb-2"><b>(2) Enter your financial data <!--({{valuationData.valuation_type}})--></b></h2>
+    <h2 class="text-h5 mb-2" id="section-financials"><b>(2) Enter your financial data <!--({{valuationData.valuation_type}})--></b></h2>
     <v-card variant="outlined" class="pa-3 mb-10">
       
       <h3 class="text-h6 mb-2 mt-2">Select Detail-Level</h3>
@@ -246,7 +246,7 @@
     <!-- EVALUATION START     1234      -->
     <!-- /////////////////////////  -->
     <template v-if="showResults">
-      <h2 class="text-h5 mb-2"><b>(3) Review valuation <!--({{valuationData.valuation_type}})--></b></h2>
+      <h2 class="text-h5 mb-2" id="section-valuation"><b>(3) Review valuation <!--({{valuationData.valuation_type}})--></b></h2>
 
         <v-card variant="outlined" class="pa-3 mb-10">
           
@@ -449,7 +449,7 @@
     <!-- FEEDBACK START    --> 
     <!-- /////////////////////////  -->
     <template v-if="showResults">
-      <h2 class="text-h5 mb-2 mt-0"><b>(4) Give us Feedback</b></h2>
+      <h2 class="text-h5 mb-2 mt-0" id="section-feedback"><b>(4) Give us Feedback</b></h2>
       
       <v-card variant="outlined" class="pa-3 mb-12">
         <v-form @submit.prevent="">
@@ -576,6 +576,36 @@
     <!-- /////////////////////////  -->
     
   </v-container>  
+
+  <v-layout class="overflow-visible" style="height: 56px;">
+    <v-bottom-navigation
+      v-model="activeNav"
+      color="primary"
+      horizontal
+      grow
+    >
+      <v-btn @click="scrollToSection('section-general')">
+        <v-icon>mdi-information</v-icon>
+        General
+      </v-btn>
+
+      <v-btn @click="scrollToSection('section-financials')">
+        <v-icon>mdi-finance</v-icon>
+        Financials
+      </v-btn>
+
+      <v-btn v-if="showResults" @click="scrollToSection('section-valuation')">
+        <v-icon>mdi-chart-line</v-icon>
+        Valuation
+      </v-btn>
+
+      <v-btn v-if="showResults" @click="scrollToSection('section-feedback')">
+        <v-icon>mdi-comment-text</v-icon>
+        Feedback
+      </v-btn>
+    </v-bottom-navigation>
+  </v-layout>
+
 </template>
 
 <script setup>
@@ -672,6 +702,10 @@ async function navigateToFinancialInfo() {
   await createInitialYearlyInputs();
   await fetchValuation(thisValuationId.value);
   valuationData.show_yearly_inputs = true;
+
+  nextTick(() => {
+    scrollToSection('section-financials');
+  });
 } 
 
   //////////////////////////////////////////////////////
@@ -3016,7 +3050,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
     async (newVal, oldVal) => {
       try {
         if (!isInitialLoad.value) {
-          console.log('i am in base multi')
+          //console.log('i am in base multi')
           if (!isInitialLoad.value) {
             recalculateAllMetrics();
           }
@@ -3050,7 +3084,8 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
 
 
 
-  
+  import confetti from 'canvas-confetti';
+
   function recalculateAllMetrics() {
     // Clear existing KPIs
     //Object.keys(valuationKPIs).forEach(key => delete valuationKPIs[key]);
@@ -3079,9 +3114,20 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
     // 6. save core EvaluationOutput in DB 
     saveOutputs();
 
+    // Trigger confetti
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+
     // 7. Set loading to false after the first full calculation
     showResults.value = true;
     showInputAlert.value = false;
+
+    nextTick(() => {
+      scrollToSection('section-valuation');
+    });
   }
   //////////////////////////////////////////////////////
   // WATCHER AN LIFECYCLE HOOKS START 
@@ -3140,6 +3186,18 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
   function formatURL() {
     if (valuationData.company_url) {
       valuationData.company_url = formatURLUtil(valuationData.company_url);
+    }
+  }
+
+
+  const activeNav = ref(0)
+
+  function scrollToSection(sectionId) {
+    const HEADER_OFFSET = 60  // Adjust as needed
+    const el = document.getElementById(sectionId)
+    if (el) {
+      const topPosition = el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET
+      window.scrollTo({ top: topPosition, behavior: 'smooth' })
     }
   }
 

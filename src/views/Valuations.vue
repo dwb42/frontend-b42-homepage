@@ -114,7 +114,6 @@ async function fetchValuations() {
   console.error('Error fetching valuations:', error);  }
 }
 
-import confetti from 'canvas-confetti';
 
 async function createValuation() {
   try {
@@ -125,12 +124,7 @@ async function createValuation() {
     const response = await axios.post(`${apiBaseURL}/valuations/`, formData);
     console.log('Valuation created:', response.data);
 
-    // Trigger confetti
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
+
 
     router.push(`/app/valuation/${response.data.id}`);
 
