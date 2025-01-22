@@ -9,6 +9,7 @@
   "dependencies": {
     "@mdi/font": "7.0.96",
     "axios": "^1.5.0",
+    "canvas-confetti": "^1.9.3",
     "core-js": "^3.29.0",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
