@@ -8,7 +8,7 @@
           <div v-if="!isSubmitted">
             <!--div class="text-body-2 font-weight-light mb-3">free service</div-->
       
-            <h1 class="text-h3 font-weight-bold">REAL What is your SaaS business worth?</h1>
+            <h1 class="text-h3 font-weight-bold">What is your SaaS business worth?</h1>
       
             <div class="py-4"/>
       
@@ -67,14 +67,14 @@
       </v-col>
     </v-row>
 
-    <footer class="pa-0 text-body-2 font-weight-light text-center mb-2">
+    <!--footer class="pa-0 text-body-2 font-weight-light text-center mb-2">
       <a href="#" @click.prevent="showDialog('imprint')" class="mr-2 text-grey">Imprint</a>
       <a href="#" @click.prevent="showDialog('privacy')" class="text-grey">Privacy Policy</a>
-    </footer>
+  </footer-->
   </v-container>
 
 
-  <!-- imprint privacy content modal -->
+  <!-- imprint privacy content modal >
   <v-dialog v-model="dialog" persistent max-width="600px" @keydown.esc="closeDialog">
   <v-card>
     <v-card-text>
@@ -174,7 +174,7 @@
       <v-btn color="primary"  @click="dialog = false">close</v-btn>
     </v-card-actions>
   </v-card>
-  </v-dialog>
+  </v-dialog-->
 
   
 
@@ -220,15 +220,15 @@ async function register() {
       email: email.value
   };
   console.log('Registering email at:', apiBaseURL);
-  const response = await axios.post(`${apiBaseURL}/auth/register`, formData);
+  const response = await axios.post(`${apiBaseURL}/emails/`, formData);
   console.log('Email registered:', response.data);
   isSubmitted.value = true; 
 
   // Call the conversion tracking function after a successful registration
-  //gtag_report_conversion(); 
+  //gtag_report_conversion();
 
   } catch (error) {
-  console.error('Error registering:', error);
+  console.error('Error creating lot:', error);
   }
 }
 

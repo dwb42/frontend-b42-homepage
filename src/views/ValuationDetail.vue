@@ -148,17 +148,17 @@
       <v-radio-group v-model="valuationData.valuation_type">
         <v-radio value="minimal">
           <template v-slot:label>
-            <div class="mb-2"><strong>minimal</strong><br>Enter financial data for latest financial period to provide investors with a first sense of growth and profitability.  </div>
+            <div class="mb-2"><strong>Minimal</strong><br>Enter financial data for your latest financial period to provide investors with a first sense of growth and profitability.  </div>
           </template>
         </v-radio>
         <v-radio value="standard">
           <template v-slot:label>
-            <div class="mt-2 mb-2"><strong>standard</strong><br>Add more revenue data to get CAGR and current period customer data to calculate logo churn. </div>
+            <div class="mt-2 mb-2"><strong>Standard</strong><br>Add revenue of previous years to get your CAGR and current period customer data to calculate your logo churn. </div>
           </template>
         </v-radio>
         <v-radio value="complete">
           <template v-slot:label>
-            <div class="mt-2"><strong>complete</strong><br>Provide investors with a complete overview of your current and past performance so that they can include trends in the valuation of your company. </div>
+            <div class="mt-2"><strong>Complete</strong><br>Provide investors with a complete overview of your current and past performance so that they can include trends in the valuation of your company. </div>
           </template>
         </v-radio>
       </v-radio-group>
@@ -399,6 +399,16 @@
           <!-- Final valuation content -->
           <div class="mt-6" v-html="currentEvaluation.evaluation_content"></div>
 
+          <h3 class="text-h6 mb-2 mt-6">
+            Is my company really worth {{ valuationData.state_of_business === 'earlyStage' ? usdFormat(outputData.arr_final_valuation) : usdFormat(outputData.ebitda_final_valuation) }}?
+          </h3>
+
+          <p class="mb-6">No. Your company is worth exactly as much as someone is willing to pay for it.</p>
+          <p class="mb-6">Each investor applies their own point of view with regards to what kind of performance will have what kind of impact on your multiple, so that the end result can vary dramatically.</p>
+          <p class="mb-6">But if you take the time to understand what goes into the valuation of your business (i.e. the financials) as well as to learn about the multiples that an investor will calculate to evaluate your business, you will enter a negotiation with more knowledge than 95% of SaaS founders, who are great at running their business, but not know little to nothing about how an investor looks at them. </p>
+
+          <p class="mb-2"><b>We hope this tool helps you along that path and wish you the best of luck!</b></p>
+          
         </v-card>
 
 
@@ -490,7 +500,10 @@
     <template v-if="showResults" class="mt-12">
       <h2 class="text-h5 mb-2 mt-0"><b>Overview Financial Inputs and KPIs</b></h2>
       <v-card variant="outlined" class="pa-3 mb-6" v-if="showResults">
-        <p class="mb-6">This valuation above is based on these financials and calculated KPIs.</p>
+        <p class="mb-6 text-body-2">The valuation above is based on your financials and the KPIs calculated below. 
+        <span v-if="valuationData.valuation_type === 'minimal'"class="mb-6">Change the "Detail-Level" to "standard" or "complete", provide us with more yearly inputs and gain more insights.</span>
+          <span v-if="valuationData.valuation_type === 'standard'"class="mb-6">Change the "Detail-Level" to "complete", provide us with more yearly inputs and gain more insights.</span>
+      </p>
         <!--h2 class="text-h5 mb-2">Calculated KPIs</h2-->
         <v-table>
           <thead>
@@ -507,39 +520,40 @@
               <template v-for="year in years" :key="year">
                 <td class="text-right">
                   <template v-if="calculatedKPIs[year] && calculatedKPIs[year][row.field] != null">
-                    <!-- we now expect each KPI to be an object with { value, missingData } -->
-
-                    <!-- 1) If it has missingData, show the icon+tooltip -->
+                    <!-- If data is missing -->
                     <template v-if="calculatedKPIs[year][row.field].missingData">
-                      ?
-                      <div v-html="missingDataTooltipContent(calculatedKPIs[year][row.field].missingData)" />
+                      <!-- We wrap our link and tooltip in a relative container yyyy -->
+                      <div class="tooltip-container" style="display:inline-block; position:relative;">
+                        <!-- Clicking toggles the tooltip on/off -->
+                        <a href="#" @click.prevent="toggleTooltip(year, row.field)"><span class="mdi mdi-help-circle-outline"></span>
+</a>
+                        <!-- Only show the tooltip if isTooltipActive(...) returns true -->
+                        <div
+                          v-if="isTooltipActive(year, row.field)"
+                          class="custom-tooltip"
+                          v-html="missingDataTooltip(calculatedKPIs[year][row.field].missingData)"
+                        ></div>
+                      </div>
                     </template>
-
-                    <!-- 2) Else if the KPI value is a number, display it -->
+                    <!-- If not missingData, check if numeric or '-' -->
                     <template v-else-if="typeof calculatedKPIs[year][row.field].value === 'number'">
                       {{ formatKPIValue(row.field, calculatedKPIs[year][row.field].value) }}
                     </template>
-
-                    <!-- 3) If the KPI value is '-' (like yoy in earliest year) -->
                     <template v-else-if="calculatedKPIs[year][row.field].value === '-'">
                       -
                     </template>
-
-                    <!-- 4) Otherwise fallback -->
                     <template v-else>
                       <span style="color: red;">No data</span>
                     </template>
                   </template>
-
-                  <!-- If for some reason we have no KPI object at all -->
                   <template v-else>
                     <span style="color: red;">No data</span>
                   </template>
                 </td>
               </template>
             </tr>
-
           </tbody>
+
         </v-table>
   
         <div 
@@ -549,15 +563,16 @@
           Compounded Average Growth Rate (CAGR) {{ oldestYear }} - {{ latestYear }}:
           {{ (calculatedKPIs[latestYear].calc_cagr_revenue * 100).toFixed(2) }}%
         </div>
+        <div v-else class="mt-2 ml-4 text-body-2">Do the "standard" or "complete" valuation to find out your CAGR.</div>
         
 
       </v-card>
     </template>
 
-    <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
+    
 
     <!-- ///////////////////////// -->
-    <!-- KPI YEARLY TABLE END           -->
+    <!-- KPI YEARLY TABLE END          <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre> -->
     <!-- /////////////////////////  -->
     
   </v-container>  
@@ -598,6 +613,8 @@
 
   const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
 
+  const outputData = reactive({}); // object to save the core metrics of valuationCalculation to be saved in db 
+  
   //////////////////////////////////////////////////////
   // GENERAL INPUT START 
   //////////////////////////////////////////////////////
@@ -928,6 +945,10 @@ async function navigateToFinancialInfo() {
   }
 
   function handleBlur(year, field) {
+    // un-focus the cell:
+    if (focusedCells[year]) {
+       focusedCells[year][field] = false;
+    }
     // The final unformatted value user typed
     const unformattedValue = valuationData.valuation_yearly_inputs[year][field];
     // Actually call your existing update function (non-debounced or lightly debounced)
@@ -993,7 +1014,7 @@ async function navigateToFinancialInfo() {
   // KPI CALCULATION START 
   //////////////////////////////////////////////////////
 
-  //main function to calculate all yearly kpis and store them in $calculatedKPIs[year]
+  // Main function to calculate all yearly KPIs and store them in $calculatedKPIs[year]
   function calculateKPIsForYear(year) {
     const financials = valuationData.valuation_yearly_inputs?.[year];
 
@@ -1011,7 +1032,7 @@ async function navigateToFinancialInfo() {
     // Helper function to build an object: { value, missingData: string | null }
     function makeKPI(value, missingFieldsArray) {
       if (missingFieldsArray && missingFieldsArray.length > 0) {
-        // Join missing fields into a single string: 'fieldA, fieldB'
+        // Join missing fields into a single string: 'Field A, Field B'
         return {
           value: value,
           missingData: missingFieldsArray.join(', '),
@@ -1025,12 +1046,50 @@ async function navigateToFinancialInfo() {
     }
 
     /***********************************************************
+     * [ENHANCEMENT] Assign costs to calc_* fields
+     ***********************************************************/
+    // calc_recurring_revenue
+    if (financials.recurring_revenue != null) {
+      kpis.calc_recurring_revenue = makeKPI(financials.recurring_revenue, []);
+    } else {
+      kpis.calc_recurring_revenue = makeKPI(null, ['Recurring Revenue']);
+    }
+    
+    // calc_costs_of_goods_sold
+    if (financials.costs_of_goods_sold != null) {
+      kpis.calc_costs_of_goods_sold = makeKPI(financials.costs_of_goods_sold, []);
+    } else {
+      kpis.calc_costs_of_goods_sold = makeKPI(null, ['Costs of Goods Sold']);
+    }
+
+    // calc_costs_of_cac
+    if (financials.costs_of_customer_acquisition != null) {
+      kpis.calc_costs_of_cac = makeKPI(financials.costs_of_customer_acquisition, []);
+    } else {
+      kpis.calc_costs_of_cac = makeKPI(null, ['Costs of Customer Acquisition']);
+    }
+
+    // calc_costs_of_r_and_d
+    if (financials.costs_of_r_and_d != null) {
+      kpis.calc_costs_of_r_and_d = makeKPI(financials.costs_of_r_and_d, []);
+    } else {
+      kpis.calc_costs_of_r_and_d = makeKPI(null, ['Costs of R&D']);
+    }
+
+    // calc_costs_of_g_and_a
+    if (financials.costs_of_general_administration != null) {
+      kpis.calc_costs_of_g_and_a = makeKPI(financials.costs_of_general_administration, []);
+    } else {
+      kpis.calc_costs_of_g_and_a = makeKPI(null, ['Costs of General Administration']);
+    }
+    
+    /***********************************************************
      * 1) TOTAL REVENUE
      ***********************************************************/
     if (financials.total_revenue != null) {
       kpis.calc_total_revenue = makeKPI(financials.total_revenue, []);
     } else {
-      kpis.calc_total_revenue = makeKPI(null, ['total_revenue']);
+      kpis.calc_total_revenue = makeKPI(null, ['Total Revenue']);
     }
 
     /***********************************************************
@@ -1044,8 +1103,8 @@ async function navigateToFinancialInfo() {
       kpis.calc_gross_margin_net = makeKPI(gmNet, []);
     } else {
       const missingFields = [];
-      if (financials.total_revenue == null) missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
+      if (financials.total_revenue == null) missingFields.push('Total Revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('Costs of Goods Sold');
       kpis.calc_gross_margin_net = makeKPI(null, missingFields);
     }
 
@@ -1067,11 +1126,11 @@ async function navigateToFinancialInfo() {
       kpis.calc_ebitda_net = makeKPI(financials.total_revenue - totalCosts, []);
     } else {
       const missingFields = [];
-      if (financials.total_revenue == null) missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
-      if (financials.costs_of_customer_acquisition == null) missingFields.push('costs_of_customer_acquisition');
-      if (financials.costs_of_r_and_d == null) missingFields.push('costs_of_r_and_d');
-      if (financials.costs_of_general_administration == null) missingFields.push('costs_of_general_administration');
+      if (financials.total_revenue == null) missingFields.push('Total Revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('Costs of Goods Sold');
+      if (financials.costs_of_customer_acquisition == null) missingFields.push('Costs of Customer Acquisition');
+      if (financials.costs_of_r_and_d == null) missingFields.push('Costs of R&D');
+      if (financials.costs_of_general_administration == null) missingFields.push('Costs of General Administration');
       kpis.calc_ebitda_net = makeKPI(null, missingFields);
     }
 
@@ -1085,8 +1144,8 @@ async function navigateToFinancialInfo() {
       kpis.calc_recurring_revenue_ratio = makeKPI(ratio, []);
     } else {
       const missingFields = [];
-      if (financials.recurring_revenue == null) missingFields.push('recurring_revenue');
-      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.recurring_revenue == null) missingFields.push('Recurring Revenue');
+      if (financials.total_revenue == null) missingFields.push('Total Revenue');
       kpis.calc_recurring_revenue_ratio = makeKPI(null, missingFields);
     }
 
@@ -1103,9 +1162,9 @@ async function navigateToFinancialInfo() {
       const prevYear = (parseInt(year) - 1).toString();
       const prevFinancials = valuationData.valuation_yearly_inputs[prevYear];
       const missingFields = [];
-      if (financials.total_revenue == null) missingFields.push(`total_revenue (${year})`);
+      if (financials.total_revenue == null) missingFields.push(`Total Revenue (${year})`);
       if (!prevFinancials || prevFinancials.total_revenue == null) {
-        missingFields.push(`total_revenue (${prevYear})`);
+        missingFields.push(`Total Revenue (${prevYear})`);
       }
 
       if (missingFields.length === 0) {
@@ -1131,8 +1190,8 @@ async function navigateToFinancialInfo() {
       kpis.calc_gross_margin = makeKPI(gm, []);
     } else {
       const missingFields = [];
-      if (financials.total_revenue == null) missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
+      if (financials.total_revenue == null) missingFields.push('Total Revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('Costs of Goods Sold');
       kpis.calc_gross_margin = makeKPI(null, missingFields);
     }
 
@@ -1156,11 +1215,11 @@ async function navigateToFinancialInfo() {
       kpis.calc_ebitda_margin = makeKPI(margin, []);
     } else {
       const missingFields = [];
-      if (financials.total_revenue == null) missingFields.push('total_revenue');
-      if (financials.costs_of_goods_sold == null) missingFields.push('costs_of_goods_sold');
-      if (financials.costs_of_customer_acquisition == null) missingFields.push('costs_of_customer_acquisition');
-      if (financials.costs_of_r_and_d == null) missingFields.push('costs_of_r_and_d');
-      if (financials.costs_of_general_administration == null) missingFields.push('costs_of_general_administration');
+      if (financials.total_revenue == null) missingFields.push('Total Revenue');
+      if (financials.costs_of_goods_sold == null) missingFields.push('Costs of Goods Sold');
+      if (financials.costs_of_customer_acquisition == null) missingFields.push('Costs of Customer Acquisition');
+      if (financials.costs_of_r_and_d == null) missingFields.push('Costs of R&D');
+      if (financials.costs_of_general_administration == null) missingFields.push('Costs of General Administration');
       kpis.calc_ebitda_margin = makeKPI(null, missingFields);
     }
 
@@ -1176,9 +1235,9 @@ async function navigateToFinancialInfo() {
       kpis.calc_average_revenue_per_customer = makeKPI(arpc, []);
     } else {
       const missingFields = [];
-      if (financials.total_revenue == null) missingFields.push('total_revenue');
+      if (financials.total_revenue == null) missingFields.push('Total Revenue');
       if (financials.number_of_customers_end_of_period == null) {
-        missingFields.push('number_of_customers_end_of_period');
+        missingFields.push('Number of Customers End of Period');
       }
       kpis.calc_average_revenue_per_customer = makeKPI(null, missingFields);
     }
@@ -1197,10 +1256,10 @@ async function navigateToFinancialInfo() {
     } else {
       const missingFields = [];
       if (financials.number_of_customers_end_of_period == null) {
-        missingFields.push('number_of_customers_end_of_period');
+        missingFields.push('Number of Customers End of Period');
       }
       if (financials.customers_lost_in_period == null) {
-        missingFields.push('customers_lost_in_period');
+        missingFields.push('Customers Lost in Period');
       }
       kpis.calc_customer_logo_churn = makeKPI(null, missingFields);
     }
@@ -1231,20 +1290,20 @@ async function navigateToFinancialInfo() {
         kpis.calc_ltv_to_cac = makeKPI(ratio, []);
       } else {
         // The formula breaks down => treat as missing / not computable
-        kpis.calc_ltv_to_cac = makeKPI(null, ['ltv or cac is invalid']);
+        kpis.calc_ltv_to_cac = makeKPI(null, ['LTV or CAC is invalid']);
       }
     } else {
       const missingFields = [];
       if (kpis.calc_average_revenue_per_customer.value == null)
-        missingFields.push('calc_average_revenue_per_customer');
+        missingFields.push('Average Revenue Per Customer');
       if (kpis.calc_gross_margin.value == null)
-        missingFields.push('calc_gross_margin');
+        missingFields.push('Gross Margin');
       if (kpis.calc_customer_logo_churn.value == null)
-        missingFields.push('calc_customer_logo_churn');
+        missingFields.push('Customer Logo Churn');
       if (financials.costs_of_customer_acquisition == null)
-        missingFields.push('costs_of_customer_acquisition');
+        missingFields.push('Costs of Customer Acquisition');
       if (financials.customers_won_in_period == null)
-        missingFields.push('customers_won_in_period');
+        missingFields.push('Customers Won in Period');
 
       kpis.calc_ltv_to_cac = makeKPI(null, missingFields);
     }
@@ -1253,6 +1312,52 @@ async function navigateToFinancialInfo() {
     calculatedKPIs[year] = kpis;
   }
 
+  ////////////////////
+  //some functions to handle tooltip for missingData 
+  // Example function to check missing data
+  function isMissingValue(year, field) {
+    const value = valuationData.valuation_yearly_inputs[year]?.[field];
+    return value == null || value === '';
+  }
+
+  // We store all tooltips states here
+  const tooltipStates = reactive({});
+
+  /**
+   * Toggle the tooltip for a specific (year, field).
+   * We define a unique key (e.g. '2022--calc_total_revenue') to store its open/close state.
+   */
+  function toggleTooltip(year, field) {
+    const key = `${year}--${field}`;
+    tooltipStates[key] = !tooltipStates[key];
+  }
+
+  /**
+   * Checks if the tooltip is active for a specific (year, field).
+   */
+  function isTooltipActive(year, field) {
+    const key = `${year}--${field}`;
+    return tooltipStates[key] === true;
+  }
+
+  /**
+   * The function that returns the HTML or text we want to show in the tooltip.
+   * Currently it just returns a basic string, but you can expand it as you wish.
+   */
+  function missingDataTooltip(missingData) {
+    if (!missingData || typeof missingData !== 'string') {
+      return '<b>Missing data</b><br>- unknown fields';
+    }
+    const fields = missingData.split(',');
+    let content = '<b>Missing data</b><br>';
+    fields.forEach((f) => {
+      content += `- ${f.trim()}<br>`;
+    });
+    return content;
+  }
+  /// end of tooltip functions 
+  ////////////////////////////////////////////////
+  
 
 
 
@@ -1281,16 +1386,18 @@ async function navigateToFinancialInfo() {
         return;
       }
 
-      // Fill both ARR and EBITDA fields no matter what
-      const outputData = {
-        arr_multiple_impact:     scenarioArr.multiple_impact,
-        arr_final_multiple:      scenarioArr.final_multiple,
-        arr_final_valuation:     scenarioArr.final_valuation,
-        ebitda_multiple_impact:  scenarioEbitda.multiple_impact,
-        ebitda_final_multiple:   scenarioEbitda.final_multiple,
-        ebitda_final_valuation:  scenarioEbitda.final_valuation,
-      };
+      // Fill both ARR and EBITDA fields no matter what asdf
+      outputData.arr_multiple_impact    = scenarioArr.multiple_impact;
+      outputData.arr_final_multiple     = scenarioArr.final_multiple;
+      outputData.arr_final_valuation    = scenarioArr.final_valuation;
+      outputData.ebitda_multiple_impact = scenarioEbitda.multiple_impact;
+      outputData.ebitda_final_multiple  = scenarioEbitda.final_multiple;
+      outputData.ebitda_final_valuation = scenarioEbitda.final_valuation;
 
+
+
+      
+      
       // Send outputData to your endpoint
       const response = await axios.post(
         `${apiBaseURL}/valuations/${thisValuationId.value}/outputs`,
@@ -1340,16 +1447,21 @@ async function navigateToFinancialInfo() {
   //////////////////////////////////////////////////////
   const rowDefinitionsKPIOutputs = computed(() => [
     { label: 'Total Revenue', field: 'calc_total_revenue', use_for_analysis: false, rank_for_analysis: 0 },
-     { label: 'Gross Margin Net', field: 'calc_gross_margin_net', use_for_analysis: false, rank_for_analysis: 0 },
-     { label: 'EBITDA Net', field: 'calc_ebitda_net', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: '- Costs of Goods Sold', field: 'calc_costs_of_goods_sold', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: '= Gross Margin Net', field: 'calc_gross_margin_net', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: '- Costs of Customer Acquisition', field: 'calc_costs_of_cac', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: '- Costs of Research & Development', field: 'calc_costs_of_r_and_d', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: '- Costs of General Administration', field: 'calc_costs_of_g_and_a', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: '= EBITDA Net', field: 'calc_ebitda_net', use_for_analysis: false, rank_for_analysis: 0 },
+    { label: 'Recurring Revenue', field: 'calc_recurring_revenue', use_for_analysis: false, rank_for_analysis: 0 },
     
     { label: 'Recurring Revenue Ratio', field: 'calc_recurring_revenue_ratio', use_for_analysis: true, rank_for_analysis: 5 },
-    { label: 'Year-over-Year Growth', field: 'calc_yoy_revenue_growth', use_for_analysis: true, rank_for_analysis: 1 },
+    { label: 'Year-over-Year Revenue Growth', field: 'calc_yoy_revenue_growth', use_for_analysis: true, rank_for_analysis: 1 },
     { label: 'Gross Margin', field: 'calc_gross_margin', use_for_analysis: true, rank_for_analysis: 3 },
     { label: 'EBITDA Margin', field: 'calc_ebitda_margin', use_for_analysis: true, rank_for_analysis: 4 },
     { label: 'Average Revenue per Customer', field: 'calc_average_revenue_per_customer', use_for_analysis: false, rank_for_analysis: null },
     { label: 'Customer Logo Churn', field: 'calc_customer_logo_churn', use_for_analysis: false, rank_for_analysis: null },
-    { label: 'LTV to CAC Ratio', field: 'calc_ltv_to_cac', use_for_analysis: true, rank_for_analysis: 6 }
+    { label: 'LTV-to-CAC Ratio', field: 'calc_ltv_to_cac', use_for_analysis: true, rank_for_analysis: 6 }
   ]);
 
   import getKPIInfo from '@/utils/kpiInterpretation/getKPIInfo';
@@ -1512,26 +1624,6 @@ async function navigateToFinancialInfo() {
   //console.log('is loading: ',isLoading.value)
   }
 
-  // Function to check if a value is missing
-  function isMissingValue(year, field) {
-    const value = valuationData.valuation_yearly_inputs[year]?.[field];
-    return value == null || value === '';
-  }
-
-  // function to provide the content of the missing fields tooltip
-  function missingDataTooltipContent(missingData) {
-    // If missingData is null or not a string, return a generic message
-    if (!missingData || typeof missingData !== 'string') {
-      return '<b>Missing data</b><br>- unknown fields';
-    }
-    // Otherwise, split the string by comma to produce lines
-    const fields = missingData.split(',');
-    let content = '<b>Missing data</b><br>';
-    fields.forEach(field => {
-      content += `- ${field.trim()}<br>`;
-    });
-    return content;
-  }
 
 
   //function to calculate and analyse combined / derived kpis for evaluation 
@@ -3015,8 +3107,13 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
     // Check if field is one of the new currency fields
     const currencyFields = [
       'calc_total_revenue',
+      'calc_recurring_revenue',
       'calc_gross_margin_net',
-      'calc_ebitda_net'
+      'calc_ebitda_net', 
+      'calc_costs_of_goods_sold',
+      'calc_costs_of_cac',
+      'calc_costs_of_r_and_d',
+      'calc_costs_of_g_and_a',
     ];
 
     if (value == null || (typeof value === 'object' && value.missingData)) {
@@ -3064,6 +3161,29 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
   .missing-data {
     border: 1px solid gray;
     background-color: #f6f6f6;
+  }
+
+
+  /* A container to help position the tooltip absolutely */
+  .tooltip-container {
+    cursor: pointer;
+  }
+
+  /* The tooltip itself */
+  .custom-tooltip {
+    position: absolute;
+    top: 0;
+    left: 20px;
+    background-color: #fff;
+    border: 1px solid #dadada;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 8px;
+    min-width: 150px;
+    z-index: 10;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    text-align: left;
   }
 
 </style>

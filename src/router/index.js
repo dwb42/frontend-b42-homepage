@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // Import components
+import HomePreLaunchSignup from '../views/HomePreLaunchSignup.vue'
 import Home from '../views/Home.vue'
-import HomeReal from '../views/HomeReal.vue'
 import Login from '../views/Login.vue'
 import Admin from '../views/Admin.vue'
 import Valuations from '@/views/Valuations.vue'
@@ -21,9 +21,9 @@ import MagicalLinkVerification from '@/views/MagicLinkVerification.vue'
           component: Home,
         },
         {
-          path: 'real', 
-          name: 'HomeReal',
-          component: HomeReal,
+          path: 'deprec_signup', 
+          name: 'HomePreLaunchSignup',
+          component: HomePreLaunchSignup,
         },
         {
           path: 'login', 
