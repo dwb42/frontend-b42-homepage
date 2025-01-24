@@ -29,8 +29,8 @@ export const checkValidPastYear = (value) => {
   
   const year = parseInt(value);
   if (isNaN(year)) return 'Year must be a valid number';
-  if (year > 2024) return 'You must have been operational since at least 2024';
-  
+  if (year > 2023) return 'You must have been operational since at least 2023 for our analysis to be somewhat valid.';
+
   return true;
 };  
 

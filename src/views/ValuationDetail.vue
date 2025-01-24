@@ -640,6 +640,7 @@
   const calculatedKPIs = reactive({}); // var to save the output of calculateKPIsForYear 
 
   const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
+  console.log('analysed_kpis', analysed_kpis);
 
   const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
 
@@ -1651,7 +1652,7 @@ async function navigateToFinancialInfo() {
       console.error('Error in testGetKPIInfo:', error.message);
     }
 
-  console.log('analysed kpis: ',analysed_kpis)
+  //console.log('analysed kpis: ',analysed_kpis)
 
   // After completing the logic, set loading to false
   //isLoading.value = false;
@@ -1671,12 +1672,16 @@ async function navigateToFinancialInfo() {
         return;
       }
 
+      //console.log('latestYearKPIs:', latestYearKPIs);
+      //console.log('latestYearKPIs.calc_yoy_revenue_growth:', latestYearKPIs.calc_yoy_revenue_growth);
+      //console.log('latestYearKPIs.calc_cagr_revenue:', latestYearKPIs.calc_cagr_revenue);
+      
       // 1. Calculate Combined Growth Rate (average of YoY and CAGR)
-      if (typeof latestYearKPIs.calc_yoy_revenue_growth === 'number' && 
+      if (typeof latestYearKPIs.calc_yoy_revenue_growth.value === 'number' && 
           typeof latestYearKPIs.calc_cagr_revenue === 'number') {
 
-        const combinedGrowthRate = (latestYearKPIs.calc_yoy_revenue_growth + latestYearKPIs.calc_cagr_revenue) / 2;
-        console.log('Combined Growth Rate:', combinedGrowthRate);
+        const combinedGrowthRate = (latestYearKPIs.calc_yoy_revenue_growth.value + latestYearKPIs.calc_cagr_revenue) / 2;
+        //console.log('Combined Growth Rate:', combinedGrowthRate);
 
         try {
           const growthAnalysis = getKPIInfo('calc_growth_general', combinedGrowthRate);
@@ -1884,10 +1889,17 @@ async function navigateToFinancialInfo() {
     
   const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
     const growthImpactMinimal = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1; // not use combined but only yoy asdf
-  const growthImpactComplete = ((analysed_kpis.calc_growth_combined?.analysisResult.impactPercentage -1) * analysed_kpis.calc_yoy_revenue_growth.trend.multipleImpact)+1;
+    const growthImpactComplete = (
+      (analysed_kpis.calc_growth_combined?.analysisResult.impactPercentage - 1) *
+      (analysed_kpis.calc_yoy_revenue_growth?.trend?.multipleImpact ?? 0)
+    ) + 1;
 
     const grossMarginImpact = analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1;
-  const grossMarginImpactComplete = ((analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage - 1) * analysed_kpis.calc_gross_margin.trend.multipleImpact)+1;
+    const grossMarginImpactComplete = (
+      ((analysed_kpis.calc_gross_margin?.analysisResult?.impactPercentage ?? 1) - 1) *
+      (analysed_kpis.calc_gross_margin?.trend?.multipleImpact ?? 0)
+    ) + 1;
+
   
   
     const ebitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
