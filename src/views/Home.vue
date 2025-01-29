@@ -129,14 +129,13 @@
       >
 
         <v-card
-          class="d-flex ga-6 justify-center pa-2 mt-2"
+          class="d-flex flex-column align-center pa-2 mt-2"
           color="transparent"
           flat
           max-width="700"
           rounded="lg"
         >
           <v-img
-            class="align-self-center ms-4"
             color="surface-light"
             cover
             height="200"
@@ -145,9 +144,9 @@
             width="180"
           />
 
-          <div>
+          <div class="text-center mt-4">
             <v-list-item
-              class="px-0 mt-0 my-2"
+              class="px-0 mt-0"
             >
               <template v-slot:title>
                 <div class="font-weight-bold">Dietrich Wedegärtner</div>
@@ -162,7 +161,7 @@
               </template>
             </v-list-item>
 
-            <div class="d-flex ga-3">
+            <div class="d-flex justify-center ga-3 mt-2">
               <v-btn
                 icon="mdi-linkedin"
                 size="x-small"
