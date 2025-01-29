@@ -136,7 +136,6 @@
           rounded="lg"
         >
           <v-img
-            v-if="!$vuetify.display.smAndDown"
             class="align-self-center ms-4"
             color="surface-light"
             cover
