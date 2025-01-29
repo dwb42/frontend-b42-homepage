@@ -1,5 +1,5 @@
 <template>
-  <v-footer class="bg-grey-lighten-1"  >
+  <v-footer class="d-flex justify-space-between align-center px-4 py-4 mt-7" color="surface-light">
     <v-row justify="center" no-gutters>
       <v-btn
         class="mx-2"

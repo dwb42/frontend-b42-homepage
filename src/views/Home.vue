@@ -109,11 +109,11 @@
         <v-responsive class="mx-auto" max-width="500">
           
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
-            B42 Capital is wholly owned by Dietrich Wedegärtner. Dietrich has been building .com Businesses for over 20 years. In 2002 he built an online community for students - one year before facebook. In 2009 he founded adzLocal.de (now <a href="https://omergy.com" target="_blank">omergy.com</a>), a Lead Generation Service for German SMBs. He sold adzLocal in 2021 to <a href="https://www.pinovacapital.com" target="_blank">PINOVA Capital</a>. 
+            B42 Capital is wholly owned by Dietrich Wedegärtner. Dietrich has been building tech businesses for over 20 years. In 2002 he built an online community for students - one year before facebook. In 2009 he founded adzLocal.de (now <a href="https://omergy.com" target="_blank">omergy.com</a>), a Lead Generation Service for German SMBs. He sold adzLocal in 2021 to <a href="https://www.pinovacapital.com" target="_blank">PINOVA Capital</a>. 
           </p>
 
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
-            Since 2022 Dietrich has been coaching startup founders on how to accelerate their growth as well as capital allocators on how to evaluate SaaS businesses. 
+            Since 2023 Dietrich has been coaching startup founders on how to accelerate their growth as well as capital allocators on how to evaluate SaaS businesses. 
           </p>
 
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
@@ -154,29 +154,24 @@
               <template v-slot:subtitle>
                 <div>Founder & CEO</div>
               </template>
-              <template v-slot:default>
-                <p class="text-caption text-medium-emphasis mt-2">
-                  20+ years experience building and scaling .com businesses
-                </p>
-              </template>
             </v-list-item>
 
             <div class="d-flex justify-center ga-3 mt-2">
               <v-btn
                 icon="mdi-linkedin"
                 size="x-small"
-                href="https://www.linkedin.com/in/dietrich-wedegaertner/"
+                href="https://www.linkedin.com/in/wedegaertner/"
                 target="_blank"
                 variant="text"
               />
 
-              <v-btn
+              <!--v-btn
                 icon="mdi-twitter"
                 size="x-small"
                 href="https://twitter.com/dietrichwedegar"
                 target="_blank"
                 variant="text"
-              />
+              /-->
             </div>
           </div>
         </v-card>
@@ -186,6 +181,41 @@
     </v-row>
 
   </v-container>
+
+
+  <v-container class="pa-6 pa-md-12 bg-primary" fluid>
+    <v-responsive
+      class="mx-auto text-center d-flex align-center"
+      max-width="600"
+      min-height="300"
+    >
+      <p class="font-weight-bold text-sm-h2 text-h4 mt-2'">
+        Get in touch
+      </p>
+
+      <p class="mt-4 text-body-1 opacity-60">
+        Write Dietrich via dw-at-b42-dot-io
+      </p>
+    </v-responsive>
+  </v-container>
+
+
+  <v-footer class="d-flex justify-space-between align-center px-4 py-4 mt-7" color="surface-light">
+    <v-row justify="center" no-gutters>
+      <v-btn
+        class="mx-2"
+        size="x-small"
+        rounded="xl"
+        variant="text"
+        @click="showDialog('imprint')"
+      >
+        IMPRINT & PRIVACY
+      </v-btn>
+      <!--v-col class="text-center mt-4" cols="12">
+        {{ new Date().getFullYear() }} — <strong>saas-valuation.com</strong>
+      </v-col-->
+    </v-row>
+  </v-footer>
   
   
   <!--v-container class="fill-height">
