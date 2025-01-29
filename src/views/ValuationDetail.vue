@@ -67,17 +67,17 @@
         <v-radio-group v-model="valuationData.state_of_business">
           <v-radio value="preRevenue">
             <template v-slot:label>
-              <div class="mb-2"><strong>pre revenue</strong><br>we are just getting started and do not have revenue yet </div>
+              <div class="mb-2"><strong>Pre Revenue</strong><br>We are just getting started and do not have revenue yet. </div>
             </template>
           </v-radio>
           <v-radio value="earlyStage">
             <template v-slot:label>
-              <div class="mt-2 mb-2"><strong>early stage / growth focused</strong><br>we are investing heavily in product and/or growth and have little to no profit because of it </div>
+              <div class="mt-2 mb-2"><strong>Early Stage / growth focused</strong><br>We are investing heavily in product and/or growth and have little to no profit because of it. </div>
             </template>
           </v-radio>
           <v-radio value="laterStage">
             <template v-slot:label>
-              <div class="mt-2"><strong>later stage / balanced</strong><br>we are balancing our focus on growth and profitability </div>
+              <div class="mt-2"><strong>Later Stage / balanced</strong><br>We are balancing our focus on growth and profitability. </div>
             </template>
           </v-radio>
         </v-radio-group>
@@ -234,12 +234,11 @@
     <!-- /////////////////////////  -->
 
     
-    
 
     <!--pre>valuationData<br>{{valuationData}}</pre>
     <pre>calculatedKPIs<br>{{calculatedKPIs}}</pre>
     <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
-    <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
+    -->
 
  
     <!-- ///////////////////////// -->
@@ -405,7 +404,7 @@
 
           <p class="mb-6">No. Your company is worth exactly as much as someone is willing to pay for it.</p>
           <p class="mb-6">Each investor applies their own point of view with regards to what kind of performance will have what kind of impact on your multiple, so that the end result can vary dramatically.</p>
-          <p class="mb-6">But if you take the time to understand what goes into the valuation of your business (i.e. the financials) as well as to learn about the multiples that an investor will calculate to evaluate your business, you will enter a negotiation with more knowledge than 95% of SaaS founders, who are great at running their business, but not know little to nothing about how an investor looks at them. </p>
+          <p class="mb-6">But if you take the time to understand what goes into the valuation of your business (i.e. the financials) as well as to learn about the multiples that an investor will calculate to evaluate your business, you will enter a negotiation with more knowledge than 95% of SaaS founders, who are great at running their business, but know little to nothing about how an investor looks at them. </p>
 
           <p class="mb-2"><b>We hope this tool helps you along that path and wish you the best of luck!</b></p>
           
@@ -414,8 +413,7 @@
 
 
       <!--pre>valuationData<br>{{valuationData}}</pre>
-      <pre>analysed_kpis<br>{{analysed_kpis}}</pre>
-      <pre>valuationCalculation<br>{{valuationCalculation}}</pre-->
+      <pre>analysed_kpis<br>{{analysed_kpis}}</pre-->
 
     </template>
 
@@ -617,7 +615,7 @@
 
 
   
-  const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
+  //const isLoading = ref(true); // Variable to track loading state used to delay display of valuation 
   const showResults = ref(false); // Variable to track if the results are shown or not
   const showInputAlert = ref(false); // Variable to track if the input alert is shown or not
   
@@ -625,7 +623,6 @@
   //setup router
   import { useRoute } from 'vue-router'
   const route = useRoute();
-  const routeParams = route.params;
 
   //valuation vars
   const thisValuationId = ref(route.params.id);
@@ -642,7 +639,7 @@
   const analysed_kpis = reactive({}); // var to save the output of getKPIInfo 
   console.log('analysed_kpis', analysed_kpis);
 
-  const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
+  //const valuationCalculation = reactive({}); // object to save ARR and EBIDTA impact and valuation in 
 
   const outputData = reactive({}); // object to save the core metrics of valuationCalculation to be saved in db 
   
@@ -973,11 +970,12 @@ async function navigateToFinancialInfo() {
   }
 
   //still needed?
-  function onBlur(year, field) { 
+  /*function onBlur(year, field) { 
     if (focusedCells[year]) {
       focusedCells[year][field] = false;
     }
   }
+  */
 
   function handleBlur(year, field) {
     // un-focus the cell:
@@ -990,7 +988,7 @@ async function navigateToFinancialInfo() {
     updateValuationFinancial(field, unformattedValue, year);
   }
 
-
+  
   function isCellFocused(year, field) {
     return focusedCells[year] && focusedCells[year][field];
   }
@@ -1887,8 +1885,8 @@ async function navigateToFinancialInfo() {
     const yoy = analysed_kpis.calc_yoy_revenue_growth?.value || 0;
     const cagr = analysed_kpis.calc_cagr_revenue?.value || 0;
     
-  const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
-    const growthImpactMinimal = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1; // not use combined but only yoy asdf
+    const growthImpact = analysed_kpis.calc_growth_combined?.analysisResult?.impactPercentage ?? 1;
+    const growthImpactMinimal = analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.impactPercentage ?? 1; // not use combined but only yoy asdf
     const growthImpactComplete = (
       (analysed_kpis.calc_growth_combined?.analysisResult.impactPercentage - 1) *
       (analysed_kpis.calc_yoy_revenue_growth?.trend?.multipleImpact ?? 0)
@@ -1900,8 +1898,6 @@ async function navigateToFinancialInfo() {
       (analysed_kpis.calc_gross_margin?.trend?.multipleImpact ?? 0)
     ) + 1;
 
-  
-  
     const ebitdaMarginImpact = analysed_kpis.calc_ebitda_margin?.analysisResult?.impactPercentage ?? 1;
     const recurringImpact = analysed_kpis.calc_recurring_revenue_ratio?.analysisResult?.impactPercentage ?? 1;
     const ltvToCacImpact = analysed_kpis.calc_ltv_to_cac?.analysisResult?.impactPercentage ?? 1;
@@ -2049,7 +2045,7 @@ async function navigateToFinancialInfo() {
               description: `
                     Your current Year-on-Year growth is ${formatKPIValue('calc_yoy_revenue_growth', yoy)}. <br><br>
                     A growth rate of ${formatKPIValue('calc_yoy_revenue_growth', yoy)} is ${
-              analysed_kpis.calc_growth_combined?.analysisResult?.evaluationDescription || 'N/A'
+              analysed_kpis.calc_yoy_revenue_growth?.analysisResult?.evaluationDescription || 'N/A'
                   }.
                     `,
               impact: `${multipleImpactPercent(growthImpactMinimal)}`,
@@ -2062,7 +2058,7 @@ async function navigateToFinancialInfo() {
                         analysed_kpis.calc_gross_margin
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br><br>
+                      }. <br>
 
                       A Gross Margin of ${
                         analysed_kpis.calc_gross_margin
@@ -2096,7 +2092,7 @@ async function navigateToFinancialInfo() {
             final: {
               description: `
                   Note that we have to multiply (not add) the invididual impact multiples to calculate the final multiple impact, i.e. 
-                  ${growthImpact} *
+                  ${growthImpactMinimal} *
                   ${grossMarginImpact} *
                   ${recurringImpact} = ${multipleImpactPercent(totalArrImpactMinimal)}.
                 `,
@@ -2195,7 +2191,7 @@ async function navigateToFinancialInfo() {
                         analysed_kpis.calc_gross_margin
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br><br>
+                      }. <br>
 
                       A Gross Margin of ${
                         analysed_kpis.calc_gross_margin
@@ -2339,7 +2335,7 @@ analysed_kpis.calc_yoy_revenue_growth?.trend?.description || 'N/A'
                         analysed_kpis.calc_gross_margin
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br><br>
+                      }. <br>
 
                       A Gross Margin of ${
                         analysed_kpis.calc_gross_margin
@@ -2476,7 +2472,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_gross_margin 
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br><br>
+                      }. <br>
                       A Gross Margin of ${
                                 analysed_kpis.calc_gross_margin
                                   ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
@@ -2529,7 +2525,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
               description: `
                   <!-- TOTAL IMPACT ROW -->
                       Note that we have to multiply (not add) the invididual impact multiples to calculate the final multiple impact, i.e. 
-                      ${growthImpact} *
+                      ${growthImpactMinimal} *
                       ${(grossMarginImpact + ebitdaMarginImpact) / 2} *
                       ${recurringImpact} = ${multipleImpactPercent(totalEbitdaImpactMinimal)}.
                 `,
@@ -2631,7 +2627,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                     analysed_kpis.calc_gross_margin 
                       ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                       : 'N/A'
-                  }. <br><br>
+                  }. <br>
                   A Gross Margin of ${
                             analysed_kpis.calc_gross_margin
                               ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
@@ -2791,7 +2787,7 @@ analysed_kpis.calc_gross_margin?.trend?.description || 'N/A'
                         analysed_kpis.calc_gross_margin 
                           ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)
                           : 'N/A'
-                      }. <br><br>
+                      }. <br>
                       A Gross Margin of ${
                                 analysed_kpis.calc_gross_margin
                                   ? formatKPIValue('calc_gross_margin', analysed_kpis.calc_gross_margin.value)

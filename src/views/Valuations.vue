@@ -11,7 +11,7 @@
             <v-table>
               <thead>
                 <tr>
-                  <th class="text-left">id</th>
+                  <!--th class="text-left">id</th-->
                   <th class="text-left" style="min-width: 200px;">Company Name</th>
                   <th class="text-left">Company URL</th>
                   <th class="text-left">Valuation Method</th>
@@ -23,7 +23,7 @@
               </thead>
               <tbody>
                 <tr v-for="valuation in valuationsData" :key="valuation.id">
-                  <td>{{ valuation.id }}</td>
+                  <!--td>{{ valuation.id }}</td-->
                   <td><router-link :to="`/app/valuation/${valuation.id}`"><b>{{ valuation.company_name }}</b></router-link></td> 
                   <td><a :href="valuation.company_url" target="_blank">{{ valuation.company_url }}</a></td> 
                   <td>{{ valuation.state_of_business === 'laterStage' ? 'EBITDA' : 'ARR' }}</td>

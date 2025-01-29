@@ -19,7 +19,7 @@
 
 
   <!-- imprint privacy content modal -->
-  <v-dialog v-model="dialog" max-width="600px" @keydown.esc="closeDialog">
+  <v-dialog v-model="dialog" max-width="800px" @keydown.esc="closeDialog">
   <v-card>
     <v-card-text>
       <v-container>

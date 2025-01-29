@@ -41,32 +41,60 @@ const kpiData = {
   "calc_yoy_revenue_growth": [
     {
       "min": -100,
+      "max": -0.1,
+      "rangeName": "Strong Negative Growth",
+      "impactPercentage": 0.50,
+      "evaluationDescription": "strong negative year-over-year revenue growth. Our valuation model does not really apply to such a restructuring case. To place some value on this we will decrease your multiple by 50%"
+    },
+    {
+      "min": -0.1,
       "max": 0,
-      "rangeName": "Negative Growth",
+      "rangeName": "Slight Negative Growth",
       "impactPercentage": 0.70,
-      "evaluationDescription": "Negative year-over-year revenue growth."
+      "evaluationDescription": "slight negative year-over-year revenue growth and will decrease your multiple by 30%"
     },
     {
       "min": 0,
-      "max": 0.2,
-      "rangeName": "Low Growth",
+      "max": 0.1,
+      "rangeName": "Slow Growth",
       "impactPercentage": 0.90,
-      "evaluationDescription": "Low year-over-year revenue growth."
+      "evaluationDescription": "slow growth and will decrease your mutiple by 10%"
+    },
+    {
+      "min": 0.1,
+      "max": 0.2,
+      "rangeName": "Steady Growth",
+      "impactPercentage": 1,
+      "evaluationDescription": "a growth rate that one would expect from a good SaaS company and hence has no effect on your multiple"
     },
     {
       "min": 0.2,
+      "max": 0.3,
+      "rangeName": "Good Growth",
+      "impactPercentage": 1.10,
+      "evaluationDescription": "is good growth and will improve your mutiple by 10%"
+    },
+    {
+      "min": 0.3,
       "max": 0.5,
-      "rangeName": "Moderate Growth",
-      "impactPercentage": 1.00,
-      "evaluationDescription": "Moderate year-over-year revenue growth."
+      "rangeName": "Strong Growth",
+      "impactPercentage": 1.25,
+      "evaluationDescription": "strong growth and will improve your multiple by 25%"
     },
     {
       "min": 0.5,
+      "max": 0.8,
+      "rangeName": "Super Strong Growth",
+      "impactPercentage": 1.5,
+      "evaluationDescription": "super strong growth and will improve your multiple by 50%"
+    },
+    {
+      "min": 0.8,
       "max": 100,
-      "rangeName": "High Growth",
-      "impactPercentage": 1.20,
-      "evaluationDescription": "High year-over-year revenue growth."
-    }
+      "rangeName": "Hyper Growth",
+      "impactPercentage": 1.8,
+      "evaluationDescription": "hyper growth and will improve your multiple by 80%"
+    }, 
   ],
   "calc_gross_margin": [
     {
@@ -74,35 +102,35 @@ const kpiData = {
       "max": 0.6,
       "rangeName": "Is This Even SaaS?",
       "impactPercentage": 0.50,
-      "evaluationDescription": "Gross margin below 60% questions the SaaS nature of the business."
+      "evaluationDescription": "so low that an investor will wonder if your business truly is a SaaS business. For argument's sake we will decrease your multiple by 50%"
     },
     {
       "min": 0.6,
       "max": 0.7,
       "rangeName": "Less Efficient SaaS",
       "impactPercentage": 0.80,
-      "evaluationDescription": "is a sign of an inefficient SaaS business and will reduce your multiple by 20%"
+      "evaluationDescription": "a sign of an inefficient SaaS business and will reduce your multiple by 20%"
     },
     {
       "min": 0.7,
       "max": 0.8,
       "rangeName": "Looks Like SaaS",
       "impactPercentage": 1.00,
-      "evaluationDescription": "is in the typical range for SaaS businesses and has no impact on the multiple"
+      "evaluationDescription": "in the typical range for SaaS businesses and has no impact on the multiple"
     },
     {
       "min": 0.8,
       "max": 0.9,
       "rangeName": "Super Healthy SaaS",
       "impactPercentage": 1.20,
-      "evaluationDescription": "Gross margin between 80% and 90% indicates a super healthy SaaS business."
+      "evaluationDescription": "indicates a super healthy SaaS business and will boost your multiple by 20%"
     },
     {
       "min": 0.9,
       "max": 1,
       "rangeName": "Amazing Gross Margin",
       "impactPercentage": 1.40,
-      "evaluationDescription": "Gross margin above 90% is considered amazing in SaaS and will increase your multiple by 40%"
+      "evaluationDescription": "is considered amazing in SaaS and will increase your multiple by 40%"
     }
   ],
   "calc_ebitda_margin": [

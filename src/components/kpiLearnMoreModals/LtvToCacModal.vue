@@ -5,19 +5,19 @@
   </p>
 
   <p class="mb-4"><b>
-    We get your Customer Acquisition Costs from the data you provide to us. </b>
+    We get your "per Customer Acquisition Cost" by dividing your "Total Customer Acquisition Cost" by the "number of customers won" in your latest period. </b>
   </p>
 
   <p class="mb-4">
     <b>Calculating the Customer Lifetime Value is a little more difficult: </b><br>
-    a) calculate Customer Churn Rate by using the following formula: "Customer at beginning of period" / "Customers lost in period" <br>
+    a) calculate Customer Churn Rate by using the following formula: "Customers at beginning of period" / "Customers lost in period" <br>
     b) calculate the Customer Lifetime via: 1 / Customer Churn Rate <br>
     c) multiply Customer Lifetime * Average Revenue per Customer 
   </p>
 
 
   <p class="mb-4">
-    For a SaaS business, a LTV-to-CAC ratio of around 3 is considered good.  
+    <b>For a SaaS business, a LTV-to-CAC ratio of around 3 is considered good.</b>  
   </p>
 
   <p class="mb-4">
@@ -25,7 +25,7 @@
   </p>
 
   <p class="mb-4">
-    Having a LTV-to-CAC ratio that is significantly higher than 3, is definitively better than having a ratio below 3. Investors will assume that you could be spending more aggressively on marketing and sales and will want to find out why you are not doing so. 
+    Having a LTV-to-CAC ratio that is significantly higher than 3 is definitively better than having a ratio below 3. Investors will assume that you could be spending more aggressively on marketing and sales and will want to find out why you are not doing so. 
   </p>
 
   <p class="mb-4 font-weight-bold">

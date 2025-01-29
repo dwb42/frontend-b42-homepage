@@ -5,7 +5,7 @@
       {{openNav}}
   </template-->
     
-    <v-app-bar-title class="pl-xs-0 pl-md-4"><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">saas-valuation.com</router-link></v-app-bar-title>
+    <v-app-bar-title class="pl-xs-0 pl-md-4"><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">B42 Capital</router-link></v-app-bar-title>
 
     <template v-slot:append v-if="userStore.user.email">
       <v-btn icon="mdi-dots-vertical" @click="openSettings = !openSettings"></v-btn>

@@ -1,57 +1,203 @@
 <template>
-  <v-container class="fill-height">
-    <!--img src="@/assets/saas-valuation-logo.png" alt="SaaS Valuation Logo" class="logo-image" /-->
+  <v-container class="h-50 d-flex align-center justify-center">
+    <div class="w-100 w-md-75 text-center">
+      <!--v-chip border="thin opacity-25" color="surface" variant="flat">
+        <span class="hidden-sm-and-down">Announcing our</span> <span class="hidden-md-and-up">Our&nbsp;</span> next round of funding. Click <a class="d-inline-block mx-1 text-decoration-none text-primary" href="#">here</a> to learn more.
+      </v-chip-->
+
+      <h1 class="text-h4 text-md-h2 font-weight-bold my-6">
+        Your Scale-Up Investor
+      </h1>
+
+      <div class="text-body-1 text-medium-emphasis mb-10">
+        B42 Capital is a hands-on investor that supports founders to scale their business. We provide capital to grow your revenue and to improve your product. We work with founders who are curious and open to new ideas.
+      </div>
+
+      <div class="d-flex ga-4 justify-center">
+        <v-btn
+          class="text-none"
+          color="primary"
+          flat
+          rounded="lg"
+          text="Learn more"
+        />
+
+        <!--v-btn
+          append-icon="mdi-chevron-right"
+          class="text-none"
+          flat
+          rounded="lg"
+          text="Learn more"
+        /-->
+      </div>
+    </div>
+
+    <div class="v-bg position-absolute top-0 right-0 left-0 bottom-0">
+      <div aria-hidden="true" class="overflow-hidden opacity-20 w-100 h-100" />
+    </div>
+  </v-container>
+
+
+  <v-card :image="src">
+    <template #image>
+      <v-img
+        gradient="to bottom, rgba(var(--v-theme-surface), .8), rgba(var(--v-theme-surface), 1)"
+      />
+    </template>
+
+    <v-container class="pa-6 pa-md-12 my-8" fluid>
+      <v-responsive class="mb-8 mx-auto text-center" max-width="700">
+        <p class="font-weight-bold text-md-h2 text-h4 mt-0">Whom we invest in</p>
+
+        <p class="mt-4 text-body-1 text-medium-emphasis">
+          Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem
+          cupidatat commodo. Elit sunt amet fugiat veniam occaecat fugiat
+          aliqua.
+        </p>
+      </v-responsive>
+
+      <v-row align="stretch" class="mt-8">
+        <v-col
+          v-for="(item, i) in features"
+          :key="i"
+          class="d-flex flex-column"
+          cols="12"
+          md="4"
+          sm="12"
+        >
+          <v-sheet
+            border
+            class="pa-6 flex-grow-1"
+            rounded="lg"
+            :style="$vuetify.theme.current.dark ? 'background-color: rgba(0, 0, 0, 0.4);' : 'background-color: rgba(255, 255, 255, 0.4);'"
+          >
+            <v-list-item rounded="lg" :subtitle="item.subtitle">
+              <template #title>
+                <p class="text-body-2 font-weight-bold pb-2">
+                  <v-icon
+                    class="mr-2"
+                    color="primary"
+                    :icon="item.icon"
+                    size="small"
+                  />
+
+                  {{ item.title }}
+                </p>
+              </template>
+            </v-list-item>
+          </v-sheet>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-card>
+
+  <v-container class="pa-6 pa-md-12 my-8" fluid>
+    <v-responsive class="mb-8 mx-auto text-center" max-width="500">
+      <p class="font-weight-bold text-md-h2 text-h4 mt-0">About B42 Capital</p>
+
+      <p class="mt-4 text-body-1 text-medium-emphasis">
+        We are not bankers but entrepreneurs who are in this for the love of building great companies. 
+      </p>
+    </v-responsive>
+
+    <v-row align="center">
+      <v-col
+        class="pa-md-12 pa-6 text-center text-md-left"
+        cols="12"
+        md="6"
+      >
+        <v-responsive class="mx-auto" max-width="500">
+          
+          <p class="text-subtitle-2 text-medium-emphasis mb-6">
+            B42 Capital is wholly owned by Dietrich Wedegärtner. Dietrich has been building .com Businesses for over 20 years. In 2002 he built an online community for students - one year before facebook. In 2009 he founded adzLocal.de (now <a href="https://omergy.com" target="_blank">omergy.com</a>), a Lead Generation Service for German SMBs. He sold adzLocal in 2021 to <a href="https://www.pinovacapital.com" target="_blank">PINOVA Capital</a>. 
+          </p>
+
+          <p class="text-subtitle-2 text-medium-emphasis mb-6">
+            Since 2022 Dietrich has been coaching startup founders on how to accelerate their growth as well as capital allocators on how to evaluate SaaS businesses. 
+          </p>
+
+          <p class="text-subtitle-2 text-medium-emphasis mb-6">
+            In 2024 B42 launched the SaaS valuation calculator <a href="https://www.saas-valuation.com" target="_blank">www.saas-valuation.com</a> to help SaaS founders learn about how SaaS investors evaluate the worth of their business. 
+          </p>
+          
+        </v-responsive>
+      </v-col>
+
+      <v-col
+        cols="12"
+        md="6"
+      >
+
+        <v-card
+          class="d-flex ga-6 justify-center pa-2 mt-2"
+          color="transparent"
+          flat
+          max-width="700"
+          rounded="lg"
+        >
+          <v-img
+            v-if="!$vuetify.display.smAndDown"
+            class="align-self-center ms-4"
+            color="surface-light"
+            cover
+            height="200"
+            rounded="lg"
+            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            width="180"
+          />
+
+          <div>
+            <v-list-item
+              class="px-0 mt-0 my-2"
+              subtitle="item.subtitle"
+              title="item.title"
+            >
+              <p class="text-caption text-medium-emphasis mt-2">asdf</p>
+            </v-list-item>
+
+            <div class="d-flex ga-3">
+              <v-btn
+                icon="mdi-linkedin"
+                size="x-small"
+                to="#"
+                variant="text"
+              />
+
+              <v-btn
+                icon="mdi-twitter"
+                size="x-small"
+                to="#"
+                variant="text"
+              />
+            </div>
+          </div>
+        </v-card>
+
+        
+      </v-col>
+    </v-row>
+
+  </v-container>
+  
+  
+  <!--v-container class="fill-height">
     <v-row no-gutters>
       <v-col cols="12" sm="12" md="6" class="d-flex align-center justify-center">
         <v-responsive class="align-left text-left fill-height">
           
-          <div v-if="!isSubmitted">
-            <!--div class="text-body-2 font-weight-light mb-3">free service</div-->
+    
       
-            <h1 class="text-h3 font-weight-bold">What is your SaaS business worth?</h1>
+            <h1 class="text-h3 font-weight-bold">Your Scale-Up Investor</h1>
       
             <div class="py-4"/>
       
             <div class="text-body-1"> 
-              Find out how investors value your SaaS business. 
-              <!--Receive our valuation guide including questions every SaaS investor will ask along with answers they like to see. -->
-              Use our SaaS valuation calculator to enter your business details in order to get a valuation estimate. 
-              
+              B42 Capital is a hands-on investor that supports founders to scale their business. We love building systems and software to automate day-to-day business operations. We are curious, honest and fair.
             </div>
             
             <div class="py-4"/>
   
-            <v-form @submit.prevent="register">
-              <!--v-text-field v-model="email" id="email" label="Your Email Address*" required hide-details class="mb-4"-->
-              <v-text-field 
-                v-model="email" 
-                id="email" 
-                label="Your Email Address*" 
-                :rules="emailRules"
-                :append-icon="isEmailValid ? 'mdi-check-circle' : ''"
-                :append-icon-color="isEmailValid ? 'success' : ''"
-                class="mb-4"
-                validate-on="input"
-                required
-              >
-                
-              </v-text-field>
-              <v-btn color="primary" size="large" type="submit">Register for free</v-btn>
-            </v-form>
-      
-            <div class="py-2 text-body-2 font-weight-light">
-              we will never share your email address with anyone
-            </div>
-          </div>
-          
-          <div v-else>
-            <h1 class="text-h3 font-weight-bold">Check your mail </h1>
-            <div class="py-4"/>
 
-            <div class="text-body-1"> 
-              A Login Link has been sent. 
-            </div>
-          </div>
     
         </v-responsive>
         
@@ -63,7 +209,7 @@
       </v-col>
     </v-row>
 
-  </v-container>
+  </v-container-->
 
 </template>
 
@@ -73,51 +219,46 @@ import { useDisplay } from 'vuetify'
 import axios from 'axios'; 
 import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
 
-const email = ref('');
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const src = computed(() => `https://images.unsplash.com/photo-1533892743580-890e5b193113?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`)
 
-const isSubmitted = ref(false);
-
-const dialog = ref(false)
-const currentContent = ref('') // 'imprint' or 'privacy'
-function showDialog(content) {
-  currentContent.value = content
-  dialog.value = true
-}
-
-const closeDialog = () => {
-  dialog.value = false;
-  console.log('closeDialog')
-};
-
-// Add computed property for email validation
-const isEmailValid = computed(() => {
-  return email.value && emailPattern.test(email.value);
-});
-
-// Validation rule function
-const emailRules = [
-  v => !!v || 'Email is required',
-  v => emailPattern.test(v) || 'Enter valid email'
-];
-
-async function register() {
-  try {
-  const formData = {
-      email: email.value
-  };
-  console.log('Registering email at:', apiBaseURL);
-  const response = await axios.post(`${apiBaseURL}/auth/register`, formData);
-  console.log('Email registered:', response.data);
-  isSubmitted.value = true; 
-
-  // Call the conversion tracking function after a successful registration
-  //gtag_report_conversion(); 
-
-  } catch (error) {
-  console.error('Error registering:', error);
-  }
-}
+const features = [
+  {
+    title: 'Builders',
+    subtitle:
+      'We are looking for entrepreneurs that are passionate about building amazing products.',
+    icon: 'mdi-cloud-upload',
+  },
+  {
+    title: 'Existing Revenue',
+    subtitle:
+      'You must already be generating revenue.',
+    icon: 'mdi-lock',
+  },
+  {
+    title: 'Post Product-Market-Fit',
+    subtitle:
+      'You must have reached product-market-fit.',
+    icon: 'mdi-sync',
+  },
+  {
+    title: 'Recurring Revenue Model',
+    subtitle:
+      'We focus on businesses with SaaS characteristics, i.e. recurring revenue streams such as subscription, license or membership models.',
+    icon: 'mdi-sync',
+  },
+  {
+    title: 'Based in Europe',
+    subtitle:
+      'We invest in businesses that are based in the European Union. ',
+    icon: 'mdi-sync',
+  },
+  {
+    title: 'We do not invest in',
+    subtitle:
+      'Commerce, entertainment, hospitality, healthcare and manufacturing businesses. ',
+    icon: 'mdi-sync',
+  },
+]
 
 </script>
 

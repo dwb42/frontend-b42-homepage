@@ -7,7 +7,7 @@
       This is because the faster a company grows, the bigger its revenue and its subsequent profit will be in the future.
   </p>
   <p class="mb-4">
-      Imagine two businesses that are both earning $1M in revenue with a 20% EBITDA margin, where one grows at 5% and the other at 30%. After 5 yeards the high growth business will generate 3x the revenue and profit as the low growth business. Because of this, investors will be willing to pay a much higher multiple for faster growth companies.
+      Imagine two businesses that are both earning $1M in revenue with a 20% EBITDA margin, where one grows at 5% and the other at 30%. After 5 years the high growth business will generate 3x the revenue and profit as the low growth business. Because of this, investors will be willing to pay a much higher multiple for faster growth companies.
   </p>
 
   <v-table class="mb-4">
@@ -25,7 +25,7 @@
       <tr>
         <td><b>5% Growth</b><br>20% Margin</td>
         <td class="text-left">$1M</td>
-        <td class="text-left">200k</td>
+        <td class="text-left">$200k</td>
         <td class="text-center">...</td>
         <td class="text-right">$1.28M</td>
         <td class="text-right">$256k</td>
@@ -33,7 +33,7 @@
       <tr>
         <td><b>30% Growth</b><br>20% Margin</td>
         <td class="text-left">$1M</td>
-        <td class="text-left">200k</td>
+        <td class="text-left">$200k</td>
         <td class="text-center">...</td>
         <td class="text-right">$3.7M</td>
         <td class="text-right">$740k</td>
@@ -49,7 +49,7 @@
       Calculating your current growth rate by comparing your current revenue to last year's revenue is one of the first things every investor will do. This is why it is so important to show strong current growth.
   </p>
   <p class="mb-4">
-      <b>Compounded Annual Growth Rate (CAGR) </b><br>
+      <b>Compound Annual Growth Rate (CAGR) </b><br>
       If your business has been around for a while (> 3 years), an investor will calculate your CAGR to determine your average growth rate per year.
   </p>
   <p class="mb-4">

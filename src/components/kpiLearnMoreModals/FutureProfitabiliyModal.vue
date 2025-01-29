@@ -1,12 +1,12 @@
 <template>
   <p class="mb-4">
-    Since the valuation of a business is, in essence, the net present value of future cash flows (i.e., future profit flowing back to the investor), a business’ ability to generate a profit is essential to its valuation.
+    Since the valuation of a business is, in essence, the net present value of future cash flows (i.e. future profit flowing back to the investor), a business’ ability to generate a profit is essential to its valuation.
   </p>
 
   <h2 class="text-body-1 mb-2"><b>“Gross Margin” vs. “EBITDA Margin”</b></h2>
 
   <p class="mb-4">
-    The two main KPIs to get a sense of a business’ profitability are “Gross Margin” and “EBITDA Margin.” Depending on the stage the business finds itself in, one or both of these metrics will be analyzed.
+    The two main KPIs to get a sense of a business’s profitability are “Gross Margin” and “EBITDA Margin”. Depending on the stage the business finds itself in, one or both of these metrics will be analyzed.
   </p>
 
   <p class="mb-4">
@@ -14,13 +14,13 @@
   </p>
 
   <p class="mb-4">
-    If the business is at a later stage, where it is generating a profit and balancing out growth- vs. profit-considerations, analyzing the EBITDA Margin will give insights into the overall operating efficiency of the business.
+    If the business is at a later stage, where it is generating a profit and balancing out growth vs. profit considerations, analyzing the EBITDA Margin will give insights into the overall operating efficiency of the business.
   </p>
 
   <h2 class="text-body-1 mb-2"><b>Implications for the valuation formula</b></h2>
 
   <p class="mb-4">
-    When we value a business based on an ARR-Multiple, we will use Gross Margin to get a sense of its unit economics and future profit potential but disregard the EBITDA Margin, i.e., not let its value influence the valuation.
+    When we value a business based on an ARR-Multiple, we will use Gross Margin to get a sense of its unit economics and future profit potential but disregard the EBITDA Margin, i.e. not let its value influence the valuation.
   </p>
 
   <p class="mb-4">
@@ -80,11 +80,11 @@
   </p>
 
   <p class="mb-4">
-    If your SaaS business is in its early stage and does not generate a profit yet, the EBITDA Margin has little meaning.
+    If your SaaS business is in its early stages and does not generate a profit yet, the EBITDA Margin has little meaning.
   </p>
 
   <p class="mb-4">
-    If you are running a later-stage SaaS company that is balancing growth with profitability, an investor will analyze your EBITDA Margin to get a sense of your business’ efficiency.
+    If you are running a later-stage SaaS company that is balancing growth with profitability, an investor will analyze your EBITDA Margin to get a sense of your business’s efficiency.
   </p>
 
   <p class="mb-4">
@@ -99,7 +99,7 @@
     For a mature SaaS business, an EBITDA Margin of about 30% might be considered as the norm.
   </p>
 
-  <p class="mb-4">If, for example, two businesses both have a €1 Mio EBITDA and one has an EBITDA Margin of 40% and the other only 10%, the business with the 40% Margin might be valued at a premium, whereas the business with the 10% Margin might be valued at a discount.
+  <p class="mb-4">If, for example, two businesses both have a €1M EBITDA and one has an EBITDA Margin of 40% and the other only 10%, the business with the 40% Margin might be valued at a premium, whereas the business with the 10% Margin might be valued at a discount.
   </p>
 
   <p class="mb-4"><b> We use the following EBITDA Margin Ranges with their respective impact on the Growth Factor in our SaaS valuation formula:</b>

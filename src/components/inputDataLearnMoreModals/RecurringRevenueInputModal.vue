@@ -35,7 +35,7 @@
       </v-list-item>
     </v-list>
   </v-card>
-  <p>We need your Recurring Revenue to calculate your Recurring Revenue Ratio.</p>
+  <p>We need your Recurring Revenue for the ARR-Multiple Method and to calculate your Recurring Revenue Ratio.</p>
 </template>
 
 <script>
