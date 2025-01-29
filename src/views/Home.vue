@@ -149,24 +149,34 @@
           <div>
             <v-list-item
               class="px-0 mt-0 my-2"
-              subtitle="item.subtitle"
-              title="item.title"
             >
-              <p class="text-caption text-medium-emphasis mt-2">asdf</p>
+              <template v-slot:title>
+                <div class="font-weight-bold">Dietrich Wedegärtner</div>
+              </template>
+              <template v-slot:subtitle>
+                <div>Founder & CEO</div>
+              </template>
+              <template v-slot:default>
+                <p class="text-caption text-medium-emphasis mt-2">
+                  20+ years experience building and scaling .com businesses
+                </p>
+              </template>
             </v-list-item>
 
             <div class="d-flex ga-3">
               <v-btn
                 icon="mdi-linkedin"
                 size="x-small"
-                to="#"
+                href="https://www.linkedin.com/in/dietrich-wedegaertner/"
+                target="_blank"
                 variant="text"
               />
 
               <v-btn
                 icon="mdi-twitter"
                 size="x-small"
-                to="#"
+                href="https://twitter.com/dietrichwedegar"
+                target="_blank"
                 variant="text"
               />
             </div>
