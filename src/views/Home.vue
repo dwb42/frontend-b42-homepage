@@ -194,7 +194,7 @@
       </p>
 
       <p class="mt-4 text-body-1 opacity-60">
-        Write Dietrich via dw-at-b42-dot-io
+        Write Dietrich via <span v-html="decodedEmail"></span>
       </p>
     </v-responsive>
   </v-container>
@@ -256,6 +256,14 @@ import { ref, computed, watchEffect, onMounted } from 'vue';
 import { useDisplay } from 'vuetify'
 import axios from 'axios'; 
 import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
+
+const decodedEmail = computed(() => {
+  const encoded = '2R392R4o2Q=='.split('').reverse().join('');
+  const decoded = atob(encoded);
+  return decoded.replace(/[a-zA-Z]/g, c => 
+    String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)
+  ).split('').reverse().join('');
+});
 
 const src = computed(() => `https://images.unsplash.com/photo-1533892743580-890e5b193113?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`)
 
