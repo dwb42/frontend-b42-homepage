@@ -1,6 +1,6 @@
 <template>
-  <v-app-bar color="primary" density="compact" :max-width="1280" class="mx-auto">
-    <v-app-bar-title><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">B42 Capital</router-link></v-app-bar-title>
+  <v-app-bar color="primary" density="compact">
+    <v-app-bar-title ><router-link :to="{ name: 'Home' }" class="text-decoration-none text-white">B42 Capital</router-link></v-app-bar-title>
   </v-app-bar>
   
   <v-container class="d-flex align-center justify-center hero-container" fluid>
