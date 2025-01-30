@@ -150,7 +150,7 @@
             cover
             height="200"
             rounded="lg"
-            src="./assets/headshot_dietrich.png"
+            :src="require('@/assets/headshot_dietrich.png')"
             width="180"
           />
 
