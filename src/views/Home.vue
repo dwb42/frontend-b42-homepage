@@ -4,7 +4,7 @@
     <div class="background-shape shape1" aria-hidden="true"></div>
     <div class="background-shape shape2" aria-hidden="true"></div>
 
-    
+
       <!-- Main Content -->
       <div class="w-100 w-md-75 text-center relative z-10">
       <!--v-chip border="thin opacity-25" color="surface" variant="flat">
@@ -92,7 +92,7 @@
     </v-container>
   </v-card>
 
-  <v-container class="pa-6 pa-md-12 my-8" fluid>
+  <v-container class="pa-6 pa-md-12 my-8 bg-gradient-to-b from-teal-lighten-4 to-teal-lighten-5" fluid>
     <v-responsive class="mb-8 mx-auto text-center" max-width="500">
       <p class="font-weight-bold text-md-h2 text-h4 mt-0">About B42 Capital</p>
 
@@ -108,7 +108,7 @@
         md="6"
       >
         <v-responsive class="mx-auto" max-width="500">
-          
+
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
             B42 Capital is wholly owned by Dietrich Wedegärtner. Dietrich has been building tech businesses for over 20 years. In 2002 he built an online community for students - one year before facebook. In 2009 he founded adzLocal.de (now <a href="https://omergy.de" target="_blank">omergy.de</a>), a Lead Generation Service for German SMBs. He sold adzLocal in 2021 to <a href="https://www.pinovacapital.com" target="_blank">PINOVA Capital</a>. 
           </p>
@@ -120,7 +120,7 @@
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
             In 2024 B42 launched the SaaS valuation calculator <a href="https://www.saas-valuation.com" target="_blank">www.saas-valuation.com</a> to help SaaS founders learn about how SaaS investors evaluate the worth of their business. 
           </p>
-          
+
         </v-responsive>
       </v-col>
 
@@ -177,7 +177,7 @@
           </div>
         </v-card>
 
-        
+
       </v-col>
     </v-row>
 
@@ -214,7 +214,7 @@
       </v-btn>
     </v-row>
   </v-footer>
-  
+
 
 </template>
 
@@ -340,7 +340,7 @@ const features = [
     background: linear-gradient(225deg, rgba(255, 128, 181, 0.4), rgba(144, 137, 252, 0.4));
     transform: rotate(-30deg) scale(1.2);
   }
- 
+
   @media (max-width: 768px) {
     .shape2 {
     width: 24rem; /* 384px */
