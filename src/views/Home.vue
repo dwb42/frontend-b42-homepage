@@ -1,8 +1,16 @@
 <template>
   <v-container class="d-flex align-center justify-center hero-container" style="height: 70vh; min-height:400px">
     <!-- Background Shapes -->
-    <div class="background-shape shape1" aria-hidden="true"></div>
-    <div class="background-shape shape2" aria-hidden="true"></div>
+    <div class="background-shape shape1" aria-hidden="true">
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+    </div>
+    <div class="background-shape shape2" aria-hidden="true">
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+    </div>
 
 
       <!-- Main Content -->
@@ -40,8 +48,8 @@
 
   </v-container>
 
-
-  <v-card :image="src">
+  <!-- WHAT -->
+  <v-card :image="src" tile flat>
     <template #image>
       <v-img
         gradient="to bottom, rgba(var(--v-theme-surface), .8), rgba(var(--v-theme-surface), 1)"
@@ -92,7 +100,8 @@
     </v-container>
   </v-card>
 
-  <v-container class="pa-6 pa-md-12 my-8 bg-gradient-to-b from-teal-lighten-4 to-teal-lighten-5" fluid>
+  <!--ABOUT -->
+  <v-container class="pa-6 pa-md-12 my-0 about-b42-gradient" fluid>
     <v-responsive class="mb-8 mx-auto text-center" max-width="500">
       <p class="font-weight-bold text-md-h2 text-h4 mt-0">About B42 Capital</p>
 
@@ -141,7 +150,7 @@
             cover
             height="200"
             rounded="lg"
-            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="./assets/headshot_dietrich.png"
             width="180"
           />
 
@@ -183,7 +192,7 @@
 
   </v-container>
 
-
+  <!-- CONTACT -->
   <v-container class="pa-6 pa-md-12 bg-primary" fluid>
     <v-responsive
       class="mx-auto text-center d-flex align-center"
@@ -200,8 +209,8 @@
     </v-responsive>
   </v-container>
 
-
-  <v-footer class="d-flex justify-space-between align-center px-4 py-4 mt-7" color="surface-light">
+  <!-- FOOTER  -->
+  <v-footer class="d-flex justify-space-between align-center px-4 py-4 mt-0" color="surface-light">
     <v-row justify="center" no-gutters>
       <v-btn
         class="mx-2"
@@ -220,14 +229,14 @@
 
 <script setup>
 import { ref, computed, watchEffect, onMounted } from 'vue';
-import { useDisplay } from 'vuetify'
-import axios from 'axios'; 
-import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
-
+//import { useDisplay } from 'vuetify'
+//import axios from 'axios'; 
+//import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
 
 
 const src = computed(() => `https://images.unsplash.com/photo-1533892743580-890e5b193113?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`)
 
+  
 const features = [
   {
     title: 'Hungry Entrepreneurs',
@@ -268,8 +277,7 @@ const features = [
 ]
 
 
-
-  /**
+  /** EMAIL ENCODING 
    * 1) We store the email in Base64 form in encodedEmail.
    *    'dw@b42.io' => 'ZHdAYjQyLmlv' (Base64)
    */
@@ -305,49 +313,83 @@ const features = [
   /* Background Shape Common Styles */
   .background-shape {
     position: absolute;
-    width: 36.125rem; /* 576px */
-    height: 36.125rem; /* 576px */
-    background: linear-gradient(135deg, rgba(255, 128, 181, 0.4), rgba(144, 137, 252, 0.4));
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.3;
-    transform: rotate(30deg);
-    clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%);
-    z-index: -1; /* Ensure it stays behind the content */
+    width: 200px; /* Adjust size as needed */
+    height: 120px; /* Adjust size as needed */
+    background: none; /* Remove existing background */
+    filter: blur(50px); /* Adjust blur for softness */
+    opacity: 0.6;
+    z-index: -1; /* Keeps shapes behind content */
+    border: 1px solid gray;
   }
 
-  /* Specific Positioning for Shape1 */
-  .shape1 {
-    top: -10%;
-    left: -10%;
-    transform: rotate(30deg) scale(1);
+  .background-shape .circle {
+    position: absolute;
+    width: 150px; /* Diameter of each circle */
+    height: 100px; /* Diameter of each circle */
+    /*background: linear-gradient(135deg, rgba(255, 128, 181, 0.4), rgba(144, 137, 252, 0.4));*/
+    background: linear-gradient(135deg, #80CBC4, #B2DFDB);
+    border-radius: 50%; /* Makes the div a circle */
   }
+
+  .shape1 .circle:nth-child(1) {
+    top: 0;
+    left: 40%;
+    border: 2px solid red; 
+  }
+
+  .shape1 .circle:nth-child(2) {
+    top: 20%;
+    left: 50%;
+  }
+
+  .shape1 .circle:nth-child(3) {
+    top: 0;
+    left: 80%;
+  }
+
+  .shape2 .circle:nth-child(1) {
+    top: 20%;
+    left: 10%;
+  }
+
+  .shape2 .circle:nth-child(2) {
+    top: 0;
+    left: 40%;
+  }
+
+  .shape2 .circle:nth-child(3) {
+    top: 20%;
+    left: 70%;
+  }
+
 
   @media (max-width: 768px) {
-    .shape1 {
-      width: 24rem;
-      height: 24rem;
-      top: -20%;
-      left: -20%;
+    .background-shape {
+      width: 150px; /* Smaller size for mobile */
+      height: 90px;
+    }
+
+    .background-shape .circle {
+      width: 75px;
+      height: 75px;
+    }
+
+    .shape1 .circle:nth-child(1),
+    .shape1 .circle:nth-child(2),
+    .shape1 .circle:nth-child(3),
+    .shape2 .circle:nth-child(1),
+    .shape2 .circle:nth-child(2),
+    .shape2 .circle:nth-child(3) {
+      /* Adjust positioning for smaller screens */
+      top: /* new value */;
+      left: /* new value */;
     }
   }
 
-
-  /* Specific Positioning for Shape2 */
-  .shape2 {
-    bottom: -20%;
-    right: -15%;
-    background: linear-gradient(225deg, rgba(255, 128, 181, 0.4), rgba(144, 137, 252, 0.4));
-    transform: rotate(-30deg) scale(1.2);
+  /* Gradient background for "About B42 Capital" container */
+  .about-b42-gradient {
+    /* Teal lighten-4 (#80CBC4) to teal lighten-5 (#B2DFDB) */
+    background: linear-gradient(to bottom, #B2DFDB, #E0F2F1);
   }
 
-  @media (max-width: 768px) {
-    .shape2 {
-    width: 24rem; /* 384px */
-    height: 24rem; /* 384px */
-    bottom: -25%;
-    right: -25%;
-    }
-  }
-
-</style>
+  </style>
