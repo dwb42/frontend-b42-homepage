@@ -1,16 +1,22 @@
 <template>
-  <v-container class="h-50 d-flex align-center justify-center">
-    <div class="w-100 w-md-75 text-center">
+  <v-container class="d-flex align-center justify-center hero-container" style="height: 70vh; min-height:400px">
+    <!-- Background Shapes -->
+    <div class="background-shape shape1" aria-hidden="true"></div>
+    <div class="background-shape shape2" aria-hidden="true"></div>
+
+    
+      <!-- Main Content -->
+      <div class="w-100 w-md-75 text-center relative z-10">
       <!--v-chip border="thin opacity-25" color="surface" variant="flat">
         <span class="hidden-sm-and-down">Announcing our</span> <span class="hidden-md-and-up">Our&nbsp;</span> next round of funding. Click <a class="d-inline-block mx-1 text-decoration-none text-primary" href="#">here</a> to learn more.
       </v-chip-->
 
       <h1 class="text-h4 text-md-h2 font-weight-bold my-6">
-        Your Scale-Up Investor
+        We help you grow and become efficient
       </h1>
 
       <div class="text-body-1 text-medium-emphasis mb-10">
-        B42 Capital is a hands-on investor that supports founders to scale their business. We provide capital to grow your revenue and to improve your product. We work with founders who are curious and open to new ideas.
+        B42 Capital is a hands-on investor that supports founders to scale their business. We provide know how and capital for product development and revenue growth. 
       </div>
 
       <div class="d-flex ga-4 justify-center">
@@ -32,9 +38,6 @@
       </div>
     </div>
 
-    <div class="v-bg position-absolute top-0 right-0 left-0 bottom-0">
-      <div aria-hidden="true" class="overflow-hidden opacity-20 w-100 h-100" />
-    </div>
   </v-container>
 
 
@@ -50,9 +53,7 @@
         <p class="font-weight-bold text-md-h2 text-h4 mt-0">Whom we invest in</p>
 
         <p class="mt-4 text-body-1 text-medium-emphasis">
-          Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem
-          cupidatat commodo. Elit sunt amet fugiat veniam occaecat fugiat
-          aliqua.
+          We work with earlier stage companies that have found product-markt-fit and need help in building a product and processes to scale efficiently into a large market. 
         </p>
       </v-responsive>
 
@@ -109,7 +110,7 @@
         <v-responsive class="mx-auto" max-width="500">
           
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
-            B42 Capital is wholly owned by Dietrich Wedegärtner. Dietrich has been building tech businesses for over 20 years. In 2002 he built an online community for students - one year before facebook. In 2009 he founded adzLocal.de (now <a href="https://omergy.com" target="_blank">omergy.com</a>), a Lead Generation Service for German SMBs. He sold adzLocal in 2021 to <a href="https://www.pinovacapital.com" target="_blank">PINOVA Capital</a>. 
+            B42 Capital is wholly owned by Dietrich Wedegärtner. Dietrich has been building tech businesses for over 20 years. In 2002 he built an online community for students - one year before facebook. In 2009 he founded adzLocal.de (now <a href="https://omergy.de" target="_blank">omergy.de</a>), a Lead Generation Service for German SMBs. He sold adzLocal in 2021 to <a href="https://www.pinovacapital.com" target="_blank">PINOVA Capital</a>. 
           </p>
 
           <p class="text-subtitle-2 text-medium-emphasis mb-6">
@@ -194,7 +195,7 @@
       </p>
 
       <p class="mt-4 text-body-1 opacity-60">
-        Write Dietrich via <span v-html="decodedEmail"></span>
+        write Dietrich via <a :href="`mailto:${decodeEmail(encodedEmail)}`" style="color: inherit; text-decoration: none">{{ decodeEmail(encodedEmail) }}</a>
       </p>
     </v-responsive>
   </v-container>
@@ -211,43 +212,9 @@
       >
         IMPRINT & PRIVACY
       </v-btn>
-      <!--v-col class="text-center mt-4" cols="12">
-        {{ new Date().getFullYear() }} — <strong>saas-valuation.com</strong>
-      </v-col-->
     </v-row>
   </v-footer>
   
-  
-  <!--v-container class="fill-height">
-    <v-row no-gutters>
-      <v-col cols="12" sm="12" md="6" class="d-flex align-center justify-center">
-        <v-responsive class="align-left text-left fill-height">
-          
-    
-      
-            <h1 class="text-h3 font-weight-bold">Your Scale-Up Investor</h1>
-      
-            <div class="py-4"/>
-      
-            <div class="text-body-1"> 
-              B42 Capital is a hands-on investor that supports founders to scale their business. We love building systems and software to automate day-to-day business operations. We are curious, honest and fair.
-            </div>
-            
-            <div class="py-4"/>
-  
-
-    
-        </v-responsive>
-        
-      </v-col>
-      <v-col cols="12" md="6" >
-        <div class="d-flex align-center justify-center">
-          <img src="@/assets/saas_scale.jpeg" alt="SaaS Scale" class="responsive-image d-none d-md-flex" />
-        </div>
-      </v-col>
-    </v-row>
-
-  </v-container-->
 
 </template>
 
@@ -257,54 +224,64 @@ import { useDisplay } from 'vuetify'
 import axios from 'axios'; 
 import { formatDateUsingDateFns, usdFormat, apiBaseURL } from '@/utils/index.js';
 
-const decodedEmail = computed(() => {
-  const encoded = '2R392R4o2Q=='.split('').reverse().join('');
-  const decoded = atob(encoded);
-  return decoded.replace(/[a-zA-Z]/g, c => 
-    String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26)
-  ).split('').reverse().join('');
-});
+
 
 const src = computed(() => `https://images.unsplash.com/photo-1533892743580-890e5b193113?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D`)
 
 const features = [
   {
-    title: 'Builders',
+    title: 'Hungry Entrepreneurs',
     subtitle:
-      'We are looking for entrepreneurs that are passionate about building amazing products.',
-    icon: 'mdi-cloud-upload',
+      'You must be an entrepreneur who is passionate about his/her customers and product.',
+    icon: 'mdi-rocket', // Emphasizes launch, ambition, and forward momentum
+  },
+  {
+    title: 'Strong Demand',
+    subtitle:
+      'You must be able to show that there is a strong demand for what you are offering.',
+    icon: 'mdi-trending-up', // Symbolizes growth and increasing demand
   },
   {
     title: 'Existing Revenue',
     subtitle:
-      'You must already be generating revenue.',
-    icon: 'mdi-lock',
+      'You must be able to show first revenue with the product that you want to scale.',
+    icon: 'mdi-cash', // Conveys money and revenue
   },
   {
-    title: 'Post Product-Market-Fit',
+    title: 'SaaS Business Models',
     subtitle:
-      'You must have reached product-market-fit.',
-    icon: 'mdi-sync',
+      'We like SaaS businesses with an asset light recurring revenue model.',
+    icon: 'mdi-server-network', // Represents servers and networks, hinting at cloud-based or SaaS offerings
   },
   {
-    title: 'Recurring Revenue Model',
+    title: 'Traditional Businesses',
     subtitle:
-      'We focus on businesses with SaaS characteristics, i.e. recurring revenue streams such as subscription, license or membership models.',
-    icon: 'mdi-sync',
+      'We are also very interested in companies that want to use technology to gain a competitive advantage in a more traditional industry.',
+    icon: 'mdi-domain', // Depicts a building, aligning with traditional or established industries
   },
   {
     title: 'Based in Europe',
     subtitle:
-      'We invest in businesses that are based in the European Union. ',
-    icon: 'mdi-sync',
-  },
-  {
-    title: 'We do not invest in',
-    subtitle:
-      'Commerce, entertainment, hospitality, healthcare and manufacturing businesses. ',
-    icon: 'mdi-sync',
+      'We mainly invest in businesses that are based in the European Union.',
+    icon: 'mdi-earth', // Generic globe icon to indicate geographic location (Europe)
   },
 ]
+
+
+
+  /**
+   * 1) We store the email in Base64 form in encodedEmail.
+   *    'dw@b42.io' => 'ZHdAYjQyLmlv' (Base64)
+   */
+  const encodedEmail = ref('ZHdAYjQyLmlv');
+
+  /**
+   * 2) decodeEmail is a simple function that decodes the Base64 string
+   *    and returns the original email.
+   */
+  function decodeEmail(encoded) {
+    return atob(encoded); 
+  }
 
 </script>
 
@@ -316,4 +293,61 @@ const features = [
   margin-left: 64px; /* To ensure some space around the image */
   border-radius: 30px;
 }
+
+  /* Hero Container Styling */
+  .hero-container {
+    position: relative;
+    overflow: visible; /* To contain the background shapes */
+    background-color: none; /* Optional: Background color for the hero section. #f0f4f8 */ 
+    z-index: 0;
+  }
+
+  /* Background Shape Common Styles */
+  .background-shape {
+    position: absolute;
+    width: 36.125rem; /* 576px */
+    height: 36.125rem; /* 576px */
+    background: linear-gradient(135deg, rgba(255, 128, 181, 0.4), rgba(144, 137, 252, 0.4));
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    transform: rotate(30deg);
+    clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%);
+    z-index: -1; /* Ensure it stays behind the content */
+  }
+
+  /* Specific Positioning for Shape1 */
+  .shape1 {
+    top: -10%;
+    left: -10%;
+    transform: rotate(30deg) scale(1);
+  }
+
+  @media (max-width: 768px) {
+    .shape1 {
+      width: 24rem;
+      height: 24rem;
+      top: -20%;
+      left: -20%;
+    }
+  }
+
+
+  /* Specific Positioning for Shape2 */
+  .shape2 {
+    bottom: -20%;
+    right: -15%;
+    background: linear-gradient(225deg, rgba(255, 128, 181, 0.4), rgba(144, 137, 252, 0.4));
+    transform: rotate(-30deg) scale(1.2);
+  }
+ 
+  @media (max-width: 768px) {
+    .shape2 {
+    width: 24rem; /* 384px */
+    height: 24rem; /* 384px */
+    bottom: -25%;
+    right: -25%;
+    }
+  }
+
 </style>
