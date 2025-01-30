@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar color="primary" density="compact" z-50>
+  <v-app-bar color="primary" density="compact">
     <!--template v-slot:prepend>
       <v-app-bar-nav-icon @click="openNav = !openNav"></v-app-bar-nav-icon>
       {{openNav}}
@@ -11,9 +11,9 @@
       <v-btn icon="mdi-dots-vertical" @click="openSettings = !openSettings"></v-btn>
     </template>
 
-    <!--template v-if="!userStore.user.email"e> 
+    <template v-if="!userStore.user.email"e> 
       <router-link :to="{ name: 'Login' }" class="text-decoration-none text-white mr-6">Login</router-link>
-  </template-->
+    </template>
   </v-app-bar>
 
 
