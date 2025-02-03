@@ -14,7 +14,7 @@ import { getAuth } from 'firebase/auth'
 // Your web app's Firebase configuration
 //const mySecret = process.env.firebase_apiKey
 const firebaseConfig = {
-  apiKey: "AIzaSyD0LJtEG_r8CeeGiwFL_vUz7uio6U0jep8",
+  apiKey: "asdf",
   authDomain: "b42sandbox.firebaseapp.com",
   projectId: "b42sandbox",
   storageBucket: "b42sandbox.appspot.com",
