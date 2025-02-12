@@ -16,15 +16,20 @@
 
     <!-- Your hero content remains visible on top of (or “over”) the snake game background. -->
     <div class="hero-content text-center">
-      <h1 class="text-h4 text-md-h2 font-weight-bold my-6">
+      <!--h1 class="text-h4 text-md-h2 font-weight-bold my-6">
         We <span class="wavering">invest</span> in companies that can
         <span class="wavering">10x their efficiency</span> by integrating
         <span class="wavering">technology</span> into their operations.
+      </h1-->
+      <h1 class="text-h4 text-md-h2 font-weight-bold my-6">
+        We help <span class="wavering">founders</span> to accelerate the
+        <span class="wavering">growth</span> &
+        <span class="wavering">efficiency</span> of their operation.
       </h1>
       <div class="text-body-1 text-medium-emphasis mb-10">
         <p class="text-grey-lighten-5">
           B42 Capital is a hands-on investor that works with founders to scale their business.
-          We provide know how and capital to improve strategy and product with the goal of fostering growth and profitability.
+          We provide know-how and capital to improve their strategy and product with the goal of fostering growth and profitability.
         </p>
       </div>
     </div>
@@ -32,7 +37,7 @@
     <!-- Game Over Overlay: shown when gameEnded is true -->
     <div v-if="gameEnded" class="game-over-overlay">
       <div class="game-over-content">
-        <h2>Game Over!</h2>
+        <h2 class="mb-2">and yeah ... we are nerds at heart 🤷‍♂️</h2>
         <v-btn color="pink" @click="replayGame">Play Again</v-btn>
       </div>
     </div>
@@ -153,7 +158,7 @@
 
           <img 
             src="@/assets/headshot_dietrich.jpg" 
-            alt="Dietrich Wedegartne" 
+            alt="Dietrich Wedegartner" 
             class="responsive-image" 
             width="200"
             rounded="lg"
@@ -221,15 +226,16 @@
   <!-- FOOTER  -->
   <v-footer class="d-flex justify-space-between align-center px-4 py-4 mt-0" color="surface-light">
     <v-row justify="center" no-gutters>
-      <v-btn
-        class="mx-2"
-        size="x-small"
-        rounded="xl"
-        variant="text"
-        @click="showDialog('imprint')"
+      <span class="text-body-2 mr-4">B42 GmbH</span>
+      
+      <a
+        class="text-body-2"
+        href="#"
+        @click.prevent="showDialog('imprint')"
+        style="text-decoration: none; color: inherit;"
       >
-        IMPRINT & PRIVACY
-      </v-btn>
+        Imprint & Privacy
+      </a>
     </v-row>
   </v-footer>
 
@@ -244,7 +250,7 @@
         <br>
 
         <h3>Website Operator</h3>
-        <p>B42 Internet GmbH<br>
+        <p>B42 GmbH<br>
            Am Born 6b<br>
            22765 Hamburg<br>
            Germany
@@ -273,7 +279,7 @@
         <h2>Privacy Policy</h2>
         <br>
         <h3>1. Introduction</h3>
-        <p>B42 Internet GmbH is committed to protecting the privacy and security of the visitors to our website, www.b42.io. This policy outlines what information we collect, how we use it, and the rights you have concerning your personal data.</p>
+        <p>B42 GmbH is committed to protecting the privacy and security of the visitors to our website, www.b42.io. This policy outlines what information we collect, how we use it, and the rights you have concerning your personal data.</p>
         <br>
 
         <h3>2. Data Collection and Processing</h3>
@@ -317,7 +323,7 @@
         <p>For questions regarding this privacy policy or to exercise your rights, please contact:</p>
         <address>
           Data Protection Officer<br>
-          B42 Internet GmbH<br>
+          B42 GmbH<br>
           Am Born 6b<br>
           22765 Hamburg<br>
         </address>
@@ -632,7 +638,7 @@ onBeforeUnmount(() => {
     color: pink;
     background-color: black;
     border: 0px solid pink;
-    width:300px
+    width:400px;
   }
   
   .about-b42-gradient {

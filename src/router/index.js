@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Import components
 import Home from '../views/Home.vue'
-import Snake from '../views/Snake.vue'
 import Login from '../views/Login.vue'
 import Admin from '../views/Admin.vue'
 import Valuations from '@/views/Valuations.vue'
@@ -19,11 +18,6 @@ import MagicalLinkVerification from '@/views/MagicLinkVerification.vue'
           path: '', // Default child of "/"
           name: 'Home',
           component: Home,
-        },
-        {
-          path: 'snake', 
-          name: 'Snake',
-          component: Snake,
         },
         {
           path: 'login', 
